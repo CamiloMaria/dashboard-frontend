@@ -1,0 +1,15 @@
+export const DISABLE_REASONS = [
+  'AGOTADO',
+  'AVERIADO',
+  'EXISTENCIA NO REAL',
+  'NO TIENE DESCRIPCIÓN',
+  'NO TIENE IMAGEN',
+  'NO TIENE PRECIO',
+  'NO TIENE TITULO',
+  'PERTENECE A UN SET',
+  'PRECIO ERRONEO',
+  'TITULO ERRONEO',
+  'YA NO VIENE',
+] as const;
+
+export type DisableReason = typeof DISABLE_REASONS[number]; 
