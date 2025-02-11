@@ -22,6 +22,7 @@ import {
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { Route } from '@tanstack/react-router';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/use-auth';
 
 interface NavRoute {
     path: string;
@@ -188,6 +189,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const navigate = useNavigate();
     const routerState = useRouterState();
     const currentPath = routerState.location.pathname;
+    const { hasAccess } = useAuth();
 
     const isRouteActive = (path: string) => {
         if (path === '/') {
@@ -199,6 +201,16 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const handleNavigate = (path: string) => {
         navigate({ to: path as Route['path'] });
     };
+
+
+    const filteredNavigation = navigationConfig.filter(item => {
+        if (!hasAccess(item.path)) return false;
+        if (item.children) {
+            item.children = item.children.filter(child => hasAccess(child.path));
+            return item.children.length > 0;
+        }
+        return true;
+    });
 
     return (
         <aside
@@ -227,7 +239,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             <ScrollArea className="h-[calc(100vh-4rem)] px-3 py-4">
                 <div className="space-y-2">
-                    {navigationConfig.map((item) => (
+                    {filteredNavigation.map((item) => (
                         <NavItem
                             key={item.path}
                             icon={<item.icon className="h-4 w-4 text-white" />}
