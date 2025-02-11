@@ -52,6 +52,8 @@ export function OrdersTable() {
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch,
+            order: 'desc',
+            sortBy: 'fecha_registro',
             store: storeFilter !== 'all' ? storeFilter : undefined
         }),
         placeholderData: keepPreviousData,
@@ -128,8 +130,10 @@ export function OrdersTable() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Stores</SelectItem>
+                                <SelectItem value="PL08">PL08</SelectItem>
                                 <SelectItem value="PL09">PL09</SelectItem>
                                 <SelectItem value="PL10">PL10</SelectItem>
+                                <SelectItem value="PL16">PL16</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -169,7 +173,7 @@ export function OrdersTable() {
                     </TableHeader>
                     <TableBody>
                         {orders.map((order) => (
-                            <Fragment key={order.ID}>
+                            <Fragment key={order.ORDEN}>
                                 <TableRow
                                     className="cursor-pointer hover:bg-muted/50"
                                     onClick={() => toggleRowExpansion(order.ID)}
