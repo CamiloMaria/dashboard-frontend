@@ -28,7 +28,7 @@ import { productEditorRoute } from '@/routes/app/product-editor';
 
 export function ProductsTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [, startTransition] = useTransition();
