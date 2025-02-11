@@ -3,6 +3,18 @@ import { getAuthToken } from './auth';
 import { jwtDecode } from 'jwt-decode';
 import { ROUTES } from '@/constants/routes';
 
+export function hasAnyAllowedPages(): boolean {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+        const decoded = jwtDecode<{ allowedPages?: string[] }>(token);
+        return !!decoded.allowedPages?.length;
+    } catch {
+        return false;
+    }
+}
+
 export function requireAuth(allowedPath: string) {
     const token = getAuthToken();
     if (!token) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     LayoutDashboard,
@@ -23,6 +23,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { Route } from '@tanstack/react-router';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
+import { hasAnyAllowedPages } from '@/lib/route-auth';
 
 interface NavRoute {
     path: string;
@@ -190,6 +191,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const routerState = useRouterState();
     const currentPath = routerState.location.pathname;
     const { hasAccess } = useAuth();
+
+    useEffect(() => {
+        if (!hasAnyAllowedPages() && currentPath !== ROUTES.EXAMPLE) {
+            navigate({ to: ROUTES.EXAMPLE });
+        }
+    }, [currentPath, navigate]);
 
     const isRouteActive = (path: string) => {
         if (path === '/') {
