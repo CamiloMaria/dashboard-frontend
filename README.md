@@ -1,7 +1,7 @@
 
-# Dashboard Frontend
+# Dashboard Ecommerce Frontend
 
-Modern React dashboard built with Vite, TypeScript, and Radix UI components.
+Modern React dashboard built with Vite, TypeScript, and Radix UI components for Plaza Lama.
 
 ## Tech Stack
 
