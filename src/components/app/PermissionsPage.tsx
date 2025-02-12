@@ -37,6 +37,7 @@ const availableRoutes = [
     { path: ROUTES.INVENTORY.PRODUCT_SETS.LIST, label: 'Product Sets' },
     { path: ROUTES.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
     { path: ROUTES.ORDERS, label: 'Orders' },
+    { path: ROUTES.PERMISSIONS, label: 'Permissions' },
 ];
 
 export function PermissionsPage() {

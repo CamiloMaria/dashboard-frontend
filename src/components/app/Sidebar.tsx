@@ -123,6 +123,8 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                         className={cn(
                             'w-full justify-between h-9 relative',
                             isCollapsed && 'justify-center px-2',
+                            'hover:[background:hsl(240,3.7%,15.9%)]',
+                            'active:[background:hsl(240,3.7%,15.9%)]',
                             isActive && '[background:hsl(240,3.7%,15.9%)]'
                         )}
                         onClick={() => {
@@ -156,6 +158,8 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                             variant={child.isActive ? 'secondary' : 'ghost'}
                             className={cn(
                                 "w-full justify-start gap-2 h-9 px-2 mb-1 relative",
+                                'hover:[background:hsl(240,3.7%,15.9%)]',
+                                'active:[background:hsl(240,3.7%,15.9%)]',
                                 child.isActive && "[background:hsl(240,3.7%,15.9%)]",
                                 isCollapsed && "justify-center"
                             )}
@@ -179,6 +183,8 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
             className={cn(
                 'w-full justify-start gap-2 h-9 relative',
                 isCollapsed && 'justify-center px-2',
+                'hover:[background:hsl(240,3.7%,15.9%)]',
+                'active:[background:hsl(240,3.7%,15.9%)]',
                 isActive && '[background:hsl(240,3.7%,15.9%)]'
             )}
             onClick={onClick}
@@ -199,8 +205,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const { hasAccess } = useAuth();
 
     useEffect(() => {
-        if (!hasAnyAllowedPages() && currentPath !== ROUTES.PERMISSIONS) {
-            navigate({ to: ROUTES.PERMISSIONS });
+        if (!hasAnyAllowedPages() && currentPath !== ROUTES.EXAMPLE) {
+            navigate({ to: ROUTES.EXAMPLE });
         }
     }, [currentPath, navigate]);
 
@@ -217,7 +223,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
 
     const filteredNavigation = navigationConfig.filter(item => {
-        if (item.path === ROUTES.EXAMPLE || item.path === ROUTES.PERMISSIONS) return true;
+        if (item.path === ROUTES.EXAMPLE) return true;
 
         if (!hasAccess(item.path)) return false;
         if (item.children) {
