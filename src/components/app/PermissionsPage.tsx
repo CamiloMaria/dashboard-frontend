@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { permissionsApi } from "@/api/permissions";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, ChevronRight } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -29,16 +29,120 @@ interface User {
     allowedPages: string[];
 }
 
-const availableRoutes = [
+interface RouteConfig {
+    path: string;
+    label: string;
+    children?: RouteConfig[];
+}
+
+const availableRoutes: RouteConfig[] = [
     { path: ROUTES.DASHBOARD, label: 'Dashboard' },
-    { path: ROUTES.INVENTORY.PRODUCTS.LIST, label: 'Products List' },
-    { path: ROUTES.INVENTORY.PRODUCTS.NEW, label: 'Create Products' },
-    { path: ROUTES.INVENTORY.PROMOTIONS, label: 'Promotions' },
-    { path: ROUTES.INVENTORY.PRODUCT_SETS.LIST, label: 'Product Sets' },
-    { path: ROUTES.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
+    {
+        path: ROUTES.INVENTORY.ROOT,
+        label: 'Inventory',
+        children: [
+            {
+                path: ROUTES.INVENTORY.PRODUCTS.LIST,
+                label: 'Products',
+                children: [
+                    { path: ROUTES.INVENTORY.PRODUCTS.NEW, label: 'Create Products' },
+                    { path: ROUTES.INVENTORY.PRODUCTS.EDITOR, label: 'Edit Products' },
+                ]
+            },
+            { path: ROUTES.INVENTORY.PROMOTIONS, label: 'Promotions' },
+            {
+                path: ROUTES.INVENTORY.PRODUCT_SETS.LIST,
+                label: 'Product Sets',
+                children: [
+                    { path: ROUTES.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
+                ]
+            },
+        ]
+    },
     { path: ROUTES.ORDERS, label: 'Orders' },
     { path: ROUTES.PERMISSIONS, label: 'Permissions' },
 ];
+
+function getAllChildPaths(route: RouteConfig): string[] {
+    const paths = [route.path];
+    if (route.children) {
+        route.children.forEach(child => {
+            paths.push(...getAllChildPaths(child));
+        });
+    }
+    return paths;
+}
+
+function RoutePermissionItem({ route, depth = 0, selectedUser, onToggle }: {
+    route: RouteConfig;
+    depth?: number;
+    selectedUser: User;
+    onToggle: (path: string) => void;
+}) {
+    const [isOpen, setIsOpen] = useState(true);
+    const allChildPaths = route.children ? getAllChildPaths(route) : [route.path];
+    const isChecked = selectedUser.allowedPages.includes(route.path);
+    const isPartiallyChecked = route.children &&
+        allChildPaths.some(path => selectedUser.allowedPages.includes(path)) &&
+        !allChildPaths.every(path => selectedUser.allowedPages.includes(path));
+
+    return (
+        <div className="space-y-1">
+            <div
+                className={cn(
+                    "flex items-center gap-2 py-1 px-2 rounded-md hover:bg-accent/50 transition-colors",
+                    (isChecked || isPartiallyChecked) && "bg-accent/30"
+                )}
+                style={{ paddingLeft: `${depth * 16 + 8}px` }}
+            >
+                {route.children ? (
+                    <button
+                        type="button"
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <ChevronRight className={cn(
+                            "h-4 w-4 transition-transform duration-200",
+                            isOpen && "rotate-90"
+                        )} />
+                    </button>
+                ) : (
+                    <div className="w-4" />
+                )}
+                <div className="flex items-center gap-2 flex-1">
+                    <Checkbox
+                        id={route.path}
+                        checked={isChecked}
+                        className={cn(isPartiallyChecked && "opacity-70")}
+                        onCheckedChange={() => onToggle(route.path)}
+                    />
+                    <Label
+                        htmlFor={route.path}
+                        className={cn(
+                            "cursor-pointer select-none",
+                            route.children && "font-medium"
+                        )}
+                    >
+                        {route.label}
+                    </Label>
+                </div>
+            </div>
+            {route.children && isOpen && (
+                <div className="ml-2 border-l pl-2">
+                    {route.children.map(child => (
+                        <RoutePermissionItem
+                            key={child.path}
+                            route={child}
+                            depth={depth + 1}
+                            selectedUser={selectedUser}
+                            onToggle={onToggle}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export function PermissionsPage() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -90,9 +194,34 @@ export function PermissionsPage() {
 
         setSelectedUser(prev => {
             if (!prev) return null;
-            const updatedPages = prev.allowedPages.includes(path)
-                ? prev.allowedPages.filter(p => p !== path)
-                : [...prev.allowedPages, path];
+
+            // Find the route config for this path
+            const findRoute = (routes: RouteConfig[], parentPaths: string[] = []): [RouteConfig | undefined, string[]] => {
+                for (const route of routes) {
+                    if (route.path === path) return [route, [...parentPaths, route.path]];
+                    if (route.children) {
+                        const [found, paths] = findRoute(route.children, [...parentPaths, route.path]);
+                        if (found) return [found, paths];
+                    }
+                }
+                return [undefined, []];
+            };
+
+            const [routeToToggle, parentPaths] = findRoute(availableRoutes);
+            if (!routeToToggle) return prev;
+
+            const allChildPaths = getAllChildPaths(routeToToggle);
+            const isCurrentlyChecked = prev.allowedPages.includes(path);
+
+            let updatedPages: string[];
+            if (isCurrentlyChecked) {
+                // Remove this path and all child paths
+                updatedPages = prev.allowedPages.filter(p => !allChildPaths.includes(p));
+            } else {
+                // Add this path, all parent paths, and all child paths
+                updatedPages = [...new Set([...prev.allowedPages, ...parentPaths, ...allChildPaths])];
+            }
+
             return { ...prev, allowedPages: updatedPages };
         });
     };
@@ -208,15 +337,12 @@ export function PermissionsPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {availableRoutes.map(route => (
-                                <div key={route.path} className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={route.path}
-                                        checked={selectedUser.allowedPages.includes(route.path)}
-                                        onCheckedChange={() => handleRouteToggle(route.path)}
-                                        disabled={isLoading}
-                                    />
-                                    <Label htmlFor={route.path}>{route.label}</Label>
-                                </div>
+                                <RoutePermissionItem
+                                    key={route.path}
+                                    route={route}
+                                    selectedUser={selectedUser}
+                                    onToggle={handleRouteToggle}
+                                />
                             ))}
                             <Button
                                 className="w-full"
