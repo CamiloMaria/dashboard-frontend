@@ -74,8 +74,8 @@ export function ImageEditor({
 
         if (!validateFile(file)) return;
 
-        // If we're replacing an image or there are existing images, replace the current one
-        const shouldReplace = isReplacing || images.length > 0;
+        // If we're replacing an image, replace the current one
+        const shouldReplace = isReplacing;
         onImageUpload(file, shouldReplace ? currentImageIndex : undefined);
 
         // Reset the input so the same file can be selected again

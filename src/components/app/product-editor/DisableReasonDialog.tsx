@@ -46,22 +46,29 @@ export function DisableReasonDialog({ open, onConfirm, onCancel }: DisableReason
     };
 
     const handleCancel = () => {
+        if (selectedShops.length === 0) {
+            setSelectedShops([SHOPS[0]]); // Select first shop by default
+            return;
+        }
         onCancel();
         setSelectedReason('');
         setSelectedShops([]);
     };
 
     const toggleShop = (shop: string) => {
-        setSelectedShops(prev =>
-            prev.includes(shop)
+        setSelectedShops(prev => {
+            const newSelection = prev.includes(shop)
                 ? prev.filter(s => s !== shop)
-                : [...prev, shop]
-        );
+                : [...prev, shop];
+
+            // Prevent empty selection
+            return newSelection.length === 0 ? [shop] : newSelection;
+        });
     };
 
     const toggleAllShops = () => {
         setSelectedShops(prev =>
-            prev.length === SHOPS.length ? [] : [...SHOPS]
+            prev.length === SHOPS.length ? [SHOPS[0]] : [...SHOPS]
         );
     };
 
