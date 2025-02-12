@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
+import { permissionsApi } from "@/api/permissions";
+import { Search, Loader2 } from "lucide-react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { PaginationControls } from './products-table/PaginationControls';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useDebounce } from '@/hooks/use-debounce';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface User {
+    id: string;
     username: string;
+    codigo: string;
     allowedPages: string[];
 }
 
@@ -24,51 +40,68 @@ const availableRoutes = [
 ];
 
 export function PermissionsPage() {
-    const [users, setUsers] = useState<User[]>([]);
-    const [username, setUsername] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [, startTransition] = useTransition();
     const { toast } = useToast();
 
-    const handleAddUser = () => {
-        if (!username.trim()) {
-            toast({
-                title: "Error",
-                description: "Username is required",
-                variant: "destructive",
-            });
-            return;
+    const debouncedSearch = useDebounce(searchTerm);
+
+    const { data, isFetching } = useQuery({
+        queryKey: ['users', { page: currentPage, limit: itemsPerPage, search: debouncedSearch }],
+        queryFn: () => permissionsApi.getAllUsers({
+            page: currentPage,
+            limit: itemsPerPage,
+            search: debouncedSearch,
+            order: 'asc',
+            sortBy: 'codigo',
+        }),
+        placeholderData: keepPreviousData,
+        staleTime: 5000,
+    });
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value !== searchTerm) {
+            setCurrentPage(1);
         }
+    };
 
-        const newUser: User = {
-            username: username.trim(),
-            allowedPages: [],
-        };
+    const handlePageChange = (newPage: number) => {
+        startTransition(() => {
+            setCurrentPage(newPage);
+        });
+    };
 
-        setUsers(prev => [...prev, newUser]);
-        setUsername('');
-        setSelectedUser(newUser);
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+        startTransition(() => {
+            setItemsPerPage(newItemsPerPage);
+            setCurrentPage(1);
+        });
     };
 
     const handleRouteToggle = (path: string) => {
         if (!selectedUser) return;
 
-        setUsers(prev => prev.map(user => {
-            if (user.username === selectedUser.username) {
-                const updatedPages = user.allowedPages.includes(path)
-                    ? user.allowedPages.filter(p => p !== path)
-                    : [...user.allowedPages, path];
-
-                const updatedUser = { ...user, allowedPages: updatedPages };
-                setSelectedUser(updatedUser);
-                return updatedUser;
-            }
-            return user;
-        }));
+        setSelectedUser(prev => {
+            if (!prev) return null;
+            const updatedPages = prev.allowedPages.includes(path)
+                ? prev.allowedPages.filter(p => p !== path)
+                : [...prev.allowedPages, path];
+            return { ...prev, allowedPages: updatedPages };
+        });
     };
 
     const handleSave = async () => {
+        if (!selectedUser) return;
+
         try {
-            // TODO: Implement API call to save user permissions
+            setIsLoading(true);
+            await permissionsApi.saveUserPermissions(selectedUser);
             toast({
                 title: "Success",
                 description: "User permissions saved successfully",
@@ -80,8 +113,15 @@ export function PermissionsPage() {
                 description: "Failed to save user permissions",
                 variant: "destructive",
             });
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    if (!data) return null;
+
+    const { data: users, pagination } = data;
+    const totalPages = Math.ceil(pagination.length / itemsPerPage);
 
     return (
         <div className="space-y-6">
@@ -96,30 +136,65 @@ export function PermissionsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Users</CardTitle>
-                        <CardDescription>Add and select users to manage their permissions</CardDescription>
+                        <CardDescription>Select a user to manage their permissions</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Enter username"
-                                value={username}
-                                onChange={e => setUsername(e.target.value)}
-                            />
-                            <Button onClick={handleAddUser}>Add User</Button>
-                        </div>
-                        <div className="space-y-2">
-                            {users.map(user => (
-                                <div
-                                    key={user.username}
-                                    className={cn(
-                                        "p-2 rounded cursor-pointer hover:bg-accent",
-                                        selectedUser?.username === user.username && "bg-accent"
-                                    )}
-                                    onClick={() => setSelectedUser(user)}
-                                >
-                                    {user.username}
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search by username or code"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    className="pl-8"
+                                />
+                            </div>
+
+                            <ScrollArea className="relative">
+                                {isFetching && (
+                                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50">
+                                        <div className="bg-background p-4 rounded-lg shadow-lg">
+                                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="rounded-lg border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Username</TableHead>
+                                                <TableHead>Code</TableHead>
+                                                <TableHead>Permissions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {users.map(user => (
+                                                <TableRow
+                                                    key={user.username}
+                                                    className={cn(
+                                                        "cursor-pointer hover:bg-accent",
+                                                        selectedUser?.username === user.username && "bg-accent"
+                                                    )}
+                                                    onClick={() => setSelectedUser(user)}
+                                                >
+                                                    <TableCell className="font-medium">{user.username}</TableCell>
+                                                    <TableCell>{user.codigo}</TableCell>
+                                                    <TableCell>{user.allowedPages.length} pages</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+
+                                    <PaginationControls
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        itemsPerPage={itemsPerPage}
+                                        onPageChange={handlePageChange}
+                                        onItemsPerPageChange={handleItemsPerPageChange}
+                                    />
                                 </div>
-                            ))}
+                            </ScrollArea>
                         </div>
                     </CardContent>
                 </Card>
@@ -137,11 +212,18 @@ export function PermissionsPage() {
                                         id={route.path}
                                         checked={selectedUser.allowedPages.includes(route.path)}
                                         onCheckedChange={() => handleRouteToggle(route.path)}
+                                        disabled={isLoading}
                                     />
                                     <Label htmlFor={route.path}>{route.label}</Label>
                                 </div>
                             ))}
-                            <Button className="w-full" onClick={handleSave}>Save Permissions</Button>
+                            <Button
+                                className="w-full"
+                                onClick={handleSave}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Saving..." : "Save Permissions"}
+                            </Button>
                         </CardContent>
                     </Card>
                 )}
