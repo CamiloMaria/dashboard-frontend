@@ -5,6 +5,8 @@ export const productFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   isActive: z.boolean(),
   borrado_comment: z.string().optional(),
+  disabledShops: z.array(z.string()).default([]),
+  disabledShopsComment: z.string().optional(),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema> 
@@ -38,7 +40,9 @@ export interface Product {
     unit: string;
     isActive: boolean;
     without_stock: number;
-    borrado_comment: string;
+    borrado_comment: string | null;
+    disabledShops: string[];
+    disabledShopsComment: string | null;
     shops_disable: string[];
     userAdd: string;
     userUpd: string;

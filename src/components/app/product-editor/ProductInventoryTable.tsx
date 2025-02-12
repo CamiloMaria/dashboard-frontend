@@ -6,7 +6,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Switch } from '@/components/ui/switch';
 import { type Inventory } from '@/types/product';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -21,16 +20,6 @@ import {
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useToast } from '@/hooks/use-toast';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 
 export interface ProductInventoryTableProps {
     inventory: Inventory[];
@@ -106,67 +95,12 @@ function PriceChange({ current, previous }: { current: number; previous: number 
     );
 }
 
-function StatusCell({ centro, status }: { centro: string, status: number }) {
-    const { toast } = useToast();
-    const [isActive, setIsActive] = useState(status === 1);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [pendingStatus, setPendingStatus] = useState(false);
-
-    const handleStatusChange = (checked: boolean) => {
-        setPendingStatus(checked);
-        setShowConfirmDialog(true);
-    };
-
-    const confirmStatusChange = () => {
-        setIsActive(pendingStatus);
-        setShowConfirmDialog(false);
-        toast({
-            title: `Status ${pendingStatus ? 'activated' : 'deactivated'}`,
-            description: `The inventory has been ${pendingStatus ? 'activated' : 'deactivated'} for ${centro}.`,
-        });
-    };
-
-    return (
-        <>
-            <div className="flex items-center gap-3">
-                <Switch
-                    checked={isActive}
-                    onCheckedChange={handleStatusChange}
-                    aria-label="Toggle status"
-                />
-                <Badge
-                    variant={isActive ? 'default' : 'secondary'}
-                    className="font-normal min-w-[72px] justify-center"
-                >
-                    {isActive ? 'Active' : 'Inactive'}
-                </Badge>
-            </div>
-            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Confirm Status Change</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to {pendingStatus ? 'activate' : 'deactivate'} the inventory for {centro}?
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
-                        <Button onClick={confirmStatusChange}>{pendingStatus ? 'Activate' : 'Deactivate'}</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-    );
-}
-
 export function ProductInventoryTable({ inventory, securityStock = 10 }: ProductInventoryTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<SortConfig>({
         key: null,
         direction: 'asc',
     });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
 
     const handleSort = (key: keyof Inventory) => {
         setSortConfig((current) => ({
@@ -181,10 +115,6 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
-        if (value !== searchTerm) {
-            setCurrentPage(1);
-            setItemsPerPage(5);
-        }
     };
 
     const sortedAndFilteredInventory = useMemo(() => {
@@ -311,7 +241,12 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                         ${inv.compare_price?.toFixed(2) ?? '0.00'}
                                     </TableCell>
                                     <TableCell className="pl-8">
-                                        <StatusCell centro={inv.centro} status={inv.status} />
+                                        <Badge
+                                            variant={inv.status === 1 ? 'default' : 'secondary'}
+                                            className="font-normal min-w-[72px] justify-center"
+                                        >
+                                            {inv.status === 1 ? 'Active' : 'Inactive'}
+                                        </Badge>
                                     </TableCell>
                                 </motion.tr>
                             ))}

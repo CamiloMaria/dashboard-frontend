@@ -61,6 +61,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       title: '',
       isActive: false,
       borrado_comment: '',
+      disabledShops: [],
+      disabledShopsComment: '',
     },
   });
 
@@ -76,6 +78,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         title: product.title || '',
         isActive: !!product.isActive,
         borrado_comment: product.borrado_comment || '',
+        disabledShops: product.disabledShops || [],
+        disabledShopsComment: product.disabledShopsComment || '',
       });
       setImages(product.images || []);
       setSpecifications(product.specifications || []);
@@ -247,12 +251,16 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     } else {
       form.setValue('isActive', checked);
       form.setValue('borrado_comment', '');
+      form.setValue('disabledShops', []);
+      form.setValue('disabledShopsComment', '');
     }
   };
 
-  const handleDisableConfirm = (reason: DisableReason) => {
+  const handleDisableConfirm = (reason: DisableReason, shops: string[]) => {
     form.setValue('isActive', false);
     form.setValue('borrado_comment', reason);
+    form.setValue('disabledShops', shops);
+    form.setValue('disabledShopsComment', reason);
     setShowDisableDialog(false);
     setPendingActiveState(null);
   };
@@ -332,6 +340,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                   name="isActive"
                   render={({ field }) => {
                     const borrado_comment = form.watch('borrado_comment');
+                    const disabledShops = form.watch('disabledShops');
                     return (
                       <FormItem className="flex flex-col rounded-lg border p-4">
                         <div className="flex items-center justify-between">
@@ -348,12 +357,29 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                             />
                           </FormControl>
                         </div>
-                        {!field.value && borrado_comment && (
-                          <div className="mt-4 pt-4 border-t">
-                            <p className="text-sm font-medium text-muted-foreground">Disable Reason:</p>
-                            <p className="text-sm font-medium text-red-600 mt-1">
-                              {borrado_comment}
-                            </p>
+                        {(!field.value && borrado_comment) && (
+                          <div className="mt-4 pt-4 border-t space-y-2">
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Disable Reason:</p>
+                              <p className="text-sm font-medium text-red-600 mt-1">
+                                {borrado_comment}
+                              </p>
+                            </div>
+                            {disabledShops?.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium text-muted-foreground">Disabled in Shops:</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  {disabledShops.map((shop) => (
+                                    <span
+                                      key={shop}
+                                      className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-red-600 border-red-600/20 bg-red-600/10"
+                                    >
+                                      {shop}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </FormItem>
