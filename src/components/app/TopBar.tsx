@@ -8,7 +8,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/hooks/use-theme'
-import { useNavigate } from '@tanstack/react-router'
 import { ROUTES } from '@/constants/routes'
 import { removeAuthToken } from '@/lib/auth'
 
@@ -19,14 +18,11 @@ interface TopBarProps {
 
 export function TopBar({ onToggleSidebar, isSidebarOpen }: TopBarProps) {
     const { setTheme } = useTheme();
-    const navigate = useNavigate();
 
-    const handleLogout = async () => {
-        // TODO: Implement actual logout logic here (clear tokens, state, etc.)
-
+    const handleLogout = () => {
         removeAuthToken();
-        // Navigate to login page
-        navigate({ to: ROUTES.AUTH.LOGIN });
+        // Force a router state reset before navigation
+        window.location.href = ROUTES.AUTH.LOGIN;
     };
 
     return (
