@@ -73,9 +73,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   useEffect(() => {
     if (product) {
       form.reset({
-        title: product.title,
-        isActive: product.isActive,
-        borrado_comment: product.borrado_comment,
+        title: product.title || '',
+        isActive: !!product.isActive,
+        borrado_comment: product.borrado_comment || '',
       });
       setImages(product.images || []);
       setSpecifications(product.specifications || []);
