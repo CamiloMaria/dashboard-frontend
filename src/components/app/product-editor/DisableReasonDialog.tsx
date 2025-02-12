@@ -18,11 +18,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { DISABLE_REASONS, type DisableReason } from '@/constants/product';
-
-const SHOPS = [
-    'PL01', 'PL02', 'PL03', 'PL04', 'PL05', 'PL06', 'PL07', 'PL08',
-    'PL09', 'PL10', 'PL11', 'PL12', 'PL13', 'PL14', 'PL15', 'PL16'
-];
+import { SHOPS } from '@/constants/shops';
 
 interface DisableReasonDialogProps {
     open: boolean;

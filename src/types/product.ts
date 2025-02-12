@@ -7,6 +7,7 @@ export const productFormSchema = z.object({
   borrado_comment: z.string().optional(),
   disabledShops: z.array(z.string()).default([]),
   disabledShopsComment: z.string().optional(),
+  borrado: z.number().default(0),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema> 

@@ -27,6 +27,7 @@ import {
 import { productsApi } from '@/api/products';
 import { productKeys } from '@/api/query-keys';
 import { type DisableReason } from '@/constants/product';
+import { SHOPS } from '@/constants/shops';
 import {
   ImageEditor,
   ProductInfoFields,
@@ -257,10 +258,13 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   };
 
   const handleDisableConfirm = (reason: DisableReason, shops: string[]) => {
+    const isAllShopsSelected = SHOPS.every(shop => shops.includes(shop));
+
     form.setValue('isActive', false);
     form.setValue('borrado_comment', reason);
     form.setValue('disabledShops', shops);
     form.setValue('disabledShopsComment', reason);
+    form.setValue('borrado', isAllShopsSelected ? 1 : 0);
     setShowDisableDialog(false);
     setPendingActiveState(null);
   };
