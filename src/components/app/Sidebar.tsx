@@ -11,6 +11,7 @@ import {
     Boxes,
     CircleDot,
     LucideIcon,
+    Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,11 @@ const navigationConfig: NavRoute[] = [
         path: ROUTES.ORDERS,
         label: 'Orders',
         icon: ShoppingCart,
+    },
+    {
+        path: ROUTES.PERMISSIONS,
+        label: 'Permissions',
+        icon: Shield,
     },
     // {
     //     path: ROUTES.CLIENTS,
@@ -193,8 +199,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const { hasAccess } = useAuth();
 
     useEffect(() => {
-        if (!hasAnyAllowedPages() && currentPath !== ROUTES.EXAMPLE) {
-            navigate({ to: ROUTES.EXAMPLE });
+        if (!hasAnyAllowedPages() && currentPath !== ROUTES.PERMISSIONS) {
+            navigate({ to: ROUTES.PERMISSIONS });
         }
     }, [currentPath, navigate]);
 
@@ -211,6 +217,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
 
     const filteredNavigation = navigationConfig.filter(item => {
+        if (item.path === ROUTES.EXAMPLE || item.path === ROUTES.PERMISSIONS) return true;
+
         if (!hasAccess(item.path)) return false;
         if (item.children) {
             item.children = item.children.filter(child => hasAccess(child.path));
