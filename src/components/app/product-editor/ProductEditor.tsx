@@ -37,6 +37,7 @@ import {
   DisableReasonDialog,
 } from './';
 import { productsListRoute } from '@/routes/app/products-list';
+import { Package } from 'lucide-react';
 
 interface ProductEditorProps {
   productId?: string;
@@ -61,9 +62,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     defaultValues: {
       title: '',
       isActive: false,
-      borrado_comment: '',
       disabledShops: [],
       disabledShopsComment: '',
+      security_stock: 10,
     },
   });
 
@@ -78,9 +79,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       form.reset({
         title: product.title || '',
         isActive: !!product.isActive,
-        borrado_comment: product.borrado_comment || '',
         disabledShops: product.disabledShops || [],
         disabledShopsComment: product.disabledShopsComment || '',
+        security_stock: product.security_stock || 10,
       });
       setImages(product.images || []);
       setSpecifications(product.specifications || []);
@@ -90,8 +91,35 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   }, [product, form]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Product> }) =>
-      productsApi.updateProduct(id, data),
+    mutationFn: async ({ sku, data, deletedImageIds, newImages }: {
+      id: number;
+      sku: string;
+      data: Partial<Product>;
+      deletedImageIds?: number[];
+      newImages?: File[];
+    }) => {
+      try {
+        // 1. Delete images if any
+        if (deletedImageIds?.length) {
+          await productsApi.deleteProductImages(sku || '', deletedImageIds);
+        }
+
+        // 2. Update product
+        const updatedProduct = await productsApi.updateProduct(sku || '', data);
+
+        // 3. Upload new images if any
+        if (newImages?.length) {
+          await productsApi.updateProductImages(sku || '', newImages);
+        }
+
+        return updatedProduct;
+      } catch (error) {
+        // Clean up arrays on error
+        setDeletedImageIds([]);
+        setNewImages([]);
+        throw error;
+      }
+    },
     onMutate: async ({ id, data }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: productKeys.detail(String(id)) });
@@ -153,6 +181,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       });
     },
     onSuccess: () => {
+      // Clean up arrays on success
+      setDeletedImageIds([]);
+      setNewImages([]);
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       toast({
         title: 'Product updated',
@@ -162,15 +193,20 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     },
   });
 
+  // Track deleted and new images
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+
   const handleImageUpload = (file: File, replaceIndex?: number) => {
     // Create a temporary URL for preview
     const previewUrl = URL.createObjectURL(file);
+    const position = (replaceIndex !== undefined ? images[replaceIndex].position : images.length) + 1;
 
     const newImage = {
       id: replaceIndex !== undefined ? images[replaceIndex].id : images.length + 1,
       product_id: Number(productId) || 0,
       sku: '',
-      position: replaceIndex !== undefined ? images[replaceIndex].position : images.length,
+      position,
       width: 800,
       height: 800,
       alt: file.name,
@@ -183,15 +219,27 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
     if (replaceIndex !== undefined) {
       // Replace existing image
-      const newImages = [...images];
+      const newImagesArray = [...images];
+      // Store the old image ID for deletion
+      const oldImage = images[replaceIndex];
+      if (oldImage.id) {
+        setDeletedImageIds(prev => [...prev, oldImage.id]);
+      }
       // Revoke the old URL to prevent memory leaks
       URL.revokeObjectURL(images[replaceIndex].src);
-      newImages[replaceIndex] = newImage;
-      setImages(newImages);
+      newImagesArray[replaceIndex] = newImage;
+      setImages(newImagesArray);
     } else {
       // Add new image
       setImages([...images, newImage]);
     }
+
+    // Create a new File with position in the name
+    const extension = file.name.split('.').pop();
+    const newFile = new File([file], `${position}.${extension}`, { type: file.type });
+
+    // Store the new file for upload
+    setNewImages(prev => [...prev, newFile]);
 
     // Clean up the temporary URL when the component unmounts
     return () => {
@@ -200,10 +248,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   };
 
   const handleImageDelete = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
-    if (currentImageIndex >= newImages.length) {
-      setCurrentImageIndex(Math.max(0, newImages.length - 1));
+    const imageToDelete = images[index];
+    if (imageToDelete.id) {
+      setDeletedImageIds(prev => [...prev, imageToDelete.id]);
+    }
+    const newImagesArray = images.filter((_, i) => i !== index);
+    setImages(newImagesArray);
+
+    // If we're deleting the last image or current image, adjust the index
+    if (newImagesArray.length === 0) {
+      setCurrentImageIndex(0);
+    } else if (index <= currentImageIndex) {
+      setCurrentImageIndex(Math.max(0, currentImageIndex - 1));
     }
   };
 
@@ -251,9 +307,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       setShowDisableDialog(true);
     } else {
       form.setValue('isActive', checked);
-      form.setValue('borrado_comment', '');
       form.setValue('disabledShops', []);
       form.setValue('disabledShopsComment', '');
+      form.setValue('borrado', 0);
     }
   };
 
@@ -261,7 +317,6 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     const isAllShopsSelected = SHOPS.every(shop => shops.includes(shop));
 
     form.setValue('isActive', false);
-    form.setValue('borrado_comment', reason);
     form.setValue('disabledShops', shops);
     form.setValue('disabledShopsComment', reason);
     form.setValue('borrado', isAllShopsSelected ? 1 : 0);
@@ -291,7 +346,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     if (productId) {
       updateMutation.mutate({
         id: Number(productId),
+        sku: product?.sku || '',
         data: productData,
+        deletedImageIds: deletedImageIds.length > 0 ? deletedImageIds : undefined,
+        newImages: newImages.length > 0 ? newImages : undefined,
       });
     }
   };
@@ -337,13 +395,45 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="security_stock"
+                  render={({ field }) => (
+                    <FormItem className="rounded-lg border p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                        <FormLabel className="font-medium">Security Stock</FormLabel>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={e => field.onChange(Number(e.target.value))}
+                              min={0}
+                              className="max-w-[180px]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </div>
+                        <div className="flex-[2]">
+                          <p className="text-sm text-muted-foreground">
+                            Set the minimum stock level for inventory alerts. When stock falls below this threshold, the system will display low stock warnings.
+                          </p>
+                        </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
                 <ProductInfoFields product={product} />
 
                 <FormField
                   control={form.control}
                   name="isActive"
                   render={({ field }) => {
-                    const borrado_comment = form.watch('borrado_comment');
+                    const disabledShopsComment = form.watch('disabledShopsComment');
                     const disabledShops = form.watch('disabledShops');
                     return (
                       <FormItem className="flex flex-col rounded-lg border p-4">
@@ -361,12 +451,12 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                             />
                           </FormControl>
                         </div>
-                        {(!field.value && borrado_comment) && (
+                        {(!field.value && disabledShopsComment) && (
                           <div className="mt-4 pt-4 border-t space-y-2">
                             <div>
                               <p className="text-sm font-medium text-muted-foreground">Disable Reason:</p>
                               <p className="text-sm font-medium text-red-600 mt-1">
-                                {borrado_comment}
+                                {disabledShopsComment}
                               </p>
                             </div>
                             {disabledShops?.length > 0 && (

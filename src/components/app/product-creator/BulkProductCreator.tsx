@@ -9,19 +9,40 @@ import { ResultsDialog } from './components/ResultsDialog';
 import { FileGrid } from './components/FileGrid';
 import { useNavigate } from '@tanstack/react-router';
 import { productsListRoute } from '@/routes/app/products-list';
+import { productsApi } from '@/api/products';
 
 // Mock API function for file upload with progress
 const uploadFiles = async (
     files: FileWithPreview[],
+    skuInput: string,
     onProgress: (file: FileWithPreview, progress: number) => void
 ): Promise<void> => {
-    for (const file of files) {
-        // Simulate chunked upload with progress
-        const totalChunks = 10;
-        for (let i = 0; i < totalChunks; i++) {
-            await new Promise(resolve => setTimeout(resolve, 150));
-            const progress = ((i + 1) / totalChunks) * 100;
-            onProgress(file, progress);
+    const skus = new Set(skuInput.split(/[\s,]+/).filter(Boolean));
+    const skuArray = Array.from(skus);
+
+    // Group files by SKU
+    const filesBySku = files.reduce((acc, file) => {
+        const sku = file.baseSku || skuArray[0];
+        if (!acc[sku]) acc[sku] = [];
+        acc[sku].push(file);
+        return acc;
+    }, {} as Record<string, FileWithPreview[]>);
+
+    // Upload files for each SKU
+    for (const [sku, skuFiles] of Object.entries(filesBySku)) {
+        const renamedFiles = skuFiles.map((file, index) => {
+            const extension = file.name.split('.').pop();
+            return new File([file], `${sku}-${index}.${extension}`, { type: file.type });
+        });
+
+        try {
+            await productsApi.uploadProductImages(renamedFiles);
+            // Update progress for all files in this batch
+            skuFiles.forEach(file => onProgress(file, 100));
+        } catch (error) {
+            console.error(`Failed to upload images for SKU ${sku}:`, error);
+            // Mark failed files with 0 progress
+            skuFiles.forEach(file => onProgress(file, 0));
         }
     }
 };
@@ -54,7 +75,7 @@ export function BulkProductCreator() {
         if (results) {
             if (files.length > 0) {
                 // Upload files with progress tracking
-                await uploadFiles(files, (file, progress) => {
+                await uploadFiles(files, skuInput, (file, progress) => {
                     updateProgress(file, progress);
                 });
             }

@@ -33,10 +33,6 @@ export function ProductInfoFields({ product }: ProductInfoFieldsProps) {
                 <p className="text-sm font-medium mt-1">{product?.without_stock ? 'Yes' : 'No'}</p>
             </div>
             <div>
-                <Label className="text-muted-foreground">Security Stock</Label>
-                <p className="text-sm font-medium mt-1">{product?.security_stock || '0'}</p>
-            </div>
-            <div>
                 <Label className="text-muted-foreground">Department</Label>
                 <p className="text-sm font-medium mt-1">{product?.depto || 'Not set'}</p>
             </div>

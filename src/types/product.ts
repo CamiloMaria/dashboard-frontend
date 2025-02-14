@@ -4,10 +4,10 @@ import { Pagination } from '.';
 export const productFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   isActive: z.boolean(),
-  borrado_comment: z.string().optional(),
   disabledShops: z.array(z.string()).default([]),
   disabledShopsComment: z.string().optional(),
   borrado: z.number().default(0),
+  security_stock: z.number().min(0, 'Security stock must be 0 or greater').default(20),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema> 
