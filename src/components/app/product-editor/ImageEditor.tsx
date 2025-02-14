@@ -15,6 +15,7 @@ import { type Image } from '@/types/product';
 import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
 import { useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export interface ImageEditorProps {
     images: Image[];
@@ -42,13 +43,14 @@ export function ImageEditor({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     const [isReplacing, setIsReplacing] = useState(false);
+    const { t } = useTranslation();
 
     const validateFile = (file: File) => {
         // Check file type
         if (!file.type.startsWith('image/')) {
             toast({
-                title: 'Invalid file type',
-                description: 'Please select an image file (JPG, PNG, etc.)',
+                title: t('products.editor.form.images.validation.invalidType'),
+                description: t('products.editor.form.images.validation.invalidTypeDescription'),
                 variant: 'destructive',
             });
             return false;
@@ -58,8 +60,8 @@ export function ImageEditor({
         const maxSize = 5 * 1024 * 1024; // 5MB in bytes
         if (file.size > maxSize) {
             toast({
-                title: 'File too large',
-                description: 'Please select an image under 5MB',
+                title: t('products.editor.form.images.validation.tooLarge'),
+                description: t('products.editor.form.images.validation.tooLargeDescription'),
                 variant: 'destructive',
             });
             return false;
@@ -88,8 +90,8 @@ export function ImageEditor({
 
         // Show success toast
         toast({
-            title: shouldReplace ? 'Image replaced' : 'Image added',
-            description: shouldReplace ? 'The image has been replaced successfully.' : 'The image has been added successfully.',
+            title: shouldReplace ? t('products.editor.form.images.success.replaced') : t('products.editor.form.images.success.added'),
+            description: shouldReplace ? t('products.editor.form.images.success.replacedDescription') : t('products.editor.form.images.success.addedDescription'),
         });
     };
 
@@ -124,7 +126,9 @@ export function ImageEditor({
             <div className="aspect-square rounded-lg border bg-muted relative overflow-hidden cursor-pointer group">
                 <div className="absolute top-3 right-3 z-10">
                     <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
-                        {images.length > 0 ? `Image ${currentImageIndex + 1} of ${images.length}` : 'No Images'}
+                        {images.length > 0
+                            ? t('products.editor.form.images.imageCount', { current: currentImageIndex + 1, total: images.length })
+                            : t('products.editor.form.images.noImages')}
                     </Badge>
                 </div>
 
@@ -146,7 +150,7 @@ export function ImageEditor({
                                     className="gap-2"
                                 >
                                     <Replace className="h-4 w-4" />
-                                    Replace Image
+                                    {t('products.editor.form.images.replaceImage')}
                                 </Button>
                             </div>
                         </div>
@@ -158,10 +162,10 @@ export function ImageEditor({
                     >
                         <Upload className="h-12 w-12 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
-                            Click to upload an image
+                            {t('products.editor.form.images.uploadHint')}
                         </p>
                         <p className="text-xs text-muted-foreground/70">
-                            JPG, PNG (max 5MB)
+                            {t('products.editor.form.images.uploadRequirements')}
                         </p>
                     </div>
                 )}
@@ -205,7 +209,7 @@ export function ImageEditor({
                     type="button"
                 >
                     <Plus className="h-4 w-4" />
-                    <span>Add Image</span>
+                    <span>{t('products.editor.form.images.addImage')}</span>
                 </Button>
 
                 <Separator orientation="vertical" className="h-6 mx-1" />
@@ -219,7 +223,7 @@ export function ImageEditor({
                     type="button"
                 >
                     <Trash2 className="h-4 w-4" />
-                    <span>Delete Current</span>
+                    <span>{t('products.editor.form.images.deleteImage')}</span>
                 </Button>
 
                 {images.length > 1 && (
@@ -233,6 +237,7 @@ export function ImageEditor({
                                 onClick={() => onReorder('up')}
                                 disabled={currentImageIndex === images.length - 1}
                                 type="button"
+                                aria-label={t('products.editor.form.images.moveUp')}
                             >
                                 <ChevronUp className="h-4 w-4" />
                             </Button>
@@ -243,6 +248,7 @@ export function ImageEditor({
                                 onClick={() => onReorder('down')}
                                 disabled={currentImageIndex === 0}
                                 type="button"
+                                aria-label={t('products.editor.form.images.moveDown')}
                             >
                                 <ChevronDown className="h-4 w-4" />
                             </Button>
@@ -253,11 +259,11 @@ export function ImageEditor({
 
             <ConfirmationDialog
                 open={imageToDelete !== null}
-                title="Delete Image"
-                description="Are you sure you want to delete this image? This action cannot be undone."
+                title={t('products.editor.form.images.deleteDialog.title')}
+                description={t('products.editor.form.images.deleteDialog.description')}
                 isLoading={false}
-                confirmText="Delete"
-                cancelText="Cancel"
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
                 confirmVariant="destructive"
                 onConfirm={onImageDeleteConfirm}
                 onCancel={() => onImageDeleteDialogChange(false)}

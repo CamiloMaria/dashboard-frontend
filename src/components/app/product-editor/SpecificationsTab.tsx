@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
+import { useTranslation } from 'react-i18next';
 
 interface SpecificationItemProps {
     specification: Specification;
@@ -32,12 +33,13 @@ function SpecificationItem({
     const [editedTitle, setEditedTitle] = useState(specification.title);
     const [editedDescription, setEditedDescription] = useState(specification.description);
     const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+    const { t } = useTranslation();
 
     const validateEdit = () => {
         const newErrors: typeof errors = {};
-        if (!editedTitle.trim()) newErrors.title = 'Title is required';
-        if (!editedDescription.trim()) newErrors.description = 'Description is required';
-        if (editedTitle.length > 50) newErrors.title = 'Title too long (max 50 chars)';
+        if (!editedTitle.trim()) newErrors.title = t('validation.required');
+        if (!editedDescription.trim()) newErrors.description = t('validation.required');
+        if (editedTitle.length > 50) newErrors.title = t('products.editor.form.specifications.titleTooLong');
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -59,7 +61,7 @@ function SpecificationItem({
             >
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="edit-title">Title</Label>
+                        <Label htmlFor="edit-title">{t('products.editor.form.specifications.title')}</Label>
                         <Input
                             id="edit-title"
                             value={editedTitle}
@@ -73,7 +75,7 @@ function SpecificationItem({
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="edit-desc">Description</Label>
+                        <Label htmlFor="edit-desc">{t('products.editor.form.specifications.description')}</Label>
                         <Input
                             id="edit-desc"
                             value={editedDescription}
@@ -95,7 +97,7 @@ function SpecificationItem({
                         className="gap-2"
                     >
                         <X className="h-4 w-4" />
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         size="sm"
@@ -103,7 +105,7 @@ function SpecificationItem({
                         className="gap-2"
                     >
                         <Check className="h-4 w-4" />
-                        Save
+                        {t('common.save')}
                     </Button>
                 </div>
             </motion.div>
@@ -145,12 +147,12 @@ function SpecificationItem({
                             }}
                             type="button"
                             className="h-8 w-8 hover:bg-background"
-                            aria-label="Edit specification"
+                            aria-label={t('products.editor.form.specifications.editSpecification')}
                         >
                             <Pencil className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">Edit specification</TooltipContent>
+                    <TooltipContent side="left">{t('products.editor.form.specifications.editSpecification')}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
@@ -164,12 +166,12 @@ function SpecificationItem({
                             }}
                             type="button"
                             className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                            aria-label="Delete specification"
+                            aria-label={t('products.editor.form.specifications.deleteSpecification')}
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">Delete specification</TooltipContent>
+                    <TooltipContent side="left">{t('products.editor.form.specifications.deleteSpecification')}</TooltipContent>
                 </Tooltip>
             </div>
         </motion.div>
@@ -195,17 +197,19 @@ function SpecificationForm({
     onSubmit,
     isEditing,
 }: SpecificationFormProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="spec-title">
-                        Specification Title
+                        {t('products.editor.form.specifications.title')}
                         <span className="text-destructive">*</span>
                     </Label>
                     <Input
                         id="spec-title"
-                        placeholder="e.g. Material, Weight, Dimensions"
+                        placeholder={t('products.editor.form.specifications.titlePlaceholder')}
                         value={title}
                         onChange={(e) => onTitleChange(e.target.value)}
                         className={errors.title ? 'border-destructive' : ''}
@@ -218,12 +222,12 @@ function SpecificationForm({
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="spec-desc">
-                        Specification Description
+                        {t('products.editor.form.specifications.description')}
                         <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
                         id="spec-desc"
-                        placeholder="e.g. 100% Cotton, 1.5kg, 10x20x30cm"
+                        placeholder={t('products.editor.form.specifications.descriptionPlaceholder')}
                         value={description}
                         onChange={(e) => onDescriptionChange(e.target.value)}
                         className={errors.description ? 'border-destructive' : ''}
@@ -242,7 +246,7 @@ function SpecificationForm({
                 className="w-full gap-2"
             >
                 <Plus className="h-4 w-4" />
-                {isEditing ? 'Update Specification' : 'Add Specification'}
+                {isEditing ? t('products.editor.form.specifications.updateSpecification') : t('products.editor.form.specifications.addSpecification')}
             </Button>
         </div>
     );
@@ -260,12 +264,13 @@ export function SpecificationsTab({ specifications, onSpecificationsChange }: Sp
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
     const [inputErrors, setInputErrors] = useState<{ title?: string; description?: string }>({});
     const { toast } = useToast();
+    const { t } = useTranslation();
 
     const validateInputs = () => {
         const errors: typeof inputErrors = {};
-        if (!newTitle.trim()) errors.title = 'Title is required';
-        if (!newDescription.trim()) errors.description = 'Description is required';
-        if (newTitle.length > 50) errors.title = 'Title too long (max 50 chars)';
+        if (!newTitle.trim()) errors.title = t('validation.required');
+        if (!newDescription.trim()) errors.description = t('validation.required');
+        if (newTitle.length > 50) errors.title = t('products.editor.form.specifications.titleTooLong');
         setInputErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -327,14 +332,14 @@ export function SpecificationsTab({ specifications, onSpecificationsChange }: Sp
                 <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                            <CardTitle>Product Specifications</CardTitle>
+                            <CardTitle>{t('products.editor.form.specifications.title')}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                Add or modify product specifications like dimensions, materials, etc.
+                                {t('products.editor.form.specifications.subtitle')}
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">{specifications.length}</span>
-                            <span className="text-sm text-muted-foreground">specifications</span>
+                            <span className="text-sm text-muted-foreground">{t('products.editor.form.specifications.count')}</span>
                         </div>
                     </div>
                 </CardHeader>
@@ -375,8 +380,8 @@ export function SpecificationsTab({ specifications, onSpecificationsChange }: Sp
                             <div className="text-muted-foreground mb-2">
                                 <Plus className="h-8 w-8" />
                             </div>
-                            <p className="text-sm text-muted-foreground">No specifications added yet</p>
-                            <p className="text-xs text-muted-foreground/70">Add specifications using the form below</p>
+                            <p className="text-sm text-muted-foreground">{t('products.editor.form.specifications.noSpecifications')}</p>
+                            <p className="text-xs text-muted-foreground/70">{t('products.editor.form.specifications.addSpecificationsHint')}</p>
                         </motion.div>
                     )}
 
@@ -386,7 +391,7 @@ export function SpecificationsTab({ specifications, onSpecificationsChange }: Sp
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                                Add New Specification
+                                {t('products.editor.form.specifications.addNew')}
                             </span>
                         </div>
                     </div>
@@ -405,9 +410,9 @@ export function SpecificationsTab({ specifications, onSpecificationsChange }: Sp
 
             <ConfirmationDialog
                 open={deleteIndex !== null}
-                title="Delete Specification"
-                description="Are you sure you want to delete this specification? This action cannot be undone."
-                confirmText="Delete"
+                title={t('products.editor.form.specifications.deleteDialog.title')}
+                description={t('products.editor.form.specifications.deleteDialog.description')}
+                confirmText={t('common.delete')}
                 confirmVariant="destructive"
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}

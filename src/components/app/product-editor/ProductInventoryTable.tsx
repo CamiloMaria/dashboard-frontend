@@ -20,6 +20,7 @@ import {
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export interface ProductInventoryTableProps {
     inventory: Inventory[];
@@ -101,6 +102,7 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
         key: null,
         direction: 'asc',
     });
+    const { t } = useTranslation();
 
     const handleSort = (key: keyof Inventory) => {
         setSortConfig((current) => ({
@@ -159,7 +161,7 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
             <div className="relative max-w-sm">
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                    placeholder="Search centers..."
+                    placeholder={t('products.editor.form.inventory.searchPlaceholder')}
                     value={searchTerm}
                     onChange={handleSearchChange}
                     className="pl-8"
@@ -175,7 +177,7 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                 onClick={() => handleSort('centro')}
                             >
                                 <div className="flex items-center gap-2">
-                                    Center
+                                    {t('products.editor.form.inventory.columns.center')}
                                     <SortIndicator columnKey="centro" />
                                 </div>
                             </TableHead>
@@ -184,7 +186,7 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                 onClick={() => handleSort('stock')}
                             >
                                 <div className="flex items-center gap-2">
-                                    Stock
+                                    {t('products.editor.form.inventory.columns.stock')}
                                     <SortIndicator columnKey="stock" />
                                 </div>
                             </TableHead>
@@ -193,17 +195,17 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                 onClick={() => handleSort('price')}
                             >
                                 <div className="flex items-center gap-2">
-                                    Price
+                                    {t('products.editor.form.inventory.columns.price')}
                                     <SortIndicator columnKey="price" />
                                 </div>
                             </TableHead>
-                            <TableHead className="pr-8">Previous Price</TableHead>
+                            <TableHead className="pr-8">{t('products.editor.form.inventory.columns.previousPrice')}</TableHead>
                             <TableHead
                                 className="cursor-pointer pl-8"
                                 onClick={() => handleSort('status')}
                             >
                                 <div className="flex items-center gap-2">
-                                    Status
+                                    {t('products.editor.form.inventory.columns.status')}
                                     <SortIndicator columnKey="status" />
                                 </div>
                             </TableHead>
@@ -245,7 +247,7 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                             variant={inv.status === 1 ? 'default' : 'secondary'}
                                             className="font-normal min-w-[72px] justify-center"
                                         >
-                                            {inv.status === 1 ? 'Active' : 'Inactive'}
+                                            {inv.status === 1 ? t('products.list.row.active') : t('products.list.row.inactive')}
                                         </Badge>
                                     </TableCell>
                                 </motion.tr>
@@ -260,10 +262,10 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                                         <Store className="h-8 w-8 mb-2" />
                                         <p className="text-sm">
-                                            No inventory found
+                                            {t('products.editor.form.inventory.noInventory')}
                                         </p>
                                         <p className="text-xs">
-                                            Try adjusting your search
+                                            {t('products.editor.form.inventory.adjustSearch')}
                                         </p>
                                     </div>
                                 </TableCell>

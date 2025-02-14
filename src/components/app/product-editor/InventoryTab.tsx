@@ -3,6 +3,7 @@ import { type Product } from '@/types/product';
 import { ProductInventoryTable } from './ProductInventoryTable';
 import { AlertCircle, ArrowDown, ArrowUp, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface StatCardProps {
     title: string;
@@ -55,6 +56,7 @@ interface InventoryTabProps {
 
 export function InventoryTab({ product }: InventoryTabProps) {
     const inventory = product?.inventory || [];
+    const { t } = useTranslation();
 
     // Calculate inventory statistics
     const totalStock = inventory.reduce((sum, inv) => sum + inv.stock, 0);
@@ -74,27 +76,27 @@ export function InventoryTab({ product }: InventoryTabProps) {
         <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard
-                    title="Total Stock"
+                    title={t('products.editor.form.inventory.stats.totalStock.title')}
                     value={totalStock.toString()}
-                    description="Across all centers"
+                    description={t('products.editor.form.inventory.stats.totalStock.description')}
                     icon={<Package className="h-4 w-4 text-muted-foreground" />}
                 />
                 <StatCard
-                    title="Low Stock Alerts"
+                    title={t('products.editor.form.inventory.stats.lowStock.title')}
                     value={lowStockCount.toString()}
-                    description={`Below ${product?.security_stock || 20} units`}
+                    description={t('products.editor.form.inventory.stats.lowStock.description', { stock: product?.security_stock || 20 })}
                     icon={<AlertCircle className="h-4 w-4 text-red-500" />}
                 />
                 <StatCard
-                    title="Active Listings"
+                    title={t('products.editor.form.inventory.stats.activeListings.title')}
                     value={activeListings.toString()}
-                    description={`Out of ${inventory.length} total`}
+                    description={t('products.editor.form.inventory.stats.activeListings.description', { total: inventory.length })}
                     icon={<Package className="h-4 w-4 text-green-500" />}
                 />
                 <StatCard
-                    title="Price Trend"
+                    title={t('products.editor.form.inventory.stats.priceTrend.title')}
                     value={`${Math.abs(avgPriceChange).toFixed(1)}%`}
-                    description="Average price change"
+                    description={t('products.editor.form.inventory.stats.priceTrend.description')}
                     icon={avgPriceChange >= 0 ? (
                         <ArrowUp className="h-4 w-4 text-green-500" />
                     ) : (
@@ -109,7 +111,7 @@ export function InventoryTab({ product }: InventoryTabProps) {
 
             <Card>
                 <CardHeader className="pb-3">
-                    <CardTitle>Inventory</CardTitle>
+                    <CardTitle>{t('products.editor.form.inventory.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <ProductInventoryTable

@@ -6,6 +6,7 @@ import { SpecificationsTab } from './SpecificationsTab';
 import { InventoryTab } from './InventoryTab';
 import { DescriptionTab } from './DescriptionTab';
 import { KeywordsTab } from './KeywordsTab';
+import { useTranslation } from 'react-i18next';
 
 export interface ProductTabsProps {
     product: Product | undefined;
@@ -30,25 +31,27 @@ export function ProductTabs({
     keywords,
     onKeywordsChange
 }: ProductTabsProps) {
+    const { t } = useTranslation();
+
     return (
         <TooltipProvider>
             <Tabs defaultValue="catalog" className="w-full">
                 <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
                     <TabsTrigger value="catalog" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent">
                         <Boxes className="h-4 w-4 mr-2" />
-                        Catalog
+                        {t('products.editor.form.tabs.catalog')}
                     </TabsTrigger>
                     <TabsTrigger value="specifications" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent">
                         <Boxes className="h-4 w-4 mr-2" />
-                        Specifications
+                        {t('products.editor.form.tabs.specifications')}
                     </TabsTrigger>
                     <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent">
                         <FileText className="h-4 w-4 mr-2" />
-                        Description
+                        {t('products.editor.form.tabs.description')}
                     </TabsTrigger>
                     <TabsTrigger value="keywords" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent">
                         <Tags className="h-4 w-4 mr-2" />
-                        Keywords
+                        {t('products.editor.form.tabs.keywords')}
                     </TabsTrigger>
                 </TabsList>
                 <div className="mt-6">

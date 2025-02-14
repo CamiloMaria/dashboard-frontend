@@ -78,6 +78,94 @@ export const en = {
           specifications: 'Specifications',
           description: 'Description',
           keywords: 'Keywords'
+        },
+        specifications: {
+          title: 'Product Specifications',
+          subtitle: 'Add or modify product specifications like dimensions, materials, etc.',
+          titlePlaceholder: 'e.g. Material, Weight, Dimensions',
+          descriptionPlaceholder: 'e.g. 100% Cotton, 1.5kg, 10x20x30cm',
+          titleTooLong: 'Title too long (max 50 chars)',
+          count: 'specifications',
+          noSpecifications: 'No specifications added yet',
+          addSpecificationsHint: 'Add specifications using the form below',
+          addNew: 'Add New Specification',
+          addSpecification: 'Add Specification',
+          updateSpecification: 'Update Specification',
+          editSpecification: 'Edit specification',
+          deleteSpecification: 'Delete specification',
+          deleteDialog: {
+            title: 'Delete Specification',
+            description: 'Are you sure you want to delete this specification? This action cannot be undone.'
+          }
+        },
+        info: {
+          notSet: 'Not set',
+          sku: 'SKU',
+          brand: 'Brand',
+          unit: 'Unit',
+          category: 'Category',
+          bigItem: 'Big Item',
+          withoutStock: 'Without Stock',
+          department: 'Department',
+          group: 'Group'
+        },
+        inventory: {
+          searchPlaceholder: 'Search centers...',
+          columns: {
+            center: 'Center',
+            stock: 'Stock',
+            price: 'Price',
+            previousPrice: 'Previous Price',
+            status: 'Status'
+          },
+          noInventory: 'No inventory found',
+          adjustSearch: 'Try adjusting your search',
+          stats: {
+            totalStock: {
+              title: 'Total Stock',
+              description: 'Across all centers'
+            },
+            lowStock: {
+              title: 'Low Stock Alerts',
+              description: 'Below {{stock}} units'
+            },
+            activeListings: {
+              title: 'Active Listings',
+              description: 'Out of {{total}} total'
+            },
+            priceTrend: {
+              title: 'Price Trend',
+              description: 'Average price change'
+            }
+          },
+          title: 'Inventory'
+        },
+        images: {
+          imageCount: 'Image {{current}} of {{total}}',
+          noImages: 'No Images',
+          uploadHint: 'Click to upload an image',
+          uploadRequirements: 'JPG, PNG (max 5MB)',
+          replaceImage: 'Replace Image',
+          addImage: 'Add Image',
+          deleteImage: 'Delete Current',
+          moveUp: 'Move Up',
+          moveDown: 'Move Down',
+          deleteDialog: {
+            title: 'Delete Image',
+            description: 'Are you sure you want to delete this image? This action cannot be undone.'
+          },
+          validation: {
+            invalidType: 'Invalid file type',
+            invalidTypeDescription: 'Please select an image file (JPG, PNG, etc.)',
+            tooLarge: 'File too large',
+            tooLargeDescription: 'Please select an image under 5MB'
+          },
+          success: {
+            added: 'Image added',
+            addedDescription: 'The image has been added successfully.',
+            replaced: 'Image replaced',
+            replacedDescription: 'The image has been replaced successfully.'
+          }
         }
       }
     },
