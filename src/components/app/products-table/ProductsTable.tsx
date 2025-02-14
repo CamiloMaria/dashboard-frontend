@@ -9,7 +9,8 @@ import {
   XCircle,
   Package,
   SlidersHorizontal,
-  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Table,
@@ -38,7 +39,6 @@ import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { productsNewRoute } from '@/routes/app/products-new';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 export function ProductsTable() {
@@ -326,34 +327,6 @@ export function ProductsTable() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-11 w-11">
-                    <ArrowUpDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>{t('products.list.sort.title')}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => toggleSort('update_at')}>
-                    {t('products.list.sort.date')}
-                    {sortConfig.field === 'update_at' && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({sortConfig.direction === 'desc' ? '↓' : '↑'})
-                      </span>
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toggleSort('title')}>
-                    {t('products.list.sort.productTitle')}
-                    {sortConfig.field === 'title' && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({sortConfig.direction === 'desc' ? '↓' : '↑'})
-                      </span>
-                    )}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               <Button
                 className="h-11 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                 onClick={() => navigate({ to: productsNewRoute.fullPath })}
@@ -414,14 +387,120 @@ export function ProductsTable() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/60 transition-colors">
-                <TableHead className="w-[100px]">{t('products.list.columns.thumbnail')}</TableHead>
-                <TableHead>{t('products.list.columns.sku')}</TableHead>
-                <TableHead>{t('products.list.columns.title')}</TableHead>
-                <TableHead>{t('products.list.columns.material')}</TableHead>
-                <TableHead>{t('products.list.columns.bigItem')}</TableHead>
-                <TableHead>{t('products.list.columns.status')}</TableHead>
-                <TableHead>{t('products.list.columns.date')}</TableHead>
-                <TableHead className="text-right">{t('products.list.columns.actions')}</TableHead>
+                <TableHead className="w-[100px] py-4">
+                  {t('products.list.columns.thumbnail')}
+                </TableHead>
+                <TableHead
+                  onClick={() => toggleSort('sku')}
+                  className={cn(
+                    "cursor-pointer select-none whitespace-nowrap",
+                    sortConfig.field === 'sku' && "text-primary"
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    {t('products.list.columns.sku')}
+                    <div className="flex flex-col ml-1">
+                      <ChevronUp className={cn(
+                        "h-3 w-3 text-muted-foreground/40",
+                        sortConfig.field === 'sku' && sortConfig.direction === 'asc' && "text-primary"
+                      )} />
+                      <ChevronDown className={cn(
+                        "h-3 w-3 text-muted-foreground/40 -mt-1",
+                        sortConfig.field === 'sku' && sortConfig.direction === 'desc' && "text-primary"
+                      )} />
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead
+                  onClick={() => toggleSort('title')}
+                  className={cn(
+                    "cursor-pointer select-none whitespace-nowrap",
+                    sortConfig.field === 'title' && "text-primary"
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    {t('products.list.columns.title')}
+                    <div className="flex flex-col ml-1">
+                      <ChevronUp className={cn(
+                        "h-3 w-3 text-muted-foreground/40",
+                        sortConfig.field === 'title' && sortConfig.direction === 'asc' && "text-primary"
+                      )} />
+                      <ChevronDown className={cn(
+                        "h-3 w-3 text-muted-foreground/40 -mt-1",
+                        sortConfig.field === 'title' && sortConfig.direction === 'desc' && "text-primary"
+                      )} />
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead
+                  onClick={() => toggleSort('matnr')}
+                  className={cn(
+                    "cursor-pointer select-none whitespace-nowrap",
+                    sortConfig.field === 'matnr' && "text-primary"
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    {t('products.list.columns.material')}
+                    <div className="flex flex-col ml-1">
+                      <ChevronUp className={cn(
+                        "h-3 w-3 text-muted-foreground/40",
+                        sortConfig.field === 'matnr' && sortConfig.direction === 'asc' && "text-primary"
+                      )} />
+                      <ChevronDown className={cn(
+                        "h-3 w-3 text-muted-foreground/40 -mt-1",
+                        sortConfig.field === 'matnr' && sortConfig.direction === 'desc' && "text-primary"
+                      )} />
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t('products.list.columns.bigItem')}
+                </TableHead>
+                <TableHead
+                  onClick={() => toggleSort('borrado')}
+                  className={cn(
+                    "cursor-pointer select-none whitespace-nowrap",
+                    sortConfig.field === 'borrado' && "text-primary"
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    {t('products.list.columns.status')}
+                    <div className="flex flex-col ml-1">
+                      <ChevronUp className={cn(
+                        "h-3 w-3 text-muted-foreground/40",
+                        sortConfig.field === 'borrado' && sortConfig.direction === 'asc' && "text-primary"
+                      )} />
+                      <ChevronDown className={cn(
+                        "h-3 w-3 text-muted-foreground/40 -mt-1",
+                        sortConfig.field === 'borrado' && sortConfig.direction === 'desc' && "text-primary"
+                      )} />
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead
+                  onClick={() => toggleSort('update_at')}
+                  className={cn(
+                    "cursor-pointer select-none whitespace-nowrap",
+                    sortConfig.field === 'update_at' && "text-primary"
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    {t('products.list.columns.date')}
+                    <div className="flex flex-col ml-1">
+                      <ChevronUp className={cn(
+                        "h-3 w-3 text-muted-foreground/40",
+                        sortConfig.field === 'update_at' && sortConfig.direction === 'asc' && "text-primary"
+                      )} />
+                      <ChevronDown className={cn(
+                        "h-3 w-3 text-muted-foreground/40 -mt-1",
+                        sortConfig.field === 'update_at' && sortConfig.direction === 'desc' && "text-primary"
+                      )} />
+                    </div>
+                  </div>
+                </TableHead>
+                <TableHead className="text-right whitespace-nowrap">
+                  {t('products.list.columns.actions')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
