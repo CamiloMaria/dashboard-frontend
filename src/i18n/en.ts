@@ -9,6 +9,8 @@ export const en = {
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
+    active: 'Active',
+    inactive: 'Inactive',
     theme: {
       light: 'Light',
       dark: 'Dark',
@@ -265,6 +267,26 @@ export const en = {
       }
     }
   },
+  promotions: {
+    title: 'Promotions',
+    searchPlaceholder: 'Search by promo number, SKU, or material...',
+    exportCSV: 'Export CSV',
+    error: {
+      title: 'Failed to load promotions',
+      description: 'There was an error loading the promotions. Please try again or contact support if the problem persists.',
+      tryAgain: 'Try Again'
+    },
+    columns: {
+      promoNumber: 'Promo Number',
+      sku: 'SKU',
+      material: 'Material',
+      shop: 'Shop',
+      price: 'Price',
+      comparePrice: 'Compare Price',
+      status: 'Status',
+      createdAt: 'Created At'
+    }
+  },
   validation: {
     required: 'This field is required',
     invalidFile: 'Invalid file type',
@@ -275,5 +297,82 @@ export const en = {
     productDeleted: 'Product deleted successfully',
     updateError: 'Failed to update product',
     deleteError: 'Failed to delete product',
+  },
+  productSets: {
+    title: 'Product Sets',
+    addSet: 'Add Set',
+    searchPlaceholder: 'Search by SKU or title...',
+    error: {
+      title: 'Failed to load product sets',
+      description: 'There was an error loading the product sets. Please try again or contact support if the problem persists.',
+      tryAgain: 'Try Again'
+    },
+    noSets: {
+      title: 'No product sets found',
+      withSearch: 'No product sets match your search criteria. Try adjusting your search terms.',
+      withoutSearch: 'There are no product sets available at the moment.'
+    },
+    columns: {
+      setSku: 'Set SKU',
+      title: 'Title',
+      price: 'Price',
+      area: 'Area',
+      createdAt: 'Created At',
+      updatedAt: 'Updated At'
+    },
+    expandedView: {
+      productsInSet: 'Products in Set',
+      productInfo: {
+        sku: 'SKU',
+        grupo: 'Group',
+        depto: 'Dept'
+      }
+    },
+    create: {
+      title: 'Create Product Set',
+      setTitle: {
+        label: 'Set Title',
+        placeholder: 'Enter set title...'
+      },
+      selectedProducts: {
+        title: 'Selected Products',
+        empty: {
+          title: 'No products selected',
+          description: 'Select products from the table below to create a set'
+        },
+        freeProduct: 'Free Product',
+        remove: 'Remove',
+        isFree: 'Is Free'
+      },
+      searchProducts: {
+        placeholder: 'Search products by SKU or title...'
+      },
+      validation: {
+        selectionLimit: {
+          title: 'Selection limit reached',
+          description: 'A product set can only contain 2 products.'
+        },
+        invalidSelection: {
+          title: 'Invalid selection',
+          description: 'All products in a set must be from the same grupo.'
+        },
+        invalidCount: {
+          title: 'Invalid selection',
+          description: 'Please select exactly 2 products for the set.'
+        },
+        missingTitle: {
+          title: 'Missing title',
+          description: 'Please enter a title for the product set.'
+        }
+      },
+      success: {
+        title: 'Product set created',
+        description: 'The product set has been created successfully.'
+      },
+      buttons: {
+        cancel: 'Cancel',
+        create: 'Create Set'
+      }
+    }
   }
 }; 

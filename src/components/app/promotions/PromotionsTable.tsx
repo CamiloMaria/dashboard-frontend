@@ -26,12 +26,14 @@ import { Promotion } from '@/types/promotion';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { promotionKeys } from '@/api/query-keys';
+import { useTranslation } from 'react-i18next';
 
 export function PromotionsTable() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [, startTransition] = useTransition();
+    const { t } = useTranslation();
 
     const debouncedSearch = useDebounce(searchTerm);
 
@@ -66,7 +68,16 @@ export function PromotionsTable() {
 
     const exportToCSV = (data: Promotion[]) => {
         const csvContent = [
-            ['Promo Number', 'SKU', 'Material', 'Shop', 'Price', 'Compare Price', 'Status', 'Created At'],
+            [
+                t('promotions.columns.promoNumber'),
+                t('promotions.columns.sku'),
+                t('promotions.columns.material'),
+                t('promotions.columns.shop'),
+                t('promotions.columns.price'),
+                t('promotions.columns.comparePrice'),
+                t('promotions.columns.status'),
+                t('promotions.columns.createdAt')
+            ],
             ...data.map(promo => [
                 promo.no_promo,
                 promo.sku,
@@ -74,7 +85,7 @@ export function PromotionsTable() {
                 promo.shop,
                 promo.price,
                 promo.compare_price,
-                promo.status ? 'Active' : 'Inactive',
+                promo.status ? t('common.active') : t('common.inactive'),
                 new Date(promo.created_at).toLocaleDateString()
             ])
         ].join('\n');
@@ -124,15 +135,15 @@ export function PromotionsTable() {
                     <div className="rounded-full bg-muted p-3">
                         <Package className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-lg">Failed to load promotions</h3>
+                    <h3 className="font-semibold text-lg">{t('promotions.error.title')}</h3>
                     <p className="text-sm text-muted-foreground max-w-[500px]">
-                        There was an error loading the promotions. Please try again or contact support if the problem persists.
+                        {t('promotions.error.description')}
                     </p>
                     <Button
                         onClick={() => window.location.reload()}
                         className="mt-2"
                     >
-                        Try Again
+                        {t('promotions.error.tryAgain')}
                     </Button>
                 </div>
             </Card>
@@ -152,7 +163,7 @@ export function PromotionsTable() {
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="text"
-                            placeholder="Search by promo number, SKU, or material..."
+                            placeholder={t('promotions.searchPlaceholder')}
                             value={searchTerm}
                             onChange={handleSearchChange}
                             className="pl-10"
@@ -165,7 +176,7 @@ export function PromotionsTable() {
                         onClick={() => exportToCSV(promotions)}
                     >
                         <Download className="h-4 w-4" />
-                        Export CSV
+                        {t('promotions.exportCSV')}
                     </Button>
                 </div>
             </div>
@@ -182,14 +193,14 @@ export function PromotionsTable() {
                 <Table>
                     <TableHeader>
                         <TableRow className="hover:bg-transparent">
-                            <TableHead>Promo Number</TableHead>
-                            <TableHead>SKU</TableHead>
-                            <TableHead>Material</TableHead>
-                            <TableHead>Shop</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Compare Price</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created At</TableHead>
+                            <TableHead>{t('promotions.columns.promoNumber')}</TableHead>
+                            <TableHead>{t('promotions.columns.sku')}</TableHead>
+                            <TableHead>{t('promotions.columns.material')}</TableHead>
+                            <TableHead>{t('promotions.columns.shop')}</TableHead>
+                            <TableHead>{t('promotions.columns.price')}</TableHead>
+                            <TableHead>{t('promotions.columns.comparePrice')}</TableHead>
+                            <TableHead>{t('promotions.columns.status')}</TableHead>
+                            <TableHead>{t('promotions.columns.createdAt')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -208,7 +219,7 @@ export function PromotionsTable() {
                                             ? 'bg-green-100 text-green-700'
                                             : 'bg-red-100 text-red-700'
                                     )}>
-                                        {promotion.status ? 'Active' : 'Inactive'}
+                                        {promotion.status ? t('common.active') : t('common.inactive')}
                                     </div>
                                 </TableCell>
                                 <TableCell className="whitespace-nowrap">

@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Product } from '@/types/product';
 import { CreateSetPayload } from '@/types/product-set';
 import { ROUTES } from '@/constants/routes';
+import { useTranslation } from 'react-i18next';
 
 export function CreateProductSetPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +35,7 @@ export function CreateProductSetPage() {
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const debouncedSearch = useDebounce(searchTerm);
+    const { t } = useTranslation();
 
     const { data: products = [], isLoading } = useQuery({
         queryKey: productKeys.search(debouncedSearch),
@@ -46,14 +48,14 @@ export function CreateProductSetPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: productSetsKeys.all });
             toast({
-                title: 'Product set created',
-                description: 'The product set has been created successfully.',
+                title: t('productSets.create.success.title'),
+                description: t('productSets.create.success.description'),
             });
             navigate({ to: ROUTES.INVENTORY.PRODUCT_SETS.LIST });
         },
         onError: (error) => {
             toast({
-                title: 'Error',
+                title: t('common.error'),
                 description: error instanceof Error ? error.message : 'Failed to create product set',
                 variant: 'destructive',
             });
@@ -68,16 +70,16 @@ export function CreateProductSetPage() {
             }
             if (prev.length >= 2) {
                 toast({
-                    title: 'Selection limit reached',
-                    description: 'A product set can only contain 2 products.',
+                    title: t('productSets.create.validation.selectionLimit.title'),
+                    description: t('productSets.create.validation.selectionLimit.description'),
                     variant: 'destructive',
                 });
                 return prev;
             }
             if (prev.length === 1 && prev[0].grupo !== product.grupo) {
                 toast({
-                    title: 'Invalid selection',
-                    description: 'All products in a set must be from the same grupo.',
+                    title: t('productSets.create.validation.invalidSelection.title'),
+                    description: t('productSets.create.validation.invalidSelection.description'),
                     variant: 'destructive',
                 });
                 return prev;
@@ -102,16 +104,16 @@ export function CreateProductSetPage() {
         e.preventDefault();
         if (selectedProducts.length !== 2) {
             toast({
-                title: 'Invalid selection',
-                description: 'Please select exactly 2 products for the set.',
+                title: t('productSets.create.validation.invalidCount.title'),
+                description: t('productSets.create.validation.invalidCount.description'),
                 variant: 'destructive',
             });
             return;
         }
         if (!title.trim()) {
             toast({
-                title: 'Missing title',
-                description: 'Please enter a title for the product set.',
+                title: t('productSets.create.validation.missingTitle.title'),
+                description: t('productSets.create.validation.missingTitle.description'),
                 variant: 'destructive',
             });
             return;
@@ -130,34 +132,34 @@ export function CreateProductSetPage() {
     };
 
     const getProductPrice = (product: Product) => {
-        return product.inventory[0]?.price ?? 0;
+        return product.inventory[0]?.price || 0;
     };
 
     const getProductComparePrice = (product: Product) => {
-        return product.inventory[0]?.compare_price ?? null;
+        return product.inventory[0]?.compare_price || null;
     };
 
     return (
         <div className="container py-6 space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Create Product Set</h1>
+                <h1 className="text-3xl font-bold">{t('productSets.create.title')}</h1>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card className="p-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="title">Set Title</Label>
+                            <Label htmlFor="title">{t('productSets.create.setTitle.label')}</Label>
                             <Input
                                 id="title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Enter set title..."
+                                placeholder={t('productSets.create.setTitle.placeholder')}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Selected Products ({selectedProducts.length}/2)</Label>
+                            <Label>{t('productSets.create.selectedProducts.title')} ({selectedProducts.length}/2)</Label>
                             {selectedProducts.length > 0 ? (
                                 <div className="grid gap-4">
                                     {selectedProducts.map((product) => (
@@ -167,7 +169,7 @@ export function CreateProductSetPage() {
                                         >
                                             {freeProducts.has(product.id) && (
                                                 <div className="absolute top-0 right-0 bg-green-500 text-white px-2 py-1 text-xs font-medium rounded-bl">
-                                                    Free Product
+                                                    {t('productSets.create.selectedProducts.freeProduct')}
                                                 </div>
                                             )}
                                             <div className="flex items-start justify-between gap-4">
@@ -177,17 +179,17 @@ export function CreateProductSetPage() {
                                                     </div>
                                                     <div className="grid gap-1 text-sm">
                                                         <div className="flex items-center text-muted-foreground">
-                                                            <span className="w-16">SKU:</span>
+                                                            <span className="w-16">{t('productSets.expandedView.productInfo.sku')}:</span>
                                                             <span className="font-medium text-foreground">{product.sku}</span>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground">
-                                                            <span className="w-16">Price:</span>
+                                                            <span className="w-16">{t('productSets.columns.price')}:</span>
                                                             <span className="font-medium text-foreground">
                                                                 ${getProductPrice(product).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground">
-                                                            <span className="w-16">Grupo:</span>
+                                                            <span className="w-16">{t('productSets.expandedView.productInfo.grupo')}:</span>
                                                             <span className="font-medium text-foreground">{product.grupo}</span>
                                                         </div>
                                                     </div>
@@ -200,10 +202,10 @@ export function CreateProductSetPage() {
                                                         onClick={() => handleProductSelect(product)}
                                                         className="text-red-500 hover:text-red-600 hover:bg-red-50"
                                                     >
-                                                        Remove
+                                                        {t('productSets.create.selectedProducts.remove')}
                                                     </Button>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-sm text-muted-foreground">Is Free:</span>
+                                                        <span className="text-sm text-muted-foreground">{t('productSets.create.selectedProducts.isFree')}:</span>
                                                         <Checkbox
                                                             checked={freeProducts.has(product.id)}
                                                             onCheckedChange={() => handleFreeProductToggle(product.id)}
@@ -217,8 +219,8 @@ export function CreateProductSetPage() {
                             ) : (
                                 <Card className="p-8 flex flex-col items-center justify-center text-center text-muted-foreground">
                                     <Package className="h-8 w-8 mb-2 text-muted-foreground/50" />
-                                    <p className="text-sm">No products selected</p>
-                                    <p className="text-xs mt-1">Select products from the table below to create a set</p>
+                                    <p className="text-sm">{t('productSets.create.selectedProducts.empty.title')}</p>
+                                    <p className="text-xs mt-1">{t('productSets.create.selectedProducts.empty.description')}</p>
                                 </Card>
                             )}
                         </div>
@@ -231,7 +233,7 @@ export function CreateProductSetPage() {
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="text"
-                                placeholder="Search products by SKU or title..."
+                                placeholder={t('productSets.create.searchProducts.placeholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -244,10 +246,10 @@ export function CreateProductSetPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[50px]"></TableHead>
-                                    <TableHead>SKU</TableHead>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Grupo</TableHead>
+                                    <TableHead>{t('productSets.expandedView.productInfo.sku')}</TableHead>
+                                    <TableHead>{t('productSets.columns.title')}</TableHead>
+                                    <TableHead>{t('productSets.columns.price')}</TableHead>
+                                    <TableHead>{t('productSets.expandedView.productInfo.grupo')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -260,7 +262,7 @@ export function CreateProductSetPage() {
                                 ) : products.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                            No products found
+                                            {t('productSets.noSets.title')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -301,7 +303,7 @@ export function CreateProductSetPage() {
                         variant="outline"
                         onClick={() => navigate({ to: ROUTES.INVENTORY.PRODUCT_SETS.LIST })}
                     >
-                        Cancel
+                        {t('productSets.create.buttons.cancel')}
                     </Button>
                     <Button
                         type="submit"
@@ -310,7 +312,7 @@ export function CreateProductSetPage() {
                         {createMutation.isPending && (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
-                        Create Set
+                        {t('productSets.create.buttons.create')}
                     </Button>
                 </div>
             </form>

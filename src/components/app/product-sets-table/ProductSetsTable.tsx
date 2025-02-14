@@ -24,7 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { productSetsApi } from '@/api';
 import { productSetsKeys } from '@/api/query-keys';
-
+import { useTranslation } from 'react-i18next';
 
 export function ProductSetsTable() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +32,7 @@ export function ProductSetsTable() {
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
     const [, startTransition] = useTransition();
+    const { t } = useTranslation();
 
     const debouncedSearch = useDebounce(searchTerm);
 
@@ -112,15 +113,15 @@ export function ProductSetsTable() {
                     <div className="rounded-full bg-muted p-3">
                         <Package className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-lg">Failed to load product sets</h3>
+                    <h3 className="font-semibold text-lg">{t('productSets.error.title')}</h3>
                     <p className="text-sm text-muted-foreground max-w-[500px]">
-                        There was an error loading the product sets. Please try again or contact support if the problem persists.
+                        {t('productSets.error.description')}
                     </p>
                     <Button
                         onClick={() => window.location.reload()}
                         className="mt-2"
                     >
-                        Try Again
+                        {t('productSets.error.tryAgain')}
                     </Button>
                 </div>
             </Card>
@@ -139,11 +140,11 @@ export function ProductSetsTable() {
                     <div className="rounded-full bg-muted p-3">
                         <Package className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-lg">No product sets found</h3>
+                    <h3 className="font-semibold text-lg">{t('productSets.noSets.title')}</h3>
                     <p className="text-sm text-muted-foreground max-w-[500px]">
                         {searchTerm
-                            ? "No product sets match your search criteria. Try adjusting your search terms."
-                            : "There are no product sets available at the moment."}
+                            ? t('productSets.noSets.withSearch')
+                            : t('productSets.noSets.withoutSearch')}
                     </p>
                 </div>
             </Card>
@@ -157,7 +158,7 @@ export function ProductSetsTable() {
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
-                        placeholder="Search by SKU or title..."
+                        placeholder={t('productSets.searchPlaceholder')}
                         value={searchTerm}
                         onChange={handleSearchChange}
                         className="pl-10"
@@ -178,12 +179,12 @@ export function ProductSetsTable() {
                     <TableHeader>
                         <TableRow className="hover:bg-transparent">
                             <TableHead className="w-[40px]"></TableHead>
-                            <TableHead>Set SKU</TableHead>
-                            <TableHead>Title</TableHead>
-                            <TableHead className="min-w-[120px]">Price</TableHead>
-                            <TableHead>Area</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Updated At</TableHead>
+                            <TableHead>{t('productSets.columns.setSku')}</TableHead>
+                            <TableHead>{t('productSets.columns.title')}</TableHead>
+                            <TableHead className="min-w-[120px]">{t('productSets.columns.price')}</TableHead>
+                            <TableHead>{t('productSets.columns.area')}</TableHead>
+                            <TableHead>{t('productSets.columns.createdAt')}</TableHead>
+                            <TableHead>{t('productSets.columns.updatedAt')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -235,7 +236,7 @@ export function ProductSetsTable() {
                                         <TableCell colSpan={7} className="p-0 border-0">
                                             <div className="bg-muted/50 p-4 space-y-4">
                                                 <h4 className="font-medium text-sm text-muted-foreground px-2">
-                                                    Products in Set ({productSet.products.length})
+                                                    {t('productSets.expandedView.productsInSet')} ({productSet.products.length})
                                                 </h4>
                                                 <div className="grid grid-cols-2 gap-6">
                                                     {productSet.products.map((product) => (
@@ -247,7 +248,7 @@ export function ProductSetsTable() {
                                                                 <p className="font-medium line-clamp-2">{product.title}</p>
                                                                 <div className="flex items-center justify-between text-sm">
                                                                     <span className="text-muted-foreground">
-                                                                        SKU: {product.sku}
+                                                                        {t('productSets.expandedView.productInfo.sku')}: {product.sku}
                                                                     </span>
                                                                 </div>
                                                                 <div className="space-y-0.5">
@@ -266,9 +267,9 @@ export function ProductSetsTable() {
                                                                     )}
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                                                    <span>Grupo: {product.grupo}</span>
+                                                                    <span>{t('productSets.expandedView.productInfo.grupo')}: {product.grupo}</span>
                                                                     <span>•</span>
-                                                                    <span>Depto: {product.depto}</span>
+                                                                    <span>{t('productSets.expandedView.productInfo.depto')}: {product.depto}</span>
                                                                 </div>
                                                             </div>
                                                         </Card>

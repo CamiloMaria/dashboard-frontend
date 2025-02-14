@@ -9,6 +9,8 @@ export const es = {
         loading: 'Cargando...',
         error: 'Error',
         success: 'Éxito',
+        active: 'Activo',
+        inactive: 'Inactivo',
         theme: {
             light: 'Claro',
             dark: 'Oscuro',
@@ -265,6 +267,26 @@ export const es = {
             }
         }
     },
+    promotions: {
+        title: 'Promociones',
+        searchPlaceholder: 'Buscar por número de promoción, SKU o material...',
+        exportCSV: 'Exportar CSV',
+        error: {
+            title: 'Error al cargar promociones',
+            description: 'Hubo un error al cargar las promociones. Por favor intenta de nuevo o contacta a soporte si el problema persiste.',
+            tryAgain: 'Intentar de Nuevo'
+        },
+        columns: {
+            promoNumber: 'Número de Promoción',
+            sku: 'SKU',
+            material: 'Material',
+            shop: 'Tienda',
+            price: 'Precio',
+            comparePrice: 'Precio Anterior',
+            status: 'Estado',
+            createdAt: 'Fecha de Creación'
+        }
+    },
     validation: {
         required: 'Este campo es requerido',
         invalidFile: 'Tipo de archivo inválido',
@@ -275,5 +297,82 @@ export const es = {
         productDeleted: 'Producto eliminado exitosamente',
         updateError: 'Error al actualizar el producto',
         deleteError: 'Error al eliminar el producto',
+    },
+    productSets: {
+        title: 'Sets de Productos',
+        addSet: 'Agregar Set',
+        searchPlaceholder: 'Buscar por SKU o título...',
+        error: {
+            title: 'Error al cargar sets de productos',
+            description: 'Hubo un error al cargar los sets de productos. Por favor intenta de nuevo o contacta a soporte si el problema persiste.',
+            tryAgain: 'Intentar de Nuevo'
+        },
+        noSets: {
+            title: 'No se encontraron sets de productos',
+            withSearch: 'No hay sets de productos que coincidan con tu búsqueda. Intenta ajustar los términos de búsqueda.',
+            withoutSearch: 'No hay sets de productos disponibles en este momento.'
+        },
+        columns: {
+            setSku: 'SKU del Set',
+            title: 'Título',
+            price: 'Precio',
+            area: 'Área',
+            createdAt: 'Fecha de Creación',
+            updatedAt: 'Fecha de Actualización'
+        },
+        expandedView: {
+            productsInSet: 'Productos en el Set',
+            productInfo: {
+                sku: 'SKU',
+                grupo: 'Grupo',
+                depto: 'Depto'
+            }
+        },
+        create: {
+            title: 'Crear Set de Productos',
+            setTitle: {
+                label: 'Título del Set',
+                placeholder: 'Ingresa el título del set...'
+            },
+            selectedProducts: {
+                title: 'Productos Seleccionados',
+                empty: {
+                    title: 'No hay productos seleccionados',
+                    description: 'Selecciona productos de la tabla de abajo para crear un set'
+                },
+                freeProduct: 'Producto Gratis',
+                remove: 'Eliminar',
+                isFree: 'Es Gratis'
+            },
+            searchProducts: {
+                placeholder: 'Buscar productos por SKU o título...'
+            },
+            validation: {
+                selectionLimit: {
+                    title: 'Límite de selección alcanzado',
+                    description: 'Un set de productos solo puede contener 2 productos.'
+                },
+                invalidSelection: {
+                    title: 'Selección inválida',
+                    description: 'Todos los productos en un set deben ser del mismo grupo.'
+                },
+                invalidCount: {
+                    title: 'Selección inválida',
+                    description: 'Por favor selecciona exactamente 2 productos para el set.'
+                },
+                missingTitle: {
+                    title: 'Falta el título',
+                    description: 'Por favor ingresa un título para el set de productos.'
+                }
+            },
+            success: {
+                title: 'Set de productos creado',
+                description: 'El set de productos ha sido creado exitosamente.'
+            },
+            buttons: {
+                cancel: 'Cancelar',
+                create: 'Crear Set'
+            }
+        }
     }
 }; 
