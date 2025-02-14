@@ -403,6 +403,7 @@ export const en = {
       rnc: 'RNC',
       total: 'Total',
       source: 'Source',
+      ptlog: 'SAP',
       store: 'Store',
       date: 'Date'
     },

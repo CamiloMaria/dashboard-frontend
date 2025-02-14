@@ -240,6 +240,12 @@ export function OrdersTable() {
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    {t('orders.columns.ptlog')}
+                                </div>
+                            </TableHead>
+                            <TableHead>
+                                <div className="flex items-center gap-2">
                                     <Store className="h-4 w-4 text-gray-400" />
                                     {t('orders.columns.store')}
                                 </div>
@@ -309,6 +315,12 @@ export function OrdersTable() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-gray-400" />
+                                            {order.PTLOG || <span className="text-gray-400 italic">N/A</span>}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
                                             <Store className="h-4 w-4 text-gray-400" />
                                             {order.TIENDA}
                                         </div>
@@ -322,7 +334,7 @@ export function OrdersTable() {
                                 </TableRow>
                                 {expandedRows.has(order.ID) && (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="p-0 border-0 bg-gray-50/50">
+                                        <TableCell colSpan={9} className="p-0 border-0 bg-gray-50/50">
                                             <div className="p-6">
                                                 <OrderDetails order={order} />
                                             </div>
