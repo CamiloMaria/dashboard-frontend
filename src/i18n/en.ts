@@ -194,7 +194,8 @@ export const en = {
             generated: 'Description generated',
             generatedDescription: 'A new product description has been generated successfully.',
             error: 'Error',
-            errorDescription: 'Failed to generate description. Please try again.'
+            errorDescription: 'Failed to generate description. Please try again.',
+            error400: 'The title is required to generate a description.'
           }
         },
         keywords: {
@@ -216,6 +217,7 @@ export const en = {
             generatedDescription: 'New keywords have been generated successfully.',
             error: 'Error',
             errorDescription: 'Failed to generate keywords. Please try again.',
+            error400: 'The title is required to generate keywords.'
           },
           generateDialog: {
             title: 'Generate Keywords',

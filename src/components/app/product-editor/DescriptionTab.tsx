@@ -20,6 +20,7 @@ import UnderlineExtension from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { useTranslation } from 'react-i18next';
 import { productsApi } from '@/api/products';
+import { AxiosError } from 'axios';
 
 interface DescriptionTabProps {
     description: string | undefined;
@@ -104,12 +105,20 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
                 title: t('products.editor.form.description.messages.generated'),
                 description: t('products.editor.form.description.messages.generatedDescription'),
             });
-        } catch {
-            toast({
-                title: t('products.editor.form.description.messages.error'),
-                description: t('products.editor.form.description.messages.errorDescription'),
-                variant: 'destructive',
-            });
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 400) {
+                toast({
+                    title: t('products.editor.form.description.messages.error'),
+                    description: t('products.editor.form.description.messages.error400'),
+                    variant: 'destructive',
+                });
+            } else {
+                toast({
+                    title: t('products.editor.form.description.messages.error'),
+                    description: t('products.editor.form.description.messages.errorDescription'),
+                    variant: 'destructive',
+                });
+            }
         } finally {
             setIsGenerating(false);
             setShowGenerateConfirm(false);

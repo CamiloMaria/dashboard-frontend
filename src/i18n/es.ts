@@ -194,7 +194,8 @@ export const es = {
                         generated: 'Descripción generada',
                         generatedDescription: 'Una nueva descripción del producto ha sido generada exitosamente.',
                         error: 'Error',
-                        errorDescription: 'Error al generar la descripción. Por favor intenta de nuevo.'
+                        errorDescription: 'Error al generar la descripción. Por favor intenta de nuevo.',
+                        error400: 'El título es requerido para generar una descripción.',
                     }
                 },
                 keywords: {
@@ -216,6 +217,7 @@ export const es = {
                         generatedDescription: 'Las nuevas palabras clave han sido generadas exitosamente.',
                         error: 'Error',
                         errorDescription: 'Error al generar palabras clave. Por favor intenta de nuevo.',
+                        error400: 'El título es requerido para generar palabras clave.',
                     },
                     generateDialog: {
                         title: 'Generar Palabras Clave',

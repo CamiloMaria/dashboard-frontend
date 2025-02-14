@@ -78,7 +78,7 @@ export const productsApi = {
   },
 
   async generateDescription(title: string): Promise<string> {
-    const response = await axios.post<string>(`${API_URL}/product/description`, {
+    const response = await axios.post<string>(`${API_URL}/product/generate/description`, {
       title
     }, {
       headers: getHeaders()
@@ -88,13 +88,13 @@ export const productsApi = {
   },
 
   async generateKeywords(title: string, category: string): Promise<string[]> {
-    const response = await axios.post<string[]>(`${API_URL}/product/keywords`, {
+    const response = await axios.post<string[]>(`${API_URL}/product/generate/keywords`, {
       title,
       category
     }, {
       headers: getHeaders()
     });
-    
+
     return response.data;
   }
 } 

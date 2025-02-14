@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
 import { useTranslation } from 'react-i18next';
 import { productsApi } from '@/api/products';
+import { AxiosError } from 'axios';
 
 interface KeywordsTabProps {
     keywords: string[];
@@ -38,12 +39,20 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
                 title: t('products.editor.form.keywords.messages.generated'),
                 description: t('products.editor.form.keywords.messages.generatedDescription'),
             });
-        } catch {
-            toast({
-                title: t('products.editor.form.keywords.messages.error'),
-                description: t('products.editor.form.keywords.messages.errorDescription'),
-                variant: 'destructive',
-            });
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 400) {
+                toast({
+                    title: t('products.editor.form.keywords.messages.error'),
+                    description: t('products.editor.form.keywords.messages.error400'),
+                    variant: 'destructive',
+                });
+            } else {
+                toast({
+                    title: t('products.editor.form.keywords.messages.error'),
+                    description: t('products.editor.form.keywords.messages.errorDescription'),
+                    variant: 'destructive',
+                });
+            }
         } finally {
             setIsGenerating(false);
             setShowGenerateConfirm(false);
