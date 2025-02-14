@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     LayoutDashboard,
@@ -9,7 +9,6 @@ import {
     Box,
     Tags,
     Boxes,
-    CircleDot,
     LucideIcon,
     Shield,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { Route } from '@tanstack/react-router';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
-import { hasAnyAllowedPages } from '@/lib/route-auth';
 import { useTranslation } from 'react-i18next';
 
 interface NavRoute {
@@ -91,11 +89,6 @@ const navigationConfig: NavRoute[] = [
     //     label: 'Clients',
     //     icon: Users,
     // },
-    {
-        path: ROUTES.EXAMPLE,
-        label: 'common.sidebar.example',
-        icon: CircleDot,
-    },
 ];
 
 interface SidebarProps {
@@ -206,12 +199,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const currentPath = routerState.location.pathname;
     const { hasAccess } = useAuth();
 
-    useEffect(() => {
-        if (!hasAnyAllowedPages() && currentPath !== ROUTES.EXAMPLE) {
-            navigate({ to: ROUTES.EXAMPLE });
-        }
-    }, [currentPath, navigate]);
-
     const isRouteActive = (path: string) => {
         if (path === '/') {
             return currentPath === path;
@@ -225,8 +212,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
 
     const filteredNavigation = navigationConfig.filter(item => {
-        if (item.path === ROUTES.EXAMPLE) return true;
-
         if (!hasAccess(item.path)) return false;
         if (item.children) {
             item.children = item.children.filter(child => hasAccess(child.path));

@@ -235,6 +235,19 @@ export const en = {
       addProduct: 'Add Product',
       settings: 'Settings',
       searchPlaceholder: 'Search by SKU, title, or material...',
+      filters: {
+        title: 'Filters',
+        status: 'Status',
+        active: 'Active',
+        inactive: 'Inactive',
+        type: 'Type',
+        bigItems: 'Big Items',
+      },
+      sort: {
+        title: 'Sort',
+        date: 'Date',
+        productTitle: 'Title',
+      },
       columns: {
         thumbnail: 'Thumbnail',
         sku: 'SKU',
@@ -248,7 +261,8 @@ export const en = {
       pagination: {
         itemsPerPage: 'Items per page',
         page: 'Page',
-        of: 'of'
+        of: 'of',
+        showing: 'Showing'
       },
       row: {
         yes: 'Yes',

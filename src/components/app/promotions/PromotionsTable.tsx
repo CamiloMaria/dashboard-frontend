@@ -4,6 +4,13 @@ import {
     Loader2,
     Package,
     Search,
+    ArrowUpDown,
+    DollarSign,
+    Calendar,
+    Store,
+    Barcode,
+    Tag,
+    Hash
 } from 'lucide-react';
 import {
     Table,
@@ -49,7 +56,7 @@ export function PromotionsTable() {
         setSearchTerm(value);
         if (value !== searchTerm) {
             setCurrentPage(1);
-            setItemsPerPage(10); // Reset to default items per page
+            setItemsPerPage(10);
         }
     };
 
@@ -98,11 +105,10 @@ export function PromotionsTable() {
         a.click();
     };
 
-    // Loading skeleton component
     const TableSkeleton = () => (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 py-3">
+                <div key={i} className="flex items-center space-x-4 p-4 bg-gray-50/50 rounded-lg animate-pulse">
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-4 w-[100px]" />
@@ -117,10 +123,11 @@ export function PromotionsTable() {
 
     if (isLoading) {
         return (
-            <Card className="p-6">
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                        <Skeleton className="h-8 w-[300px]" />
+            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <Skeleton className="h-10 w-[300px]" />
+                        <Skeleton className="h-10 w-[120px]" />
                     </div>
                     <TableSkeleton />
                 </div>
@@ -130,18 +137,20 @@ export function PromotionsTable() {
 
     if (isError) {
         return (
-            <Card className="p-6">
-                <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-                    <div className="rounded-full bg-muted p-3">
-                        <Package className="h-6 w-6 text-muted-foreground" />
+            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
+                    <div className="rounded-full bg-red-50 p-4">
+                        <Package className="h-8 w-8 text-red-500" />
                     </div>
-                    <h3 className="font-semibold text-lg">{t('promotions.error.title')}</h3>
-                    <p className="text-sm text-muted-foreground max-w-[500px]">
-                        {t('promotions.error.description')}
-                    </p>
+                    <div className="space-y-2">
+                        <h3 className="font-semibold text-xl text-gray-900">{t('promotions.error.title')}</h3>
+                        <p className="text-gray-500 max-w-[500px]">
+                            {t('promotions.error.description')}
+                        </p>
+                    </div>
                     <Button
                         onClick={() => window.location.reload()}
-                        className="mt-2"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                         {t('promotions.error.tryAgain')}
                     </Button>
@@ -156,23 +165,23 @@ export function PromotionsTable() {
     const totalPages = Math.ceil(pagination.length / itemsPerPage);
 
     return (
-        <Card>
-            <div className="p-4 border-b">
-                <div className="flex items-center justify-between gap-4">
+        <Card className="bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+            <div className="p-6 border-b bg-white">
+                <div className="flex items-center justify-between gap-6">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
                             type="text"
                             placeholder={t('promotions.searchPlaceholder')}
                             value={searchTerm}
                             onChange={handleSearchChange}
-                            className="pl-10"
+                            className="pl-10 h-11 bg-gray-50 border-gray-200 hover:border-gray-300 focus:border-indigo-500 transition-colors"
                         />
                     </div>
                     <Button
                         variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2"
+                        size="lg"
+                        className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 text-gray-700 h-11 px-6 transition-all duration-200 shadow-sm hover:shadow"
                         onClick={() => exportToCSV(promotions)}
                     >
                         <Download className="h-4 w-4" />
@@ -183,47 +192,102 @@ export function PromotionsTable() {
 
             <ScrollArea className="relative">
                 {isFetching && (
-                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-background p-4 rounded-lg shadow-lg">
-                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-200">
+                        <div className="bg-white p-4 rounded-xl shadow-lg">
+                            <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
                         </div>
                     </div>
                 )}
 
                 <Table>
                     <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                            <TableHead>{t('promotions.columns.promoNumber')}</TableHead>
-                            <TableHead>{t('promotions.columns.sku')}</TableHead>
-                            <TableHead>{t('promotions.columns.material')}</TableHead>
-                            <TableHead>{t('promotions.columns.shop')}</TableHead>
-                            <TableHead>{t('promotions.columns.price')}</TableHead>
-                            <TableHead>{t('promotions.columns.comparePrice')}</TableHead>
-                            <TableHead>{t('promotions.columns.status')}</TableHead>
-                            <TableHead>{t('promotions.columns.createdAt')}</TableHead>
+                        <TableRow className="bg-gray-50/80 hover:bg-gray-50/90 transition-colors">
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <Hash className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.promoNumber')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <Barcode className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.sku')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <Tag className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.material')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <Store className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.shop')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.price')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <ArrowUpDown className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.comparePrice')}
+                                </div>
+                            </TableHead>
+                            <TableHead className="font-semibold">{t('promotions.columns.status')}</TableHead>
+                            <TableHead className="font-semibold">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-gray-400" />
+                                    {t('promotions.columns.createdAt')}
+                                </div>
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {promotions.map((promotion) => (
-                            <TableRow key={`${promotion.no_promo}-${promotion.sku}`}>
-                                <TableCell className="font-medium">{promotion.no_promo}</TableCell>
-                                <TableCell>{promotion.sku}</TableCell>
-                                <TableCell>{promotion.matnr}</TableCell>
+                            <TableRow
+                                key={`${promotion.no_promo}-${promotion.sku}`}
+                                className="hover:bg-gray-50/50 transition-colors"
+                            >
+                                <TableCell className="font-medium text-gray-900">{promotion.no_promo}</TableCell>
+                                <TableCell className="font-mono text-sm">{promotion.sku}</TableCell>
+                                <TableCell className="font-mono text-sm">{promotion.matnr}</TableCell>
                                 <TableCell>{promotion.shop}</TableCell>
-                                <TableCell>${promotion.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
-                                <TableCell>${promotion.compare_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
+                                <TableCell className="tabular-nums">
+                                    <div className="flex items-center gap-1 text-gray-900">
+                                        <DollarSign className="h-3 w-3" />
+                                        {promotion.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                    </div>
+                                </TableCell>
+                                <TableCell className="tabular-nums">
+                                    <div className="flex items-center gap-1 text-gray-500">
+                                        <DollarSign className="h-3 w-3" />
+                                        {promotion.compare_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <div className={cn(
-                                        'px-2 py-1 rounded-full text-xs font-medium inline-block',
+                                        'px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1',
                                         promotion.status
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-red-100 text-red-700'
+                                            ? 'bg-green-50 text-green-700 border border-green-200'
+                                            : 'bg-red-50 text-red-700 border border-red-200'
                                     )}>
+                                        <span className={cn(
+                                            'w-1.5 h-1.5 rounded-full',
+                                            promotion.status ? 'bg-green-500' : 'bg-red-500'
+                                        )} />
                                         {promotion.status ? t('common.active') : t('common.inactive')}
                                     </div>
                                 </TableCell>
-                                <TableCell className="whitespace-nowrap">
-                                    {format(new Date(promotion.created_at), 'MMM d, yyyy')}
+                                <TableCell className="whitespace-nowrap text-gray-500">
+                                    <div className="flex items-center gap-1.5">
+                                        <Calendar className="h-3 w-3" />
+                                        {format(new Date(promotion.created_at), 'MMM d, yyyy')}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -231,7 +295,7 @@ export function PromotionsTable() {
                 </Table>
             </ScrollArea>
 
-            <div className="border-t">
+            <div className="border-t bg-white">
                 <PaginationControls
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -242,4 +306,4 @@ export function PromotionsTable() {
             </div>
         </Card>
     );
-} 
+}

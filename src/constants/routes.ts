@@ -21,6 +21,5 @@ export const ROUTES = {
     },
     ORDERS: '/orders',
     // CLIENTS: '/clients',
-    EXAMPLE: '/example',
     PERMISSIONS: '/permissions',
 } as const; 

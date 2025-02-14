@@ -235,6 +235,19 @@ export const es = {
             addProduct: 'Agregar Producto',
             settings: 'Configuración',
             searchPlaceholder: 'Buscar por SKU, título o material...',
+            filters: {
+                title: 'Filtros',
+                status: 'Estado',
+                active: 'Activo',
+                inactive: 'Inactivo',
+                type: 'Tipo',
+                bigItems: 'Big Items',
+            },
+            sort: {
+                title: 'Ordenar',
+                date: 'Fecha',
+                productTitle: 'Título',
+            },
             columns: {
                 thumbnail: 'Miniatura',
                 sku: 'SKU',
@@ -248,7 +261,8 @@ export const es = {
             pagination: {
                 itemsPerPage: 'Items por página',
                 page: 'Página',
-                of: 'de'
+                of: 'de',
+                showing: 'Mostrando'
             },
             row: {
                 yes: 'Sí',
