@@ -1,3 +1,4 @@
+import { GetOrdersParams } from "@/types/order";
 import { GetProductsParams } from "@/types/product";
 import { GetProductSetsParams } from "@/types/product-set";
 import { GetPromotionsParams } from "@/types/promotion";
@@ -21,4 +22,10 @@ export const promotionKeys = {
     all: ['promotions'] as const,
     lists: () => [...promotionKeys.all] as const,
     list: (filters: GetPromotionsParams) => [...promotionKeys.lists(), filters] as const,
+} as const;
+
+export const orderKeys = {
+    all: ['orders'] as const,
+    lists: () => [...orderKeys.all] as const,
+    list: (filters: GetOrdersParams) => [...orderKeys.lists(), filters] as const,
 } as const;

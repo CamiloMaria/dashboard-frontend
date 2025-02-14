@@ -374,5 +374,48 @@ export const es = {
                 create: 'Crear Set'
             }
         }
+    },
+    orders: {
+        title: 'Órdenes',
+        subtitle: 'Ver y gestionar órdenes de clientes',
+        searchPlaceholder: 'Buscar órdenes...',
+        filterByStore: 'Filtrar por tienda',
+        allStores: 'Todas las Tiendas',
+        export: 'Exportar',
+        error: 'Error al cargar órdenes',
+        columns: {
+            orderNumber: 'Orden #',
+            customer: 'Cliente',
+            rnc: 'RNC',
+            total: 'Total',
+            source: 'Origen',
+            store: 'Tienda',
+            date: 'Fecha'
+        },
+        details: {
+            title: 'Detalles de la Orden',
+            billingInformation: 'Información de Facturación',
+            shippingInformation: 'Información de Envío',
+            items: 'Artículos',
+            invoices: 'Facturas',
+            transactions: 'Transacciones',
+            columns: {
+                sku: 'SKU',
+                description: 'Descripción',
+                quantity: 'Cantidad',
+                price: 'Precio',
+                discount: 'Descuento',
+                total: 'Total',
+                invoiceNumber: 'Factura #',
+                department: 'Departamento',
+                ncf: 'NCF',
+                itbis: 'ITBIS',
+                card: 'Tarjeta',
+                approval: 'Aprobación',
+                date: 'Fecha',
+                time: 'Hora',
+                amount: 'Monto'
+            }
+        }
     }
 }; 

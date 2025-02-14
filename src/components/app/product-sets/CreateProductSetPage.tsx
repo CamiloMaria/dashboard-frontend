@@ -39,7 +39,7 @@ export function CreateProductSetPage() {
 
     const { data: products = [], isLoading } = useQuery({
         queryKey: productKeys.search(debouncedSearch),
-        queryFn: () => productsApi.getProducts({ search: debouncedSearch, page: 1, limit: 100 }),
+        queryFn: () => productsApi.getProducts({ search: debouncedSearch, page: 1, limit: 25 }),
         select: (data) => data.data.filter(product => product.bigItems === 1),
     });
 

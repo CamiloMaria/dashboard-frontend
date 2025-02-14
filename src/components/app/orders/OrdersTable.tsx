@@ -1,4 +1,5 @@
 import { useState, useCallback, useTransition, Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ChevronDown,
     Loader2,
@@ -30,8 +31,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { OrderDetails } from './OrderDetails';
+import { orderKeys } from '@/api/query-keys';
 
 export function OrdersTable() {
+    const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
@@ -42,12 +45,12 @@ export function OrdersTable() {
     const debouncedSearch = useDebounce(searchTerm);
 
     const { data, isLoading, isError, isFetching } = useQuery({
-        queryKey: ['orders', {
+        queryKey: orderKeys.list({
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch,
             store: storeFilter !== 'all' ? storeFilter : undefined
-        }],
+        }),
         queryFn: () => ordersApi.getOrders({
             page: currentPage,
             limit: itemsPerPage,
@@ -65,7 +68,7 @@ export function OrdersTable() {
         setSearchTerm(value);
         if (value !== searchTerm) {
             setCurrentPage(1);
-            setItemsPerPage(10); // Reset to default items per page
+            setItemsPerPage(10);
         }
     };
 
@@ -104,6 +107,16 @@ export function OrdersTable() {
         );
     }
 
+    if (isError) {
+        return (
+            <Card className="p-6">
+                <div className="flex justify-center">
+                    <p>{t('orders.error')}</p>
+                </div>
+            </Card>
+        );
+    }
+
     if (!data) return null;
 
     const { data: orders, pagination } = data;
@@ -118,7 +131,7 @@ export function OrdersTable() {
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="text"
-                                placeholder="Search orders..."
+                                placeholder={t('orders.searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={handleSearchChange}
                                 className="pl-10 w-[300px]"
@@ -126,10 +139,10 @@ export function OrdersTable() {
                         </div>
                         <Select value={storeFilter} onValueChange={setStoreFilter}>
                             <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by store" />
+                                <SelectValue placeholder={t('orders.filterByStore')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Stores</SelectItem>
+                                <SelectItem value="all">{t('orders.allStores')}</SelectItem>
                                 <SelectItem value="PL08">PL08</SelectItem>
                                 <SelectItem value="PL09">PL09</SelectItem>
                                 <SelectItem value="PL10">PL10</SelectItem>
@@ -144,7 +157,7 @@ export function OrdersTable() {
                         onClick={() => {/* TODO: Implement export */ }}
                     >
                         <Download className="h-4 w-4" />
-                        Export
+                        {t('orders.export')}
                     </Button>
                 </div>
             </div>
@@ -162,13 +175,13 @@ export function OrdersTable() {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[40px]"></TableHead>
-                            <TableHead>Order #</TableHead>
-                            <TableHead>Customer</TableHead>
-                            <TableHead>RNC</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Source</TableHead>
-                            <TableHead>Store</TableHead>
-                            <TableHead>Date</TableHead>
+                            <TableHead>{t('orders.columns.orderNumber')}</TableHead>
+                            <TableHead>{t('orders.columns.customer')}</TableHead>
+                            <TableHead>{t('orders.columns.rnc')}</TableHead>
+                            <TableHead>{t('orders.columns.total')}</TableHead>
+                            <TableHead>{t('orders.columns.source')}</TableHead>
+                            <TableHead>{t('orders.columns.store')}</TableHead>
+                            <TableHead>{t('orders.columns.date')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

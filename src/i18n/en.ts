@@ -374,5 +374,48 @@ export const en = {
         create: 'Create Set'
       }
     }
+  },
+  orders: {
+    title: 'Orders',
+    subtitle: 'View and manage customer orders',
+    searchPlaceholder: 'Search orders...',
+    filterByStore: 'Filter by store',
+    allStores: 'All Stores',
+    export: 'Export',
+    error: 'Failed to load orders',
+    columns: {
+      orderNumber: 'Order #',
+      customer: 'Customer',
+      rnc: 'RNC',
+      total: 'Total',
+      source: 'Source',
+      store: 'Store',
+      date: 'Date'
+    },
+    details: {
+      title: 'Order Details',
+      billingInformation: 'Billing Information',
+      shippingInformation: 'Shipping Information',
+      items: 'Items',
+      invoices: 'Invoices',
+      transactions: 'Transactions',
+      columns: {
+        sku: 'SKU',
+        description: 'Description',
+        quantity: 'Quantity',
+        price: 'Price',
+        discount: 'Discount',
+        total: 'Total',
+        invoiceNumber: 'Invoice #',
+        department: 'Department',
+        ncf: 'NCF',
+        itbis: 'ITBIS',
+        card: 'Card',
+        approval: 'Approval',
+        date: 'Date',
+        time: 'Time',
+        amount: 'Amount'
+      }
+    }
   }
 }; 

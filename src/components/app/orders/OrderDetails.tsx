@@ -1,6 +1,7 @@
 import { Order } from '@/types/order';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import {
     Table,
     TableBody,
@@ -11,58 +12,113 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+    Package2,
+    CreditCard,
+    Truck,
+    Receipt,
+    Building2,
+    Mail,
+    Phone,
+    MapPin,
+    Globe,
+    MessageSquare,
+    Calendar,
+    Clock,
+    DollarSign,
+    Percent,
+    ShoppingCart
+} from 'lucide-react';
 
 interface OrderDetailsProps {
     order: Order;
 }
 
 export function OrderDetails({ order }: OrderDetailsProps) {
+    const { t } = useTranslation();
     const totalAmount = order.FACTURES.reduce((sum, invoice) => sum + invoice.TOTAL, 0);
     const totalItems = order.ARTICLES.reduce((sum, article) => sum + article.CANT, 0);
 
     return (
-        <div className="bg-muted/50 p-6 space-y-8">
+        <div className="max-w-7xl mx-auto bg-gradient-to-b from-gray-50 to-white p-6 rounded-xl shadow-sm space-y-8">
             {/* Order Summary */}
-            <div className="flex flex-wrap gap-4 items-center justify-between">
-                <div className="space-y-1">
-                    <h2 className="text-2xl font-semibold tracking-tight">Order Details</h2>
-                    <p className="text-sm text-muted-foreground">
-                        {format(new Date(order.TRANSACTIONS[0]?.FECHA_APROBACION), 'PPP')}
-                    </p>
+            <div className="relative">
+                <div className="flex flex-wrap gap-4 items-center justify-between">
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                            {t('orders.details.title')}
+                        </h2>
+                        <div className="flex items-center gap-2 text-gray-500">
+                            <Calendar className="w-4 h-4" />
+                            <p className="text-sm">
+                                {format(new Date(order.TRANSACTIONS[0]?.FECHA_APROBACION), 'PPP')}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <Badge variant="outline" className="px-4 py-2 flex items-center gap-2">
+                            <ShoppingCart className="w-4 h-4" />
+                            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                        </Badge>
+                        <Badge variant="secondary" className="px-4 py-2 flex items-center gap-2 bg-green-100 text-green-800">
+                            <DollarSign className="w-4 h-4" />
+                            ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </Badge>
+                    </div>
                 </div>
-                <div className="flex gap-3">
-                    <Badge variant="outline" className="px-3 py-1">
-                        {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                    </Badge>
-                    <Badge variant="secondary" className="px-3 py-1">
-                        Total: ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </Badge>
-                </div>
+                <Separator className="my-6" />
             </div>
-
-            <Separator />
 
             {/* Billing & Shipping Section */}
             <div className="grid md:grid-cols-2 gap-6">
-                <Card className="p-6">
-                    <h4 className="text-lg font-semibold mb-4">Billing Information</h4>
-                    <div className="space-y-2 text-sm">
-                        <p className="font-medium">{order.NOMBRE} {order.APELLIDOS}</p>
-                        <p className="text-muted-foreground">{order.RNC_NAME}</p>
-                        {order.RNC && <p className="text-muted-foreground">RNC: {order.RNC}</p>}
-                        <p className="text-muted-foreground">{order.EMAIL}</p>
-                        <p className="text-muted-foreground">{order.TELEFONO}</p>
+                <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+                    <div className="flex items-center gap-2 mb-4">
+                        <CreditCard className="w-5 h-5 text-blue-600" />
+                        <h4 className="text-lg font-semibold">{t('orders.details.billingInformation')}</h4>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                        <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <p className="font-medium">{order.NOMBRE} {order.APELLIDOS}</p>
+                        </div>
+                        <p className="text-gray-600 pl-6">{order.RNC_NAME}</p>
+                        {order.RNC && <p className="text-gray-600 pl-6">RNC: {order.RNC}</p>}
+                        <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-gray-400" />
+                            <p className="text-gray-600">{order.EMAIL}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-gray-400" />
+                            <p className="text-gray-600">{order.TELEFONO}</p>
+                        </div>
                     </div>
                 </Card>
-                <Card className="p-6">
-                    <h4 className="text-lg font-semibold mb-4">Shipping Information</h4>
-                    <div className="space-y-2 text-sm">
-                        <p className="font-medium">{order.DIRECCION}</p>
-                        <p className="text-muted-foreground">{order.CIUDAD}</p>
-                        {order.PAIS && <p className="text-muted-foreground">{order.PAIS}</p>}
+                <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Truck className="w-5 h-5 text-green-600" />
+                        <h4 className="text-lg font-semibold">{t('orders.details.shippingInformation')}</h4>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                        <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <p className="font-medium">{order.DIRECCION}</p>
+                        </div>
+                        <div className="flex items-center gap-2 pl-6">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <p className="text-gray-600">{order.CIUDAD}</p>
+                        </div>
+                        {order.PAIS && (
+                            <div className="flex items-center gap-2 pl-6">
+                                <Globe className="w-4 h-4 text-gray-400" />
+                                <p className="text-gray-600">{order.PAIS}</p>
+                            </div>
+                        )}
                         {order.COMENTARIO && (
-                            <div className="mt-4 p-3 bg-muted rounded-md">
-                                <p className="text-muted-foreground italic">{order.COMENTARIO}</p>
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                <div className="flex items-start gap-2">
+                                    <MessageSquare className="w-4 h-4 text-gray-400 mt-1" />
+                                    <p className="text-gray-600 italic">{order.COMENTARIO}</p>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -70,38 +126,50 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </div>
 
             {/* Items */}
-            <Card className="p-6">
-                <h4 className="text-lg font-semibold mb-4">Items</h4>
+            <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+                <div className="flex items-center gap-2 mb-6">
+                    <Package2 className="w-5 h-5 text-purple-600" />
+                    <h4 className="text-lg font-semibold">{t('orders.details.items')}</h4>
+                </div>
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-muted/50">
-                                <TableHead>SKU</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Discount</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
+                            <TableRow className="bg-gray-50">
+                                <TableHead className="font-semibold">{t('orders.details.columns.sku')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.description')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.quantity')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.price')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.discount')}</TableHead>
+                                <TableHead className="text-right font-semibold">{t('orders.details.columns.total')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {order.ARTICLES.map((article) => (
-                                <TableRow key={article.EAN} className="hover:bg-muted/50">
+                                <TableRow key={article.EAN} className="hover:bg-gray-50 transition-colors">
                                     <TableCell className="font-medium">{article.EAN}</TableCell>
                                     <TableCell>{article.DESCRIPCION}</TableCell>
-                                    <TableCell>{article.CANT}</TableCell>
-                                    <TableCell>${article.PRECIO.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
+                                    <TableCell className="font-medium">{article.CANT}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            {article.PRECIO.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         {article.TOTAL_DISCOUNT > 0 ? (
-                                            <span className="text-red-500">
+                                            <div className="flex items-center gap-1 text-red-500">
+                                                <Percent className="w-4 h-4" />
                                                 -${article.TOTAL_DISCOUNT.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                            </span>
+                                            </div>
                                         ) : (
                                             '-'
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
-                                        ${article.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        <div className="flex items-center justify-end gap-1">
+                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            {article.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -111,28 +179,39 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </Card>
 
             {/* Invoices */}
-            <Card className="p-6">
-                <h4 className="text-lg font-semibold mb-4">Invoices</h4>
+            <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+                <div className="flex items-center gap-2 mb-6">
+                    <Receipt className="w-5 h-5 text-orange-600" />
+                    <h4 className="text-lg font-semibold">{t('orders.details.invoices')}</h4>
+                </div>
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-muted/50">
-                                <TableHead>Invoice #</TableHead>
-                                <TableHead>Department</TableHead>
-                                <TableHead>NCF</TableHead>
-                                <TableHead>ITBIS</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
+                            <TableRow className="bg-gray-50">
+                                <TableHead className="font-semibold">{t('orders.details.columns.invoiceNumber')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.department')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.ncf')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.itbis')}</TableHead>
+                                <TableHead className="text-right font-semibold">{t('orders.details.columns.total')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {order.FACTURES.map((invoice) => (
-                                <TableRow key={invoice.FACTURAS} className="hover:bg-muted/50">
+                                <TableRow key={invoice.FACTURAS} className="hover:bg-gray-50 transition-colors">
                                     <TableCell className="font-medium">{invoice.FACTURAS}</TableCell>
                                     <TableCell>{invoice.DEPTO}</TableCell>
                                     <TableCell>{invoice.NCF}</TableCell>
-                                    <TableCell>${invoice.ITBIS.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            {invoice.ITBIS.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="text-right font-medium">
-                                        ${invoice.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        <div className="flex items-center justify-end gap-1">
+                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            {invoice.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -142,28 +221,44 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </Card>
 
             {/* Transactions */}
-            <Card className="p-6">
-                <h4 className="text-lg font-semibold mb-4">Transactions</h4>
+            <Card className="p-6 hover:shadow-md transition-shadow duration-200">
+                <div className="flex items-center gap-2 mb-6">
+                    <CreditCard className="w-5 h-5 text-indigo-600" />
+                    <h4 className="text-lg font-semibold">{t('orders.details.transactions')}</h4>
+                </div>
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-muted/50">
-                                <TableHead>Card</TableHead>
-                                <TableHead>Approval</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Time</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
+                            <TableRow className="bg-gray-50">
+                                <TableHead className="font-semibold">{t('orders.details.columns.card')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.approval')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.date')}</TableHead>
+                                <TableHead className="font-semibold">{t('orders.details.columns.time')}</TableHead>
+                                <TableHead className="text-right font-semibold">{t('orders.details.columns.amount')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {order.TRANSACTIONS.map((transaction) => (
-                                <TableRow key={transaction.APROBACION} className="hover:bg-muted/50">
+                                <TableRow key={transaction.APROBACION} className="hover:bg-gray-50 transition-colors">
                                     <TableCell className="font-medium">{transaction.TARJETA}</TableCell>
                                     <TableCell>{transaction.APROBACION}</TableCell>
-                                    <TableCell>{format(new Date(transaction.FECHA_APROBACION), 'MMM d, yyyy')}</TableCell>
-                                    <TableCell>{transaction.HORA_APROBACION}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            {format(new Date(transaction.FECHA_APROBACION), 'MMM d, yyyy')}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-4 h-4 text-gray-400" />
+                                            {transaction.HORA_APROBACION}
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="text-right font-medium">
-                                        ${transaction.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        <div className="flex items-center justify-end gap-1">
+                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            {transaction.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -173,4 +268,4 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </Card>
         </div>
     );
-} 
+}
