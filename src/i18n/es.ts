@@ -166,7 +166,63 @@ export const es = {
                         replaced: 'Imagen reemplazada',
                         replacedDescription: 'La imagen ha sido reemplazada exitosamente.'
                     }
-                }
+                },
+                description: {
+                    title: 'Descripción del Producto',
+                    subtitle: 'Edita la descripción del producto usando el editor de texto enriquecido',
+                    generateButton: 'Generar Descripción',
+                    generating: 'Generando...',
+                    saveChanges: 'Guardar Cambios',
+                    toolbar: {
+                        bold: 'Negrita',
+                        italic: 'Cursiva',
+                        underline: 'Subrayado',
+                        alignLeft: 'Alinear a la izquierda',
+                        alignCenter: 'Centrar',
+                        alignRight: 'Alinear a la derecha',
+                        bulletList: 'Lista con viñetas',
+                        numberedList: 'Lista numerada'
+                    },
+                    generateDialog: {
+                        title: 'Generar Descripción',
+                        description: 'Esto generará una nueva descripción del producto basada en la información del producto. La descripción actual será reemplazada. ¿Deseas continuar?',
+                        confirmText: 'Generar'
+                    },
+                    messages: {
+                        saved: 'Descripción guardada',
+                        savedDescription: 'La descripción del producto ha sido actualizada exitosamente.',
+                        generated: 'Descripción generada',
+                        generatedDescription: 'Una nueva descripción del producto ha sido generada exitosamente.',
+                        error: 'Error',
+                        errorDescription: 'Error al generar la descripción. Por favor intenta de nuevo.'
+                    }
+                },
+                keywords: {
+                    title: 'Palabras Clave',
+                    subtitle: 'Gestiona las palabras clave de búsqueda para este producto',
+                    generateButton: 'Generar Palabras Clave',
+                    generating: 'Generando...',
+                    addPlaceholder: 'Agregar nueva palabra clave...',
+                    addButton: 'Agregar',
+                    removeTooltip: 'Eliminar palabra clave',
+                    messages: {
+                        duplicate: 'Palabra clave duplicada',
+                        duplicateDescription: 'Esta palabra clave ya existe.',
+                        added: 'Palabra clave agregada',
+                        addedDescription: 'La palabra clave ha sido agregada exitosamente.',
+                        removed: 'Palabra clave eliminada',
+                        removedDescription: 'La palabra clave ha sido eliminada exitosamente.',
+                        generated: 'Palabras clave generadas',
+                        generatedDescription: 'Las nuevas palabras clave han sido generadas exitosamente.',
+                        error: 'Error',
+                        errorDescription: 'Error al generar palabras clave. Por favor intenta de nuevo.',
+                    },
+                    generateDialog: {
+                        title: 'Generar Palabras Clave',
+                        description: 'Esto generará nuevas palabras clave basadas en la información del producto. Las palabras clave actuales serán reemplazadas. ¿Deseas continuar?',
+                        confirmText: 'Generar',
+                    },
+                },
             }
         },
         list: {

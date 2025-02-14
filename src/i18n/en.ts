@@ -166,7 +166,63 @@ export const en = {
             replaced: 'Image replaced',
             replacedDescription: 'The image has been replaced successfully.'
           }
-        }
+        },
+        description: {
+          title: 'Product Description',
+          subtitle: 'Edit the product description using the rich text editor',
+          generateButton: 'Generate Description',
+          generating: 'Generating...',
+          saveChanges: 'Save Changes',
+          toolbar: {
+            bold: 'Bold',
+            italic: 'Italic',
+            underline: 'Underline',
+            alignLeft: 'Align left',
+            alignCenter: 'Align center',
+            alignRight: 'Align right',
+            bulletList: 'Bullet list',
+            numberedList: 'Numbered list'
+          },
+          generateDialog: {
+            title: 'Generate Description',
+            description: 'This will generate a new product description based on the product information. The current description will be replaced. Do you want to continue?',
+            confirmText: 'Generate'
+          },
+          messages: {
+            saved: 'Description saved',
+            savedDescription: 'The product description has been updated successfully.',
+            generated: 'Description generated',
+            generatedDescription: 'A new product description has been generated successfully.',
+            error: 'Error',
+            errorDescription: 'Failed to generate description. Please try again.'
+          }
+        },
+        keywords: {
+          title: 'Product Keywords',
+          subtitle: 'Manage search keywords for this product',
+          generateButton: 'Generate Keywords',
+          generating: 'Generating...',
+          addPlaceholder: 'Add new keyword...',
+          addButton: 'Add',
+          removeTooltip: 'Remove keyword',
+          messages: {
+            duplicate: 'Duplicate keyword',
+            duplicateDescription: 'This keyword already exists.',
+            added: 'Keyword added',
+            addedDescription: 'The keyword has been added successfully.',
+            removed: 'Keyword removed',
+            removedDescription: 'The keyword has been removed successfully.',
+            generated: 'Keywords generated',
+            generatedDescription: 'New keywords have been generated successfully.',
+            error: 'Error',
+            errorDescription: 'Failed to generate keywords. Please try again.',
+          },
+          generateDialog: {
+            title: 'Generate Keywords',
+            description: 'This will generate new keywords based on the product information. The current keywords will be replaced. Do you want to continue?',
+            confirmText: 'Generate',
+          },
+        },
       }
     },
     list: {

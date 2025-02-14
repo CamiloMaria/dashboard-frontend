@@ -76,4 +76,25 @@ export const productsApi = {
       },
     });
   },
+
+  async generateDescription(title: string): Promise<string> {
+    const response = await axios.post<string>(`${API_URL}/product/description`, {
+      title
+    }, {
+      headers: getHeaders()
+    });
+
+    return response.data;
+  },
+
+  async generateKeywords(title: string, category: string): Promise<string[]> {
+    const response = await axios.post<string[]>(`${API_URL}/product/keywords`, {
+      title,
+      category
+    }, {
+      headers: getHeaders()
+    });
+    
+    return response.data;
+  }
 } 

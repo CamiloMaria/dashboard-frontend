@@ -510,7 +510,6 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         <ActionButtons
           isLoading={isLoading}
           isPending={updateMutation.isPending}
-          productId={productId}
           onCancel={() => navigate({ to: productsListRoute.fullPath })}
         />
 

@@ -18,28 +18,14 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import UnderlineExtension from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import { useTranslation } from 'react-i18next';
+import { productsApi } from '@/api/products';
 
 interface DescriptionTabProps {
     description: string | undefined;
+    title: string;
     onDescriptionChange: (description: string) => void;
 }
-
-// Mock API function - replace with actual API call later
-const generateDescription = async () => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return `
-        <h2>Product Overview</h2>
-        <p>This high-quality product is designed to meet your needs with premium materials and expert craftsmanship.</p>
-        <ul>
-            <li>Premium quality materials</li>
-            <li>Expert craftsmanship</li>
-            <li>Durable construction</li>
-        </ul>
-        <h3>Features & Benefits</h3>
-        <p>Experience the difference with our innovative features and lasting benefits.</p>
-    `;
-};
 
 interface ToolbarButtonProps {
     onClick: () => void;
@@ -65,10 +51,11 @@ function ToolbarButton({ onClick, isActive, disabled, children, title }: Toolbar
     );
 }
 
-export function DescriptionTab({ description, onDescriptionChange }: DescriptionTabProps) {
+export function DescriptionTab({ description, title, onDescriptionChange }: DescriptionTabProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
     const { toast } = useToast();
+    const { t } = useTranslation();
 
     const editor = useEditor({
         extensions: [
@@ -97,8 +84,8 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
         const html = editor.getHTML();
         onDescriptionChange(html);
         toast({
-            title: 'Description saved',
-            description: 'The product description has been updated successfully.',
+            title: t('products.editor.form.description.messages.saved'),
+            description: t('products.editor.form.description.messages.savedDescription'),
         });
     };
 
@@ -110,17 +97,17 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
         if (!editor) return;
         try {
             setIsGenerating(true);
-            const newDescription = await generateDescription();
+            const newDescription = await productsApi.generateDescription(title);
             editor.commands.setContent(newDescription);
             onDescriptionChange(newDescription);
             toast({
-                title: 'Description generated',
-                description: 'A new product description has been generated successfully.',
+                title: t('products.editor.form.description.messages.generated'),
+                description: t('products.editor.form.description.messages.generatedDescription'),
             });
         } catch {
             toast({
-                title: 'Error',
-                description: 'Failed to generate description. Please try again.',
+                title: t('products.editor.form.description.messages.error'),
+                description: t('products.editor.form.description.messages.errorDescription'),
                 variant: 'destructive',
             });
         } finally {
@@ -143,9 +130,9 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
                 <CardHeader className="pb-3 flex-none">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                            <CardTitle>Product Description</CardTitle>
+                            <CardTitle>{t('products.editor.form.description.title')}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                Edit the product description using the rich text editor
+                                {t('products.editor.form.description.subtitle')}
                             </p>
                         </div>
                         <div className="flex gap-2">
@@ -157,13 +144,15 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
                                 type="button"
                             >
                                 <Wand2 className="h-4 w-4" />
-                                {isGenerating ? 'Generating...' : 'Generate Description'}
+                                {isGenerating
+                                    ? t('products.editor.form.description.generating')
+                                    : t('products.editor.form.description.generateButton')}
                             </Button>
                             <Button
                                 onClick={() => handleSave()}
                                 type="button"
                             >
-                                Save Changes
+                                {t('products.editor.form.description.saveChanges')}
                             </Button>
                         </div>
                     </div>
@@ -173,21 +162,21 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleBold().run()}
                             isActive={editor.isActive('bold')}
-                            title="Bold"
+                            title={t('products.editor.form.description.toolbar.bold')}
                         >
                             <Bold className="h-4 w-4" />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleItalic().run()}
                             isActive={editor.isActive('italic')}
-                            title="Italic"
+                            title={t('products.editor.form.description.toolbar.italic')}
                         >
                             <Italic className="h-4 w-4" />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleUnderline().run()}
                             isActive={editor.isActive('underline')}
-                            title="Underline"
+                            title={t('products.editor.form.description.toolbar.underline')}
                         >
                             <UnderlineIcon className="h-4 w-4" />
                         </ToolbarButton>
@@ -195,21 +184,21 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('left').run()}
                             isActive={editor.isActive({ textAlign: 'left' })}
-                            title="Align left"
+                            title={t('products.editor.form.description.toolbar.alignLeft')}
                         >
                             <AlignLeft className="h-4 w-4" />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('center').run()}
                             isActive={editor.isActive({ textAlign: 'center' })}
-                            title="Align center"
+                            title={t('products.editor.form.description.toolbar.alignCenter')}
                         >
                             <AlignCenter className="h-4 w-4" />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('right').run()}
                             isActive={editor.isActive({ textAlign: 'right' })}
-                            title="Align right"
+                            title={t('products.editor.form.description.toolbar.alignRight')}
                         >
                             <AlignRight className="h-4 w-4" />
                         </ToolbarButton>
@@ -217,14 +206,14 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleBulletList().run()}
                             isActive={editor.isActive('bulletList')}
-                            title="Bullet list"
+                            title={t('products.editor.form.description.toolbar.bulletList')}
                         >
                             <List className="h-4 w-4" />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleOrderedList().run()}
                             isActive={editor.isActive('orderedList')}
-                            title="Numbered list"
+                            title={t('products.editor.form.description.toolbar.numberedList')}
                         >
                             <ListOrdered className="h-4 w-4" />
                         </ToolbarButton>
@@ -237,9 +226,9 @@ export function DescriptionTab({ description, onDescriptionChange }: Description
 
             <ConfirmationDialog
                 open={showGenerateConfirm}
-                title="Generate Description"
-                description="This will generate a new product description based on the product information. The current description will be replaced. Do you want to continue?"
-                confirmText="Generate"
+                title={t('products.editor.form.description.generateDialog.title')}
+                description={t('products.editor.form.description.generateDialog.description')}
+                confirmText={t('products.editor.form.description.generateDialog.confirmText')}
                 isLoading={isGenerating}
                 onConfirm={handleGenerateConfirm}
                 onCancel={handleGenerateCancel}

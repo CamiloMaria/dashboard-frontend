@@ -67,6 +67,7 @@ export function ProductTabs({
                     <TabsContent value="description" className="m-0">
                         <DescriptionTab
                             description={description}
+                            title={title}
                             onDescriptionChange={onDescriptionChange}
                         />
                     </TabsContent>
