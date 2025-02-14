@@ -11,6 +11,7 @@ import {
     Boxes,
     LucideIcon,
     Shield,
+    ScrollText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,11 @@ const navigationConfig: NavRoute[] = [
         path: ROUTES.ORDERS,
         label: 'common.sidebar.orders',
         icon: ShoppingCart,
+    },
+    {
+        path: ROUTES.LOGS,
+        label: 'common.sidebar.logs',
+        icon: ScrollText,
     },
     {
         path: ROUTES.PERMISSIONS,

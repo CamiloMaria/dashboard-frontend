@@ -38,6 +38,7 @@ export const en = {
       },
       orders: 'Orders',
       permissions: 'Permissions',
+      logs: 'Users Logs',
       example: 'Example'
     }
   },

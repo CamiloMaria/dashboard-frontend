@@ -12,6 +12,7 @@ import { createProductSetRoute } from './routes/app/create-product-set'
 import { promotionsRoute } from './routes/app/promotions'
 import { orderRoute } from './routes/app/order'
 import { permissionsRoute } from './routes/app/permissions'
+import { logsRoute } from './routes/app/logs'
 
 const routeTree = rootRoute.addChildren([
     authRoute.addChildren([
@@ -26,6 +27,7 @@ const routeTree = rootRoute.addChildren([
         promotionsRoute,
         orderRoute,
         permissionsRoute,
+        logsRoute,
     ]),
     notFoundRoute,
 ])

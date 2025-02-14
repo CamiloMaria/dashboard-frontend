@@ -1,3 +1,4 @@
+import { GetLogsParams } from "@/types/log";
 import { GetOrdersParams } from "@/types/order";
 import { GetProductsParams } from "@/types/product";
 import { GetProductSetsParams } from "@/types/product-set";
@@ -28,4 +29,10 @@ export const orderKeys = {
     all: ['orders'] as const,
     lists: () => [...orderKeys.all] as const,
     list: (filters: GetOrdersParams) => [...orderKeys.lists(), filters] as const,
+} as const;
+
+export const logKeys = {
+    all: ['logs'] as const,
+    lists: () => [...logKeys.all] as const,
+    list: (filters: GetLogsParams) => [...logKeys.lists(), filters] as const,
 } as const;

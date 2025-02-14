@@ -60,6 +60,7 @@ const availableRoutes: RouteConfig[] = [
         ]
     },
     { path: ROUTES.ORDERS, label: 'Orders' },
+    { path: ROUTES.LOGS, label: 'Logs' },
     { path: ROUTES.PERMISSIONS, label: 'Permissions' },
 ];
 

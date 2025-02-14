@@ -22,4 +22,5 @@ export const ROUTES = {
     ORDERS: '/orders',
     // CLIENTS: '/clients',
     PERMISSIONS: '/permissions',
+    LOGS: '/logs',
 } as const; 

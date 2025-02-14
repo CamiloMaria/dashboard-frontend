@@ -59,8 +59,8 @@ export function ProductsTable() {
     bigItem: null as boolean | null,
   });
   const [sortConfig, setSortConfig] = useState({
-    field: 'title',
-    direction: 'asc' as 'asc' | 'desc',
+    field: 'update_at',
+    direction: 'desc' as 'asc' | 'desc',
   });
   const [, startTransition] = useTransition();
 
