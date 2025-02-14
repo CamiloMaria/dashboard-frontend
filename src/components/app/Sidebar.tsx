@@ -25,6 +25,7 @@ import type { Route } from '@tanstack/react-router';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { hasAnyAllowedPages } from '@/lib/route-auth';
+import { useTranslation } from 'react-i18next';
 
 interface NavRoute {
     path: string;
@@ -40,22 +41,22 @@ interface NavRoute {
 const navigationConfig: NavRoute[] = [
     {
         path: ROUTES.DASHBOARD,
-        label: 'Dashboard',
+        label: 'common.sidebar.dashboard',
         icon: LayoutDashboard,
     },
     {
         path: ROUTES.INVENTORY.ROOT,
-        label: 'Inventory',
+        label: 'common.sidebar.inventory.root',
         icon: Package,
         children: [
             {
                 path: ROUTES.INVENTORY.PRODUCTS.LIST,
-                label: 'Products',
+                label: 'common.sidebar.inventory.products',
                 icon: Box,
             },
             {
                 path: ROUTES.INVENTORY.PROMOTIONS,
-                label: 'Promotions',
+                label: 'common.sidebar.inventory.promotions',
                 icon: Tags,
             },
             // {
@@ -70,19 +71,19 @@ const navigationConfig: NavRoute[] = [
             // },
             {
                 path: ROUTES.INVENTORY.PRODUCT_SETS.LIST,
-                label: 'Product Sets',
+                label: 'common.sidebar.inventory.productSets',
                 icon: Boxes,
             },
         ],
     },
     {
         path: ROUTES.ORDERS,
-        label: 'Orders',
+        label: 'common.sidebar.orders',
         icon: ShoppingCart,
     },
     {
         path: ROUTES.PERMISSIONS,
-        label: 'Permissions',
+        label: 'common.sidebar.permissions',
         icon: Shield,
     },
     // {
@@ -92,7 +93,7 @@ const navigationConfig: NavRoute[] = [
     // },
     {
         path: ROUTES.EXAMPLE,
-        label: 'Example',
+        label: 'common.sidebar.example',
         icon: CircleDot,
     },
 ];
@@ -113,6 +114,7 @@ interface NavItemProps {
 
 function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavItemProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const { t } = useTranslation();
 
     if (children) {
         return (
@@ -136,7 +138,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                     >
                         <span className="flex items-center gap-2">
                             {icon}
-                            {!isCollapsed && <span className="text-white">{label}</span>}
+                            {!isCollapsed && <span className="text-white">{t(label)}</span>}
                         </span>
                         {!isCollapsed && (
                             <ChevronDown
@@ -166,7 +168,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                             onClick={child.onClick}
                         >
                             {child.icon}
-                            {!isCollapsed && <span className="text-sm text-white">{child.label}</span>}
+                            {!isCollapsed && <span className="text-sm text-white">{t(child.label)}</span>}
                             {child.isActive && !isCollapsed && (
                                 <span className="absolute left-0 top-1 bottom-1 w-1 bg-white rounded-r-full" />
                             )}
@@ -190,7 +192,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
             onClick={onClick}
         >
             {icon}
-            {!isCollapsed && <span className="text-sm text-white">{label}</span>}
+            {!isCollapsed && <span className="text-sm text-white">{t(label)}</span>}
             {isActive && !isCollapsed && (
                 <span className="absolute left-0 top-1 bottom-1 w-1 bg-white rounded-r-full" />
             )}

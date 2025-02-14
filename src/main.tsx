@@ -5,6 +5,7 @@ import { router } from './router'
 import { Toaster } from '@/components/ui/toaster'
 import './index.css'
 import { ThemeProvider } from './components/ui/theme-provider'
+import './i18n/config'
 
 // Wait for the router to be ready
 await router.load()

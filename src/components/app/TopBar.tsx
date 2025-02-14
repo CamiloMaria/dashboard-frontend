@@ -10,6 +10,7 @@ import {
 import { useTheme } from '@/hooks/use-theme'
 import { ROUTES } from '@/constants/routes'
 import { removeAuthToken } from '@/lib/auth'
+import { useTranslation } from 'react-i18next'
 
 interface TopBarProps {
     onToggleSidebar: () => void
@@ -18,11 +19,18 @@ interface TopBarProps {
 
 export function TopBar({ onToggleSidebar, isSidebarOpen }: TopBarProps) {
     const { setTheme } = useTheme();
+    const { t, i18n } = useTranslation();
 
     const handleLogout = () => {
         removeAuthToken();
         // Force a router state reset before navigation
         window.location.href = ROUTES.AUTH.LOGIN;
+    };
+
+    const handleLanguageChange = (lang: string) => {
+        i18n.changeLanguage(lang);
+        // Optionally save the language preference
+        localStorage.setItem('preferredLanguage', lang);
     };
 
     return (
@@ -56,11 +64,18 @@ export function TopBar({ onToggleSidebar, isSidebarOpen }: TopBarProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-32">
-                            <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme('light')}>
+                                {t('common.theme.light')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme('dark')}>
+                                {t('common.theme.dark')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme('system')}>
+                                {t('common.theme.system')}
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
                     {/* Language Switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -69,9 +84,14 @@ export function TopBar({ onToggleSidebar, isSidebarOpen }: TopBarProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-32">
-                            <DropdownMenuItem>English</DropdownMenuItem>
-                            <DropdownMenuItem>Spanish</DropdownMenuItem>
-                            <DropdownMenuItem>French</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleLanguageChange('es')} className="flex items-center justify-between">
+                                {t('common.languages.es')}
+                                {i18n.language === 'es' && <span className="text-primary">✓</span>}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleLanguageChange('en')} className="flex items-center justify-between">
+                                {t('common.languages.en')}
+                                {i18n.language === 'en' && <span className="text-primary">✓</span>}
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
@@ -92,9 +112,9 @@ export function TopBar({ onToggleSidebar, isSidebarOpen }: TopBarProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem>Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Settings</DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                            <DropdownMenuItem>{t('common.profile.profile')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('common.profile.settings')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleLogout}>{t('common.profile.logout')}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

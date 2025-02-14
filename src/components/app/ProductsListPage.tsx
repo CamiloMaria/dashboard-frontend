@@ -3,17 +3,19 @@ import { Button } from '@/components/ui/button'
 import { ProductsTable } from '@/components/app/products-table'
 import { useNavigate } from '@tanstack/react-router'
 import { productsNewRoute } from '@/routes/app/products-new'
+import { useTranslation } from 'react-i18next'
 
 export function ProductsListPage() {
     const navigate = useNavigate()
+    const { t } = useTranslation()
 
     return (
         <>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight">Products</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight">{t('products.list.title')}</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Manage your product inventory and settings
+                        {t('products.list.subtitle')}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -25,7 +27,7 @@ export function ProductsListPage() {
                         onClick={() => navigate({ to: productsNewRoute.fullPath })}
                     >
                         <Plus className="h-4 w-4 mr-2" />
-                        Add Product
+                        {t('products.list.addProduct')}
                     </Button>
                 </div>
             </div>

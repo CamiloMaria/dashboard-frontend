@@ -25,6 +25,7 @@ import {
 } from '.';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { productEditorRoute } from '@/routes/app/product-editor';
+import { useTranslation } from 'react-i18next';
 
 export function ProductsTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,6 +37,7 @@ export function ProductsTable() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const debouncedSearch = useDebounce(searchTerm);
 
@@ -83,16 +85,16 @@ export function ProductsTable() {
         );
       }
       toast({
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to delete the product. Please try again.',
+        title: t('common.error'),
+        description: err instanceof Error ? err.message : t('messages.deleteError'),
         variant: 'destructive',
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       toast({
-        title: 'Product deleted',
-        description: 'The product has been deleted successfully.',
+        title: t('common.success'),
+        description: t('messages.productDeleted'),
       });
     },
     onSettled: () => {
@@ -140,10 +142,10 @@ export function ProductsTable() {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <p className="text-lg font-medium text-muted-foreground">
-          Failed to load products
+          {t('products.list.loadingError')}
         </p>
         <Button onClick={() => queryClient.invalidateQueries({ queryKey: productKeys.all })}>
-          Try Again
+          {t('products.list.tryAgain')}
         </Button>
       </div>
     );
@@ -161,7 +163,7 @@ export function ProductsTable() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search by SKU, title, or material..."
+            placeholder={t('products.list.searchPlaceholder')}
             value={searchTerm}
             onChange={handleSearchChange}
             className="pl-10 w-2/3"
@@ -177,7 +179,7 @@ export function ProductsTable() {
 
       {isError && (
         <div className="text-center text-red-500">
-          Error loading products. Please try again.
+          {t('products.list.loadingError')}
         </div>
       )}
 
@@ -191,14 +193,14 @@ export function ProductsTable() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[100px]">Thumbnail</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Material</TableHead>
-                <TableHead>Big Item</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-[100px]">{t('products.list.columns.thumbnail')}</TableHead>
+                <TableHead>{t('products.list.columns.sku')}</TableHead>
+                <TableHead>{t('products.list.columns.title')}</TableHead>
+                <TableHead>{t('products.list.columns.material')}</TableHead>
+                <TableHead>{t('products.list.columns.bigItem')}</TableHead>
+                <TableHead>{t('products.list.columns.status')}</TableHead>
+                <TableHead>{t('products.list.columns.date')}</TableHead>
+                <TableHead className="text-right">{t('products.list.columns.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -215,11 +217,13 @@ export function ProductsTable() {
 
           <ConfirmationDialog
             open={!!productToDelete}
-            title="Are you sure you want to delete this product?"
-            description={`This action cannot be undone. This will permanently delete the product "${productToDelete?.title}" and remove its data from the server.`}
+            title={t('products.list.deleteConfirmation.title')}
+            description={t('products.list.deleteConfirmation.description', {
+              product: productToDelete?.sku || productToDelete?.material || productToDelete?.title || ''
+            })}
             isLoading={deleteMutation.isPending}
-            confirmText="Delete"
-            cancelText="Cancel"
+            confirmText={t('common.delete')}
+            cancelText={t('common.cancel')}
             confirmVariant="destructive"
             onConfirm={handleDeleteConfirm}
             onCancel={() => setProductToDelete(null)}

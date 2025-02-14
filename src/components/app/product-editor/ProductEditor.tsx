@@ -31,19 +31,21 @@ import { SHOPS } from '@/constants/shops';
 import {
   ImageEditor,
   ProductInfoFields,
-  ProductTabs,
   LoadingOverlay,
   ActionButtons,
   DisableReasonDialog,
+  ProductTabs,
 } from './';
 import { productsListRoute } from '@/routes/app/products-list';
 import { Package } from 'lucide-react';
-
+import { useTranslation } from 'react-i18next';
 interface ProductEditorProps {
   productId?: string;
 }
 
 export function ProductEditor({ productId }: ProductEditorProps) {
+  const { t } = useTranslation();
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [images, setImages] = useState<Image[]>([]);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
@@ -359,12 +361,12 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <LoadingOverlay
           isLoading={updateMutation.isPending}
-          message={productId ? 'Updating product...' : ''}
+          message={productId ? t('products.updating') : ''}
         />
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>{t('products.basicInfo')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-6">
@@ -386,7 +388,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Product Name</FormLabel>
+                      <FormLabel>{t('products.editor.form.productName')}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -402,7 +404,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                     <FormItem className="rounded-lg border p-4 space-y-3">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-muted-foreground" />
-                        <FormLabel className="font-medium">Security Stock</FormLabel>
+                        <FormLabel className="font-medium">
+                          {t('products.editor.form.securityStock.label')}
+                        </FormLabel>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
@@ -419,7 +423,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         </div>
                         <div className="flex-[2]">
                           <p className="text-sm text-muted-foreground">
-                            Set the minimum stock level for inventory alerts. When stock falls below this threshold, the system will display low stock warnings.
+                            {t('products.editor.form.securityStock.description')}
                           </p>
                         </div>
                       </div>
@@ -439,9 +443,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                       <FormItem className="flex flex-col rounded-lg border p-4">
                         <div className="flex items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel>Active Status</FormLabel>
+                            <FormLabel>{t('products.editor.form.activeStatus.label')}</FormLabel>
                             <p className="text-sm text-muted-foreground">
-                              Enable or disable this product
+                              {t('products.editor.form.activeStatus.description')}
                             </p>
                           </div>
                           <FormControl>
@@ -454,14 +458,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         {(!field.value && disabledShopsComment) && (
                           <div className="mt-4 pt-4 border-t space-y-2">
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Disable Reason:</p>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {t('products.editor.form.activeStatus.disableReason')}
+                              </p>
                               <p className="text-sm font-medium text-red-600 mt-1">
                                 {disabledShopsComment}
                               </p>
                             </div>
                             {disabledShops?.length > 0 && (
                               <div>
-                                <p className="text-sm font-medium text-muted-foreground">Disabled in Shops:</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  {t('products.editor.form.activeStatus.disabledShops')}
+                                </p>
                                 <div className="flex flex-wrap gap-2 mt-1">
                                   {disabledShops.map((shop) => (
                                     <span

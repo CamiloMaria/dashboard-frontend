@@ -9,6 +9,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export interface ConfirmationDialogProps {
     open: boolean;
@@ -33,6 +34,8 @@ export function ConfirmationDialog({
     onConfirm,
     onCancel,
 }: ConfirmationDialogProps) {
+    const { t } = useTranslation();
+
     return (
         <AlertDialog open={open} onOpenChange={() => onCancel()}>
             <AlertDialogContent>
@@ -52,7 +55,7 @@ export function ConfirmationDialog({
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Loading...
+                                {t('common.loading')}
                             </>
                         ) : (
                             confirmText

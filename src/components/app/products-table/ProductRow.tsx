@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { type Product } from '@/types/product';
+import { useTranslation } from 'react-i18next';
 
 export interface ProductRowProps {
     product: Product;
@@ -25,6 +26,8 @@ export interface ProductRowProps {
 }
 
 export function ProductRow({ product, onEdit, onDelete }: ProductRowProps) {
+    const { t } = useTranslation();
+
     return (
         <TableRow key={product.id} className="hover:bg-muted/50">
             <TableCell>
@@ -53,24 +56,24 @@ export function ProductRow({ product, onEdit, onDelete }: ProductRowProps) {
                     variant={product.bigItems ? 'default' : 'secondary'}
                     className="font-normal"
                 >
-                    {product.bigItems ? 'Yes' : 'No'}
+                    {product.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}
                 </Badge>
             </TableCell>
             <TableCell>
                 {product.isActive ? (
                     <Badge variant="success" className="bg-green-500/15 text-green-600 hover:bg-green-500/25">
                         <Check className="h-3.5 w-3.5 mr-1" />
-                        Active
+                        {t('products.list.row.active')}
                     </Badge>
                 ) : (
                     <Badge variant="destructive" className="bg-red-500/15 text-red-600 hover:bg-red-500/25">
                         <X className="h-3.5 w-3.5 mr-1" />
-                        Inactive
+                        {t('products.list.row.inactive')}
                     </Badge>
                 )}
             </TableCell>
             <TableCell className="font-medium">
-                {new Date(product.create_at).toLocaleDateString('en-GB', {
+                {new Date(product.create_at).toLocaleDateString(undefined, {
                     day: '2-digit',
                     month: '2-digit',
                     year: '2-digit',
@@ -85,13 +88,13 @@ export function ProductRow({ product, onEdit, onDelete }: ProductRowProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem onClick={() => onEdit(product.id)}>
-                            Edit
+                            {t('products.list.row.edit')}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="text-red-600"
                             onClick={() => onDelete(product)}
                         >
-                            Delete
+                            {t('products.list.row.delete')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
