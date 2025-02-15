@@ -12,13 +12,13 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Download, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
-import type { ProductResult } from '../hooks/useProductCreation';
 import { getResultStats } from '../hooks/useProductCreation';
+import { CreateProductResult } from '@/types/product';
 
 interface ResultsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    results: ProductResult[];
+    results: CreateProductResult[];
 }
 
 export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProps) {

@@ -15,6 +15,7 @@ export interface CreateSetPayload {
     sku: string;
     price: number;
     is_free: boolean;
+    grupo: string;
   }>;
 }
 

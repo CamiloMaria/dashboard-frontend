@@ -6,3 +6,10 @@ node_modules
 .env.test
 
 .cursor
+
+/dist
+/build
+/coverage
+/node_modules
+/public
+/src

@@ -125,6 +125,7 @@ export function CreateProductSetPage() {
                 sku: product.sku,
                 price: product.inventory[0]?.price ?? 0,
                 is_free: freeProducts.has(product.id),
+                grupo: product.grupo,
             })),
         };
 

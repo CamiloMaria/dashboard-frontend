@@ -7,19 +7,21 @@ import './index.css'
 import { ThemeProvider } from './components/ui/theme-provider'
 import './i18n/config'
 
-// Wait for the router to be ready
-await router.load()
+void (async () => {
+  // Wait for the router to be ready
+  await router.load()
 
-const container = document.getElementById('root')
-if (!container) throw new Error('Root element not found')
+  const container = document.getElementById('root')
+  if (!container) throw new Error('Root element not found')
 
-const root = createRoot(container)
+  const root = createRoot(container)
 
-root.render(
-  <StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-      <Toaster />
-    </ThemeProvider>
-  </StrictMode>
-)
+  root.render(
+    <StrictMode>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </ThemeProvider>
+    </StrictMode>
+  )
+})();
