@@ -13,6 +13,7 @@ import { promotionsRoute } from './routes/app/promotions'
 import { orderRoute } from './routes/app/order'
 import { permissionsRoute } from './routes/app/permissions'
 import { logsRoute } from './routes/app/logs'
+import { BASE_PATH } from './constants/routes'
 
 const routeTree = rootRoute.addChildren([
     authRoute.addChildren([
@@ -32,7 +33,10 @@ const routeTree = rootRoute.addChildren([
     notFoundRoute,
 ])
 
-export const router = createRouter({ routeTree })
+export const router = createRouter({
+  basepath: BASE_PATH,
+  routeTree
+})
 
 declare module '@tanstack/react-router' {
     interface Register {

@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/collapsible';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import type { Route } from '@tanstack/react-router';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES, BASE_PATH } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from 'react-i18next';
 
@@ -205,7 +205,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const { hasAccess } = useAuth();
 
     const isRouteActive = (path: string) => {
-        if (path === '/') {
+        if (path === BASE_PATH) {
             return currentPath === path;
         }
         return currentPath.startsWith(path);

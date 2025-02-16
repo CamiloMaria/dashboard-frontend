@@ -1,4 +1,4 @@
-const BASE_PATH = '/dashboard-v2';
+export const BASE_PATH = '/dashboard-v2';
 
 export const ROUTES = {
     AUTH: {
@@ -6,7 +6,6 @@ export const ROUTES = {
         FORGOT_PASSWORD: `${BASE_PATH}/forgot-password`,
         RESET_PASSWORD: `${BASE_PATH}/reset-password`,
     },
-    DASHBOARD: `${BASE_PATH}/`,
     INVENTORY: {
         ROOT: `${BASE_PATH}/inventory`,
         PRODUCTS: {

@@ -1,7 +1,7 @@
 import { redirect } from '@tanstack/react-router';
 import { getAuthToken } from './auth';
 import { jwtDecode } from 'jwt-decode';
-import { ROUTES } from '@/constants/routes';
+import { BASE_PATH, ROUTES } from '@/constants/routes';
 
 export function hasAnyAllowedPages(): boolean {
     const token = getAuthToken();
@@ -23,8 +23,9 @@ export function requireAuth(allowedPath: string) {
 
     try {
         const decoded = jwtDecode<{ allowedPages?: string[] }>(token);
-        if (!decoded.allowedPages?.length || !decoded.allowedPages.some(path => path === allowedPath)) {
-            throw redirect({ to: '/' });
+        const allowedPathWithoutBase = allowedPath.replace(BASE_PATH, '');
+        if (!decoded.allowedPages?.length || !decoded.allowedPages.some(path => path === allowedPathWithoutBase)) {
+            throw redirect({ to: ROUTES.AUTH.LOGIN });
         }
     } catch {
         throw redirect({ to: ROUTES.AUTH.LOGIN });

@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { getAuthToken } from '@/lib/auth';
+import { BASE_PATH } from "@/constants/routes";
 
 interface JWTPayload {
   sub: string;
@@ -22,9 +23,10 @@ export function useAuth() {
     const decoded = getDecodedToken();
     if (!decoded || !decoded.allowedPages) return false;
 
+    const pathWithoutBase = path.replace(BASE_PATH, '');
     return decoded.allowedPages.some(allowedPath => {
       const regex = new RegExp(`^${allowedPath.replace('*', '.*')}$`);
-      return regex.test(path);
+      return regex.test(pathWithoutBase);
     });
   };
 

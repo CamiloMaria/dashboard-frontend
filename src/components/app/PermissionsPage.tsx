@@ -36,7 +36,6 @@ interface RouteConfig {
 }
 
 const availableRoutes: RouteConfig[] = [
-    { path: ROUTES.DASHBOARD, label: 'Dashboard' },
     {
         path: ROUTES.INVENTORY.ROOT,
         label: 'Inventory',
