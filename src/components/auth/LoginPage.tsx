@@ -30,7 +30,7 @@ export function LoginPage() {
 
     useEffect(() => {
         if (isAuthenticated()) {
-            navigate({ to: ROUTES.DASHBOARD });
+            navigate({ to: ROUTES.INVENTORY.PRODUCTS.LIST });
         }
     }, [navigate]);
 
@@ -41,7 +41,7 @@ export function LoginPage() {
         try {
             const response = await authApi.signIn(formData);
             setAuthToken(response.access_token);
-            navigate({ to: ROUTES.DASHBOARD });
+            navigate({ to: ROUTES.INVENTORY.PRODUCTS.LIST });
         } catch (error) {
             console.error('Login failed:', error);
             toast({

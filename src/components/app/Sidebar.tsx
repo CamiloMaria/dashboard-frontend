@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    LayoutDashboard,
     Package,
     ShoppingCart,
     ChevronDown,
@@ -38,11 +37,11 @@ interface NavRoute {
 }
 
 const navigationConfig: NavRoute[] = [
-    {
-        path: ROUTES.DASHBOARD,
-        label: 'common.sidebar.dashboard',
-        icon: LayoutDashboard,
-    },
+    // {
+    //     path: ROUTES.DASHBOARD,
+    //     label: 'common.sidebar.dashboard',
+    //     icon: LayoutDashboard,
+    // },
     {
         path: ROUTES.INVENTORY.ROOT,
         label: 'common.sidebar.inventory.root',
