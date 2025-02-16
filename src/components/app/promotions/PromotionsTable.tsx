@@ -108,7 +108,7 @@ export function PromotionsTable() {
     const TableSkeleton = () => (
         <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 p-4 bg-gray-50/50 rounded-lg animate-pulse">
+                <div key={i} className="flex items-center space-x-4 p-4 rounded-lg animate-pulse">
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-4 w-[100px]" />
@@ -123,7 +123,7 @@ export function PromotionsTable() {
 
     if (isLoading) {
         return (
-            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+            <Card className="p-6">
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <Skeleton className="h-10 w-[300px]" />
@@ -137,14 +137,14 @@ export function PromotionsTable() {
 
     if (isError) {
         return (
-            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+            <Card className="p-6">
                 <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                     <div className="rounded-full bg-red-50 p-4">
                         <Package className="h-8 w-8 text-red-500" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="font-semibold text-xl text-gray-900">{t('promotions.error.title')}</h3>
-                        <p className="text-gray-500 max-w-[500px]">
+                        <h3 className="font-semibold text-xl">{t('promotions.error.title')}</h3>
+                        <p className="max-w-[500px]">
                             {t('promotions.error.description')}
                         </p>
                     </div>
@@ -165,23 +165,23 @@ export function PromotionsTable() {
     const totalPages = Math.ceil(pagination.length / itemsPerPage);
 
     return (
-        <Card className="bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-            <div className="p-6 border-b bg-white">
+        <Card className="overflow-hidden">
+            <div className="p-6 border-b">
                 <div className="flex items-center justify-between gap-6">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
                         <Input
                             type="text"
                             placeholder={t('promotions.searchPlaceholder')}
                             value={searchTerm}
                             onChange={handleSearchChange}
-                            className="pl-10 h-11 bg-gray-50 border-gray-200 hover:border-gray-300 focus:border-indigo-500 transition-colors"
+                            className="pl-10 h-11 transition-colors"
                         />
                     </div>
                     <Button
                         variant="outline"
                         size="lg"
-                        className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 text-gray-700 h-11 px-6 transition-all duration-200 shadow-sm hover:shadow"
+                        className="flex items-center gap-2 h-11 px-6 transition-all duration-200 shadow-sm hover:shadow"
                         onClick={() => exportToCSV(promotions)}
                     >
                         <Download className="h-4 w-4" />
@@ -192,8 +192,8 @@ export function PromotionsTable() {
 
             <ScrollArea className="relative">
                 {isFetching && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-200">
-                        <div className="bg-white p-4 rounded-xl shadow-lg">
+                    <div className="absolute inset-0 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-200">
+                        <div className="p-4 rounded-xl shadow-lg">
                             <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
                         </div>
                     </div>
@@ -201,47 +201,47 @@ export function PromotionsTable() {
 
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-50/80 hover:bg-gray-50/90 transition-colors">
+                        <TableRow className="transition-colors">
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <Hash className="h-4 w-4 text-gray-400" />
+                                    <Hash className="h-4 w-4" />
                                     {t('promotions.columns.promoNumber')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <Barcode className="h-4 w-4 text-gray-400" />
+                                    <Barcode className="h-4 w-4" />
                                     {t('promotions.columns.sku')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <Tag className="h-4 w-4 text-gray-400" />
+                                    <Tag className="h-4 w-4" />
                                     {t('promotions.columns.material')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <Store className="h-4 w-4 text-gray-400" />
+                                    <Store className="h-4 w-4" />
                                     {t('promotions.columns.shop')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <DollarSign className="h-4 w-4 text-gray-400" />
+                                    <DollarSign className="h-4 w-4" />
                                     {t('promotions.columns.price')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <ArrowUpDown className="h-4 w-4 text-gray-400" />
+                                    <ArrowUpDown className="h-4 w-4" />
                                     {t('promotions.columns.comparePrice')}
                                 </div>
                             </TableHead>
                             <TableHead className="font-semibold">{t('promotions.columns.status')}</TableHead>
                             <TableHead className="font-semibold">
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-gray-400" />
+                                    <Calendar className="h-4 w-4" />
                                     {t('promotions.columns.createdAt')}
                                 </div>
                             </TableHead>
@@ -251,20 +251,20 @@ export function PromotionsTable() {
                         {promotions.map((promotion) => (
                             <TableRow
                                 key={`${promotion.no_promo}-${promotion.sku}`}
-                                className="hover:bg-gray-50/50 transition-colors"
+                                className="transition-colors"
                             >
-                                <TableCell className="font-medium text-gray-900">{promotion.no_promo}</TableCell>
+                                <TableCell className="font-medium">{promotion.no_promo}</TableCell>
                                 <TableCell className="font-mono text-sm">{promotion.sku}</TableCell>
                                 <TableCell className="font-mono text-sm">{promotion.matnr}</TableCell>
                                 <TableCell>{promotion.shop}</TableCell>
                                 <TableCell className="tabular-nums">
-                                    <div className="flex items-center gap-1 text-gray-900">
+                                    <div className="flex items-center gap-1">
                                         <DollarSign className="h-3 w-3" />
                                         {promotion.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                     </div>
                                 </TableCell>
                                 <TableCell className="tabular-nums">
-                                    <div className="flex items-center gap-1 text-gray-500">
+                                    <div className="flex items-center gap-1">
                                         <DollarSign className="h-3 w-3" />
                                         {promotion.compare_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                     </div>
@@ -283,7 +283,7 @@ export function PromotionsTable() {
                                         {promotion.status ? t('common.active') : t('common.inactive')}
                                     </div>
                                 </TableCell>
-                                <TableCell className="whitespace-nowrap text-gray-500">
+                                <TableCell className="whitespace-nowrap">
                                     <div className="flex items-center gap-1.5">
                                         <Calendar className="h-3 w-3" />
                                         {format(new Date(promotion.created_at), 'MMM d, yyyy')}
@@ -295,7 +295,7 @@ export function PromotionsTable() {
                 </Table>
             </ScrollArea>
 
-            <div className="border-t bg-white">
+            <div className="border-t">
                 <PaginationControls
                     currentPage={currentPage}
                     totalPages={totalPages}

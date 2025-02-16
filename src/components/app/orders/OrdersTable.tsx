@@ -107,12 +107,12 @@ export function OrdersTable() {
 
     if (isLoading) {
         return (
-            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+            <Card className="p-6">
                 <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                    <div className="bg-white/80 p-4 rounded-full shadow-lg">
+                    <div className="p-4 rounded-full shadow-lg">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                     </div>
-                    <p className="text-sm text-gray-500 animate-pulse">
+                    <p className="text-sm animate-pulse">
                         {t('orders.loading')}
                     </p>
                 </div>
@@ -122,14 +122,14 @@ export function OrdersTable() {
 
     if (isError) {
         return (
-            <Card className="p-6 bg-gradient-to-b from-white to-gray-50">
+            <Card className="p-6">
                 <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
                     <div className="rounded-full bg-red-50 p-4">
                         <Package2 className="h-8 w-8 text-red-500" />
                     </div>
                     <div className="space-y-2">
-                        <h3 className="font-semibold text-xl text-gray-900">{t('orders.error')}</h3>
-                        <p className="text-gray-500 max-w-[500px]">
+                        <h3 className="font-semibold text-xl">{t('orders.error')}</h3>
+                        <p className="max-w-[500px]">
                             {t('orders.errorDescription')}
                         </p>
                     </div>
@@ -150,24 +150,24 @@ export function OrdersTable() {
     const totalPages = Math.ceil(pagination.length / itemsPerPage);
 
     return (
-        <Card className="bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-            <div className="p-6 border-b bg-white">
+        <Card className="overflow-hidden">
+            <div className="p-6 border-b">
                 <div className="flex flex-wrap items-center justify-between gap-6">
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
                             <Input
                                 type="text"
                                 placeholder={t('orders.searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                className="pl-10 h-11 min-w-[300px] bg-gray-50 border-gray-200 hover:border-gray-300 focus:border-indigo-500 transition-colors"
+                                className="pl-10 h-11 min-w-[300px] transition-colors"
                             />
                         </div>
                         <Select value={storeFilter} onValueChange={setStoreFilter}>
-                            <SelectTrigger className="w-[180px] h-11 bg-gray-50 border-gray-200 hover:border-gray-300 focus:border-indigo-500 transition-colors">
+                            <SelectTrigger className="w-[180px] h-11 transition-colors">
                                 <div className="flex items-center gap-2">
-                                    <Store className="h-4 w-4 text-gray-500" />
+                                    <Store className="h-4 w-4" />
                                     <SelectValue placeholder={t('orders.filterByStore')} />
                                 </div>
                             </SelectTrigger>
@@ -186,7 +186,7 @@ export function OrdersTable() {
                     <Button
                         variant="outline"
                         size="lg"
-                        className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 text-gray-700 h-11 px-6 transition-all duration-200 shadow-sm hover:shadow"
+                        className="flex items-center gap-2 h-11 px-6 transition-all duration-200 shadow-sm hover:shadow"
                         onClick={() => {/* TODO: Implement export */ }}
                     >
                         <Download className="h-4 w-4" />
@@ -197,8 +197,8 @@ export function OrdersTable() {
 
             <ScrollArea className="relative">
                 {isFetching && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-200">
-                        <div className="bg-white p-4 rounded-xl shadow-lg">
+                    <div className="absolute inset-0 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-200">
+                        <div className="p-4 rounded-xl shadow-lg">
                             <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
                         </div>
                     </div>
@@ -206,53 +206,53 @@ export function OrdersTable() {
 
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-50/80 hover:bg-gray-50/90 transition-colors">
+                        <TableRow className="transition-colors">
                             <TableHead className="w-[40px]"></TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    <FileText className="h-4 w-4" />
                                     {t('orders.columns.orderNumber')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-gray-400" />
+                                    <User className="h-4 w-4" />
                                     {t('orders.columns.customer')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    <FileText className="h-4 w-4" />
                                     {t('orders.columns.rnc')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <DollarSign className="h-4 w-4 text-gray-400" />
+                                    <DollarSign className="h-4 w-4" />
                                     {t('orders.columns.total')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <Globe className="h-4 w-4 text-gray-400" />
+                                    <Globe className="h-4 w-4" />
                                     {t('orders.columns.source')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    <FileText className="h-4 w-4" />
                                     {t('orders.columns.ptlog')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <Store className="h-4 w-4 text-gray-400" />
+                                    <Store className="h-4 w-4" />
                                     {t('orders.columns.store')}
                                 </div>
                             </TableHead>
                             <TableHead>
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-gray-400" />
+                                    <Calendar className="h-4 w-4" />
                                     {t('orders.columns.date')}
                                 </div>
                             </TableHead>
@@ -265,8 +265,8 @@ export function OrdersTable() {
                                     className={cn(
                                         "cursor-pointer transition-colors",
                                         expandedRows.has(order.ID)
-                                            ? "bg-gray-50/80"
-                                            : "hover:bg-gray-50/50"
+                                            ? ""
+                                            : ""
                                     )}
                                     onClick={() => toggleRowExpansion(order.ID)}
                                 >
@@ -279,28 +279,28 @@ export function OrdersTable() {
                                                     : 'rotate(0deg)'
                                             }}
                                         >
-                                            <ChevronDown className="h-4 w-4 text-gray-500" />
+                                            <ChevronDown className="h-4 w-4" />
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium text-gray-900">{order.ORDEN}</TableCell>
+                                    <TableCell className="font-medium">{order.ORDEN}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <User className="h-4 w-4 text-gray-400" />
+                                            <User className="h-4 w-4" />
                                             <span>{order.NOMBRE} {order.APELLIDOS}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         {order.RNC ? (
                                             <div className="space-y-1">
-                                                <div className="font-medium text-gray-900">{order.RNC}</div>
-                                                <div className="text-sm text-gray-500">{order.RNC_NAME}</div>
+                                                <div className="font-medium">{order.RNC}</div>
+                                                <div className="text-sm">{order.RNC_NAME}</div>
                                             </div>
                                         ) : (
-                                            <span className="text-gray-400 italic">N/A</span>
+                                            <span className="italic">N/A</span>
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-1 font-medium text-gray-900">
+                                        <div className="flex items-center gap-1 font-medium">
                                             <DollarSign className="h-3 w-3" />
                                             <span className="tabular-nums">
                                                 {order.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -315,17 +315,17 @@ export function OrdersTable() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-gray-400" />
-                                            {order.PTLOG || <span className="text-gray-400 italic">N/A</span>}
+                                            <FileText className="h-4 w-4" />
+                                            {order.PTLOG || <span className="italic">N/A</span>}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <Store className="h-4 w-4 text-gray-400" />
+                                            <Store className="h-4 w-4" />
                                             {order.TIENDA}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="whitespace-nowrap text-gray-500">
+                                    <TableCell className="whitespace-nowrap">
                                         <div className="flex items-center gap-1.5">
                                             <Calendar className="h-3 w-3" />
                                             {format(new Date(order.FECHA_REGISTRO), 'MMM d, yyyy')}
@@ -334,7 +334,7 @@ export function OrdersTable() {
                                 </TableRow>
                                 {expandedRows.has(order.ID) && (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="p-0 border-0 bg-gray-50/50">
+                                        <TableCell colSpan={9} className="p-0 border-0">
                                             <div className="p-6">
                                                 <OrderDetails order={order} />
                                             </div>
@@ -347,7 +347,7 @@ export function OrdersTable() {
                 </Table>
             </ScrollArea>
 
-            <div className="border-t bg-white p-4">
+            <div className="border-t p-4">
                 <PaginationControls
                     currentPage={currentPage}
                     totalPages={totalPages}

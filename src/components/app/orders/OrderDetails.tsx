@@ -40,15 +40,15 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     const totalItems = order.ARTICLES.reduce((sum, article) => sum + article.CANT, 0);
 
     return (
-        <div className="max-w-7xl mx-auto bg-gradient-to-b from-gray-50 to-white p-6 rounded-xl shadow-sm space-y-8">
+        <div className="max-w-7xl mx-auto p-6 rounded-xl shadow-sm space-y-8">
             {/* Order Summary */}
             <div className="relative">
                 <div className="flex flex-wrap gap-4 items-center justify-between">
                     <div className="space-y-2">
-                        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                        <h2 className="text-3xl font-bold tracking-tight">
                             {t('orders.details.title')}
                         </h2>
-                        <div className="flex items-center gap-2 text-gray-500">
+                        <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             <p className="text-sm">
                                 {format(new Date(order.TRANSACTIONS[0]?.FECHA_APROBACION), 'PPP')}
@@ -78,18 +78,18 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     </div>
                     <div className="space-y-3 text-sm">
                         <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <Building2 className="w-4 h-4" />
                             <p className="font-medium">{order.NOMBRE} {order.APELLIDOS}</p>
                         </div>
-                        <p className="text-gray-600 pl-6">{order.RNC_NAME}</p>
-                        {order.RNC && <p className="text-gray-600 pl-6">RNC: {order.RNC}</p>}
+                        <p className="pl-6">{order.RNC_NAME}</p>
+                        {order.RNC && <p className="pl-6">RNC: {order.RNC}</p>}
                         <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-gray-400" />
-                            <p className="text-gray-600">{order.EMAIL}</p>
+                            <Mail className="w-4 h-4" />
+                            <p>{order.EMAIL}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-gray-400" />
-                            <p className="text-gray-600">{order.TELEFONO}</p>
+                            <Phone className="w-4 h-4" />
+                            <p>{order.TELEFONO}</p>
                         </div>
                     </div>
                 </Card>
@@ -100,24 +100,24 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                     </div>
                     <div className="space-y-3 text-sm">
                         <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <MapPin className="w-4 h-4" />
                             <p className="font-medium">{order.DIRECCION}</p>
                         </div>
                         <div className="flex items-center gap-2 pl-6">
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                            <p className="text-gray-600">{order.CIUDAD}</p>
+                            <Building2 className="w-4 h-4" />
+                            <p>{order.CIUDAD}</p>
                         </div>
                         {order.PAIS && (
                             <div className="flex items-center gap-2 pl-6">
-                                <Globe className="w-4 h-4 text-gray-400" />
-                                <p className="text-gray-600">{order.PAIS}</p>
+                                <Globe className="w-4 h-4" />
+                                <p>{order.PAIS}</p>
                             </div>
                         )}
                         {order.COMENTARIO && (
-                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                            <div className="mt-4 p-4 rounded-lg border">
                                 <div className="flex items-start gap-2">
-                                    <MessageSquare className="w-4 h-4 text-gray-400 mt-1" />
-                                    <p className="text-gray-600 italic">{order.COMENTARIO}</p>
+                                    <MessageSquare className="w-4 h-4 mt-1" />
+                                    <p className="italic">{order.COMENTARIO}</p>
                                 </div>
                             </div>
                         )}
@@ -134,7 +134,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-gray-50">
+                            <TableRow>
                                 <TableHead className="font-semibold">{t('orders.details.columns.sku')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.description')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.quantity')}</TableHead>
@@ -145,13 +145,13 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         </TableHeader>
                         <TableBody>
                             {order.ARTICLES.map((article) => (
-                                <TableRow key={article.EAN} className="hover:bg-gray-50 transition-colors">
+                                <TableRow key={article.EAN} className="transition-colors">
                                     <TableCell className="font-medium">{article.EAN}</TableCell>
                                     <TableCell>{article.DESCRIPCION}</TableCell>
                                     <TableCell className="font-medium">{article.CANT}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1">
-                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            <DollarSign className="w-4 h-4" />
                                             {article.PRECIO.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                     </TableCell>
@@ -167,7 +167,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
                                         <div className="flex items-center justify-end gap-1">
-                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            <DollarSign className="w-4 h-4" />
                                             {article.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                     </TableCell>
@@ -187,7 +187,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-gray-50">
+                            <TableRow>
                                 <TableHead className="font-semibold">{t('orders.details.columns.invoiceNumber')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.department')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.ncf')}</TableHead>
@@ -197,19 +197,19 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         </TableHeader>
                         <TableBody>
                             {order.FACTURES.map((invoice) => (
-                                <TableRow key={invoice.FACTURAS} className="hover:bg-gray-50 transition-colors">
+                                <TableRow key={invoice.FACTURAS} className="transition-colors">
                                     <TableCell className="font-medium">{invoice.FACTURAS}</TableCell>
                                     <TableCell>{invoice.DEPTO}</TableCell>
                                     <TableCell>{invoice.NCF}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1">
-                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            <DollarSign className="w-4 h-4" />
                                             {invoice.ITBIS.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
                                         <div className="flex items-center justify-end gap-1">
-                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            <DollarSign className="w-4 h-4" />
                                             {invoice.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                     </TableCell>
@@ -229,7 +229,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="rounded-lg overflow-hidden border">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-gray-50">
+                            <TableRow>
                                 <TableHead className="font-semibold">{t('orders.details.columns.card')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.approval')}</TableHead>
                                 <TableHead className="font-semibold">{t('orders.details.columns.date')}</TableHead>
@@ -239,24 +239,24 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         </TableHeader>
                         <TableBody>
                             {order.TRANSACTIONS.map((transaction) => (
-                                <TableRow key={transaction.APROBACION} className="hover:bg-gray-50 transition-colors">
+                                <TableRow key={transaction.APROBACION} className="transition-colors">
                                     <TableCell className="font-medium">{transaction.TARJETA}</TableCell>
                                     <TableCell>{transaction.APROBACION}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1">
-                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <Calendar className="w-4 h-4" />
                                             {format(new Date(transaction.FECHA_APROBACION), 'MMM d, yyyy')}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4 text-gray-400" />
+                                            <Clock className="w-4 h-4" />
                                             {transaction.HORA_APROBACION}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
                                         <div className="flex items-center justify-end gap-1">
-                                            <DollarSign className="w-4 h-4 text-gray-400" />
+                                            <DollarSign className="w-4 h-4" />
                                             {transaction.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                     </TableCell>

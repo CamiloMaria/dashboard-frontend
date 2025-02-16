@@ -236,6 +236,7 @@ export const es = {
             addProduct: 'Agregar Producto',
             settings: 'Configuración',
             searchPlaceholder: 'Buscar por SKU, título o material...',
+            loading: 'Cargando productos...',
             filters: {
                 title: 'Filtros',
                 status: 'Estado',
