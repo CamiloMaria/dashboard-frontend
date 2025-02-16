@@ -1,11 +1,9 @@
 import { type Product, type ProductsResponse, type GetProductsParams, CreateProductResult } from '@/types'
 import axios from '@/lib/axios';
-import { API_URL, getHeaders } from './config';
 
 export const productsApi = {
   async getProducts({ page, limit: size, search, order, sortBy }: GetProductsParams): Promise<ProductsResponse> {
-    const response = await axios.get<ProductsResponse>(`${API_URL}/product`, {
-      headers: getHeaders(),
+    const response = await axios.get<ProductsResponse>('/product', {
       params: {
         page,
         size,
@@ -23,28 +21,21 @@ export const productsApi = {
   },
 
   async createProduct(skus: string[]): Promise<CreateProductResult[]> {
-    const response = await axios.post<CreateProductResult[]>(`${API_URL}/product`, {skus}, {
-      headers: getHeaders()
-    });
+    const response = await axios.post<CreateProductResult[]>('/product', {skus});
     return response.data;
   },
 
   async updateProduct(sku: string, data: Partial<Product>): Promise<Product> {
-    const response = await axios.patch<Product>(`${API_URL}/product/${sku}`, data, {
-      headers: getHeaders()
-    });
+    const response = await axios.patch<Product>(`/product/${sku}`, data);
     return response.data;
   },
 
   async deleteProduct(id: number): Promise<void> {
-    await axios.delete(`${API_URL}/product/${id}`, {
-      headers: getHeaders()
-    });
+    await axios.delete(`/product/${id}`);
   },
 
   async deleteProductImages(sku: string, ids: number[]): Promise<void> {
-    await axios.delete(`${API_URL}/product/images/${sku}`, {
-      headers: getHeaders(),
+    await axios.delete(`/product/images/${sku}`, {
       params: { ids: ids.join(',') },
     });
   },
@@ -55,9 +46,8 @@ export const productsApi = {
       formData.append('images', file);
     });
 
-    await axios.post(`${API_URL}/product/images`, formData, {
+    await axios.post('/product/images', formData, {
       headers: {
-        ...getHeaders(),
         'Content-Type': 'multipart/form-data',
       },
     });
@@ -69,30 +59,25 @@ export const productsApi = {
       formData.append('images', file);
     });
 
-    await axios.put(`${API_URL}/product/images/${sku}`, formData, {
+    await axios.put(`/product/images/${sku}`, formData, {
       headers: {
-        ...getHeaders(),
         'Content-Type': 'multipart/form-data',
       },
     });
   },
 
   async generateDescription(title: string): Promise<string> {
-    const response = await axios.post<string>(`${API_URL}/product/generate/description`, {
+    const response = await axios.post<string>('/product/generate/description', {
       title
-    }, {
-      headers: getHeaders()
     });
 
     return response.data;
   },
 
   async generateKeywords(title: string, category: string): Promise<string[]> {
-    const response = await axios.post<string[]>(`${API_URL}/product/generate/keywords`, {
+    const response = await axios.post<string[]>('/product/generate/keywords', {
       title,
       category
-    }, {
-      headers: getHeaders()
     });
 
     return response.data;

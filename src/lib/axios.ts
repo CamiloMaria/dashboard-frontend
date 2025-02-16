@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { ROUTES } from '@/constants/routes';
-import { removeAuthToken } from '@/lib/auth';
+import { getAuthToken, removeAuthToken } from '@/lib/auth';
+import { config } from '@/config/env';
 
 // Create axios instance
-const axiosInstance = axios.create();
+const axiosInstance = axios.create({
+    baseURL: config.apiUrl,
+    headers: {
+        Authorization: `Bearer ${getAuthToken()}`
+    }
+});
 
 // Add response interceptor
 axiosInstance.interceptors.response.use(
