@@ -1,6 +1,5 @@
 import axios from '@/lib/axios';
 import { GetOrdersParams, OrdersResponse } from '@/types/order';
-import { API_URL, getHeaders } from './config';
 
 export const ordersApi = {
   async getOrders({ 
@@ -11,8 +10,7 @@ export const ordersApi = {
     sortBy,
     store
   }: GetOrdersParams): Promise<OrdersResponse> {
-    const response = await axios.get<OrdersResponse>(`${API_URL}/order`, {
-      headers: getHeaders(),
+    const response = await axios.get<OrdersResponse>('/order', {
       params: {
         page,
         size,

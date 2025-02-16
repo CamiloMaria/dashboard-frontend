@@ -1,26 +1,28 @@
+const BASE_PATH = '/dashboard-v2';
+
 export const ROUTES = {
     AUTH: {
-        LOGIN: '/login',
-        FORGOT_PASSWORD: '/forgot-password',
-        RESET_PASSWORD: '/reset-password',
+        LOGIN: `${BASE_PATH}/login`,
+        FORGOT_PASSWORD: `${BASE_PATH}/forgot-password`,
+        RESET_PASSWORD: `${BASE_PATH}/reset-password`,
     },
-    DASHBOARD: '/',
+    DASHBOARD: `${BASE_PATH}/`,
     INVENTORY: {
-        ROOT: '/inventory',
+        ROOT: `${BASE_PATH}/inventory`,
         PRODUCTS: {
-            LIST: '/products',
-            NEW: '/products/new',
-            EDITOR: '/product/$productId',
+            LIST: `${BASE_PATH}/products`,
+            NEW: `${BASE_PATH}/products/new`,
+            EDITOR: `${BASE_PATH}/product/$productId`,
         },
-        PROMOTIONS: '/promotions',
+        PROMOTIONS: `${BASE_PATH}/promotions`,
         // CATEGORIES: '/categories',
         PRODUCT_SETS: {
-            LIST: '/product-sets',
-            NEW: '/product-sets/new',
+            LIST: `${BASE_PATH}/product-sets`,
+            NEW: `${BASE_PATH}/product-sets/new`,
         }
     },
-    ORDERS: '/orders',
+    ORDERS: `${BASE_PATH}/orders`,
     // CLIENTS: '/clients',
-    PERMISSIONS: '/permissions',
-    LOGS: '/logs',
+    PERMISSIONS: `${BASE_PATH}/permissions`,
+    LOGS: `${BASE_PATH}/logs`,
 } as const; 

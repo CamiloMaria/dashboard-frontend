@@ -1,5 +1,4 @@
 import axios from '@/lib/axios';
-import { API_URL, getHeaders } from './config';
 
 interface User {
     id: string;
@@ -25,22 +24,19 @@ interface PaginatedResponse<T> {
 
 export const permissionsApi = {
     saveUserPermissions: async (user: User): Promise<void> => {
-        await axios.post(`${API_URL}/auth/user/permissions`, {
+        await axios.post('/auth/user/permissions', {
             username: user.username,
             allowedPages: user.allowedPages
-        }, {
-            headers: getHeaders(),
         });
     },
 
     getUserPermissions: async (username: string): Promise<User> => {
-        const response = await axios.get<User>(`${API_URL}/permissions/users/${username}`);
+        const response = await axios.get<User>(`/permissions/users/${username}`);
         return response.data;
     },
 
     getAllUsers: async ({ page, limit, search, order, sortBy }: GetUsersParams): Promise<PaginatedResponse<User>> => {
-        const response = await axios.get<PaginatedResponse<User>>(`${API_URL}/auth/user/all`, {
-            headers: getHeaders(),
+        const response = await axios.get<PaginatedResponse<User>>('/auth/user/all', {
             params: {
                 page,
                 size: limit,
