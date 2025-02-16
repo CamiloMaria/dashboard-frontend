@@ -108,7 +108,7 @@ export const en = {
           unit: 'Unit',
           category: 'Category',
           bigItem: 'Big Item',
-          withoutStock: 'Without Stock',
+          withoutStock: 'Sell without Stock',
           department: 'Department',
           group: 'Group'
         },

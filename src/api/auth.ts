@@ -17,5 +17,5 @@ export const authApi = {
             payload
         );
         return response.data;
-    },
+    }
 }; 

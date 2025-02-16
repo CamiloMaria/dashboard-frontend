@@ -200,11 +200,11 @@ export function ImageEditor({
                 )}
             </div>
 
-            <div className="flex items-center gap-2 mt-5 px-4 py-2 bg-background/90 backdrop-blur-sm rounded-lg border">
+            <div className="flex items-center gap-1 mt-5 px-3 py-2 bg-background/90 backdrop-blur-sm rounded-lg border">
                 <Button
                     variant="default"
                     size="sm"
-                    className="gap-2 px-4"
+                    className="gap-2 px-3"
                     onClick={handleAddClick}
                     type="button"
                 >
@@ -217,7 +217,7 @@ export function ImageEditor({
                 <Button
                     variant="destructive"
                     size="sm"
-                    className="gap-2 px-4"
+                    className="gap-2 px-3"
                     onClick={() => onImageDelete(currentImageIndex)}
                     disabled={images.length === 0}
                     type="button"
@@ -233,7 +233,7 @@ export function ImageEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-9 w-9 p-0"
+                                className="h-8 w-8 p-0"
                                 onClick={() => onReorder('up')}
                                 disabled={currentImageIndex === images.length - 1}
                                 type="button"
@@ -244,7 +244,7 @@ export function ImageEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-9 w-9 p-0"
+                                className="h-8 w-8 p-0"
                                 onClick={() => onReorder('down')}
                                 disabled={currentImageIndex === 0}
                                 type="button"

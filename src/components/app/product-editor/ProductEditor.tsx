@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
   type Product,
@@ -37,8 +37,9 @@ import {
   ProductTabs,
 } from './';
 import { productsListRoute } from '@/routes/app/products-list';
-import { Package } from 'lucide-react';
+import { AlertCircle, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 interface ProductEditorProps {
   productId?: string;
 }
@@ -358,160 +359,177 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <LoadingOverlay
           isLoading={updateMutation.isPending}
           message={productId ? t('products.updating') : ''}
         />
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle>{t('products.basicInfo')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-6">
-              <ImageEditor
-                images={images}
-                currentImageIndex={currentImageIndex}
-                onImageUpload={handleImageUpload}
-                onImageDelete={handleImageDeleteClick}
-                onNavigate={navigateImage}
-                onReorder={reorderImage}
-                onImageDeleteConfirm={handleImageDeleteConfirm}
-                imageToDelete={imageToDelete}
-                onImageDeleteDialogChange={(open) => !open && setImageToDelete(null)}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="h-[600px] animate-pulse bg-muted rounded-lg" />
+          ) : (
+            <>
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex gap-8">
+                    <ImageEditor
+                      images={images}
+                      currentImageIndex={currentImageIndex}
+                      onImageUpload={handleImageUpload}
+                      onImageDelete={handleImageDeleteClick}
+                      onNavigate={navigateImage}
+                      onReorder={reorderImage}
+                      onImageDeleteConfirm={handleImageDeleteConfirm}
+                      imageToDelete={imageToDelete}
+                      onImageDeleteDialogChange={(open) => !open && setImageToDelete(null)}
+                    />
+
+                    <div className="flex-1 space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              {t('products.editor.form.productName')}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                className="h-10"
+                                placeholder={t('products.editor.form.productNamePlaceholder')}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="security_stock"
+                        render={({ field }) => (
+                          <FormItem className="rounded-lg border p-4 space-y-3 bg-muted/5">
+                            <div className="flex items-center gap-2">
+                              <Package className="h-4 w-4 text-primary" />
+                              <FormLabel className="font-medium m-0">
+                                {t('products.editor.form.securityStock.label')}
+                              </FormLabel>
+                            </div>
+                            <div className="flex items-start gap-6">
+                              <div className="flex-none w-[180px]">
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={e => field.onChange(Number(e.target.value))}
+                                    min={0}
+                                    className="h-9"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                  {t('products.editor.form.securityStock.description')}
+                                </p>
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <ProductInfoFields product={product} />
+
+                      <FormField
+                        control={form.control}
+                        name="isActive"
+                        render={({ field }) => {
+                          const disabledShopsComment = form.watch('disabledShopsComment');
+                          const disabledShops = form.watch('disabledShops');
+                          return (
+                            <FormItem className="rounded-lg border p-4 space-y-4 bg-muted/5">
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                  <FormLabel className="text-base">
+                                    {t('products.editor.form.activeStatus.label')}
+                                  </FormLabel>
+                                  <p className="text-sm text-muted-foreground">
+                                    {t('products.editor.form.activeStatus.description')}
+                                  </p>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={handleStatusChange}
+                                    className="data-[state=checked]:bg-green-600"
+                                  />
+                                </FormControl>
+                              </div>
+                              {(!field.value && disabledShopsComment) && (
+                                <div className="pt-4 border-t space-y-4">
+                                  <Alert variant="destructive" className="bg-destructive/5 text-destructive border-destructive/20">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="mt-1">
+                                      <span className="font-medium block">
+                                        {t('products.editor.form.activeStatus.disableReason')}
+                                      </span>
+                                      <span className="block mt-1">
+                                        {disabledShopsComment}
+                                      </span>
+                                    </AlertDescription>
+                                  </Alert>
+                                  {disabledShops?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <p className="text-sm font-medium text-muted-foreground">
+                                        {t('products.editor.form.activeStatus.disabledShops')}
+                                      </p>
+                                      <div className="flex flex-wrap gap-2">
+                                        {disabledShops.map((shop) => (
+                                          <span
+                                            key={shop}
+                                            className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-destructive border-destructive/20 bg-destructive/5"
+                                          >
+                                            {shop}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <ProductTabs
+                product={product}
+                title={form.watch('title')}
+                category={product?.category || ''}
+                specifications={specifications}
+                onSpecificationsChange={setSpecifications}
+                description={description}
+                onDescriptionChange={setDescription}
+                keywords={keywords}
+                onKeywordsChange={setKeywords}
               />
 
-              <div className="flex-1 space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('products.editor.form.productName')}</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <Separator className="my-8" />
 
-                <FormField
-                  control={form.control}
-                  name="security_stock"
-                  render={({ field }) => (
-                    <FormItem className="rounded-lg border p-4 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <FormLabel className="font-medium">
-                          {t('products.editor.form.securityStock.label')}
-                        </FormLabel>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              onChange={e => field.onChange(Number(e.target.value))}
-                              min={0}
-                              className="max-w-[180px]"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </div>
-                        <div className="flex-[2]">
-                          <p className="text-sm text-muted-foreground">
-                            {t('products.editor.form.securityStock.description')}
-                          </p>
-                        </div>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <ProductInfoFields product={product} />
-
-                <FormField
-                  control={form.control}
-                  name="isActive"
-                  render={({ field }) => {
-                    const disabledShopsComment = form.watch('disabledShopsComment');
-                    const disabledShops = form.watch('disabledShops');
-                    return (
-                      <FormItem className="flex flex-col rounded-lg border p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t('products.editor.form.activeStatus.label')}</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              {t('products.editor.form.activeStatus.description')}
-                            </p>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={handleStatusChange}
-                            />
-                          </FormControl>
-                        </div>
-                        {(!field.value && disabledShopsComment) && (
-                          <div className="mt-4 pt-4 border-t space-y-2">
-                            <div>
-                              <p className="text-sm font-medium text-muted-foreground">
-                                {t('products.editor.form.activeStatus.disableReason')}
-                              </p>
-                              <p className="text-sm font-medium text-red-600 mt-1">
-                                {disabledShopsComment}
-                              </p>
-                            </div>
-                            {disabledShops?.length > 0 && (
-                              <div>
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  {t('products.editor.form.activeStatus.disabledShops')}
-                                </p>
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                  {disabledShops.map((shop) => (
-                                    <span
-                                      key={shop}
-                                      className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-red-600 border-red-600/20 bg-red-600/10"
-                                    >
-                                      {shop}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </FormItem>
-                    );
-                  }}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <ProductTabs
-          product={product}
-          title={form.watch('title')}
-          category={product?.category || ''}
-          specifications={specifications}
-          onSpecificationsChange={setSpecifications}
-          description={description}
-          onDescriptionChange={setDescription}
-          keywords={keywords}
-          onKeywordsChange={setKeywords}
-        />
-
-        <Separator />
-
-        <ActionButtons
-          isLoading={isLoading}
-          isPending={updateMutation.isPending}
-          onCancel={() => navigate({ to: productsListRoute.fullPath })}
-        />
+              <ActionButtons
+                isLoading={isLoading}
+                isPending={updateMutation.isPending}
+                onCancel={() => navigate({ to: productsListRoute.fullPath })}
+              />
+            </>
+          )}
+        </div>
 
         <DisableReasonDialog
           open={showDisableDialog}

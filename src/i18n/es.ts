@@ -68,7 +68,7 @@ export const es = {
                 productName: 'Nombre del Producto',
                 securityStock: {
                     label: 'Stock de Seguridad',
-                    description: 'Establece el nivel mínimo de stock para las alertas de inventario. Cuando el stock cae por debajo de este umbral, el sistema mostrará advertencias de stock bajo.'
+                    description: 'Establece el nivel mínimo de stock para las alertas de inventario. Cuando el stock cae por debajo de este, el sistema mostrará advertencias de stock bajo y se desactivará el producto en las tiendas.'
                 },
                 activeStatus: {
                     label: 'Estado Activo',
@@ -108,7 +108,7 @@ export const es = {
                     unit: 'Unidad',
                     category: 'Categoría',
                     bigItem: 'Big Item',
-                    withoutStock: 'Sin Stock',
+                    withoutStock: 'Vender sin Stock',
                     department: 'Departamento',
                     group: 'Grupo'
                 },
