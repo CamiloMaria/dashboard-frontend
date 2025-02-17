@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES_WITHOUT_BASE } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import { permissionsApi } from "@/api/permissions";
 import { Search, Loader2, ChevronRight } from "lucide-react";
@@ -37,30 +37,30 @@ interface RouteConfig {
 
 const availableRoutes: RouteConfig[] = [
     {
-        path: ROUTES.INVENTORY.ROOT,
+        path: ROUTES_WITHOUT_BASE.INVENTORY.ROOT,
         label: 'Inventory',
         children: [
             {
-                path: ROUTES.INVENTORY.PRODUCTS.LIST,
+                path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.LIST,
                 label: 'Products',
                 children: [
-                    { path: ROUTES.INVENTORY.PRODUCTS.NEW, label: 'Create Products' },
-                    { path: ROUTES.INVENTORY.PRODUCTS.EDITOR, label: 'Edit Products' },
+                    { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.NEW, label: 'Create Products' },
+                    { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.EDITOR, label: 'Edit Products' },
                 ]
             },
-            { path: ROUTES.INVENTORY.PROMOTIONS, label: 'Promotions' },
+            { path: ROUTES_WITHOUT_BASE.INVENTORY.PROMOTIONS, label: 'Promotions' },
             {
-                path: ROUTES.INVENTORY.PRODUCT_SETS.LIST,
+                path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCT_SETS.LIST,
                 label: 'Product Sets',
                 children: [
-                    { path: ROUTES.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
+                    { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
                 ]
             },
         ]
     },
-    { path: ROUTES.ORDERS, label: 'Orders' },
-    { path: ROUTES.LOGS, label: 'Logs' },
-    { path: ROUTES.PERMISSIONS, label: 'Permissions' },
+    { path: ROUTES_WITHOUT_BASE.ORDERS, label: 'Orders' },
+    { path: ROUTES_WITHOUT_BASE.LOGS, label: 'Logs' },
+    { path: ROUTES_WITHOUT_BASE.PERMISSIONS, label: 'Permissions' },
 ];
 
 function getAllChildPaths(route: RouteConfig): string[] {
