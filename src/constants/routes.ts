@@ -1,4 +1,4 @@
-export const BASE_PATH = '/dashboard-v2';
+export const BASE_PATH = '';
 
 export const ROUTES = {
     AUTH: {
