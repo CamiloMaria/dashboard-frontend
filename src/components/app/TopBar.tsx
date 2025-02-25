@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, Globe, SunMoon, User } from 'lucide-react'
+import { Bell, ChevronDown, Globe, Menu, SunMoon, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -17,9 +17,10 @@ import { cn } from '@/lib/utils'
 
 interface TopBarProps {
     isSidebarOpen: boolean
+    onToggleSidebar: () => void
 }
 
-export function TopBar({ isSidebarOpen }: TopBarProps) {
+export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
     const { theme, setTheme } = useTheme();
     const { t, i18n } = useTranslation();
     const isMobile = useMediaQuery('(max-width: 640px)');
@@ -41,18 +42,17 @@ export function TopBar({ isSidebarOpen }: TopBarProps) {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-16 items-center px-4 md:container">
                 {/* Menu toggle button - only visible on mobile/tablet or when sidebar is closed */}
-                {/* <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                        "mr-2 flex-shrink-0",
-                        isSidebarOpen && !isMobile && !isTablet && "invisible"
-                    )}
-                    onClick={onToggleSidebar}
-                    aria-label="Toggle sidebar"
-                >
-                    <Menu className="h-5 w-5" />
-                </Button> */}
+                {(isMobile || isTablet) && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="mr-2 flex-shrink-0"
+                        onClick={onToggleSidebar}
+                        aria-label="Toggle sidebar"
+                    >
+                        <Menu className="h-5 w-5" />
+                    </Button>
+                )}
 
                 {/* Logo container with flex layout for better positioning */}
                 <div className={cn(

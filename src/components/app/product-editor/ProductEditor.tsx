@@ -38,14 +38,18 @@ import {
 } from './';
 import { productsListRoute } from '@/routes/app/products-list';
 import { AlertCircle, Package } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@/hooks/use-media-query';
+
 interface ProductEditorProps {
   productId?: string;
 }
 
 export function ProductEditor({ productId }: ProductEditorProps) {
   const { t } = useTranslation();
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isTablet = useMediaQuery('(max-width: 1024px)');
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [images, setImages] = useState<Image[]>([]);
@@ -371,8 +375,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           ) : (
             <>
               <Card className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex gap-8">
+                <CardContent className="p-4 sm:p-6">
+                  <div className={`flex flex-col ${!isMobile ? 'lg:flex-row' : ''} gap-6 lg:gap-8`}>
                     <ImageEditor
                       images={images}
                       currentImageIndex={currentImageIndex}
@@ -383,9 +387,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                       onImageDeleteConfirm={handleImageDeleteConfirm}
                       imageToDelete={imageToDelete}
                       onImageDeleteDialogChange={(open) => !open && setImageToDelete(null)}
+                      isMobile={isMobile}
+                      isTablet={isTablet}
                     />
 
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1 space-y-4 sm:space-y-6">
                       <FormField
                         control={form.control}
                         name="title"
@@ -410,15 +416,15 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         control={form.control}
                         name="security_stock"
                         render={({ field }) => (
-                          <FormItem className="rounded-lg border p-4 space-y-3 bg-muted/5">
+                          <FormItem className="rounded-lg border p-3 sm:p-4 space-y-2 sm:space-y-3 bg-muted/5">
                             <div className="flex items-center gap-2">
                               <Package className="h-4 w-4 text-primary" />
                               <FormLabel className="font-medium m-0">
                                 {t('products.editor.form.securityStock.label')}
                               </FormLabel>
                             </div>
-                            <div className="flex items-start gap-6">
-                              <div className="flex-none w-[180px]">
+                            <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-6">
+                              <div className="w-full sm:w-[180px] sm:flex-none">
                                 <FormControl>
                                   <Input
                                     type="number"
@@ -440,7 +446,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         )}
                       />
 
-                      <ProductInfoFields product={product} />
+                      <ProductInfoFields
+                        product={product}
+                        isMobile={isMobile}
+                      />
 
                       <FormField
                         control={form.control}
@@ -449,7 +458,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                           const disabledShopsComment = form.watch('disabledShopsComment');
                           const disabledShops = form.watch('disabledShops');
                           return (
-                            <FormItem className="rounded-lg border p-4 space-y-4 bg-muted/5">
+                            <FormItem className="rounded-lg border p-3 sm:p-4 space-y-3 sm:space-y-4 bg-muted/5">
                               <div className="flex items-center justify-between">
                                 <div className="space-y-1">
                                   <FormLabel className="text-base">
@@ -468,7 +477,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                                 </FormControl>
                               </div>
                               {(!field.value && disabledShopsComment) && (
-                                <div className="pt-4 border-t space-y-4">
+                                <div className="pt-3 sm:pt-4 border-t space-y-3 sm:space-y-4">
                                   <Alert variant="destructive" className="bg-destructive/5 text-destructive border-destructive/20">
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertDescription className="mt-1">
@@ -518,9 +527,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 onDescriptionChange={setDescription}
                 keywords={keywords}
                 onKeywordsChange={setKeywords}
+                isMobile={isMobile}
+                isTablet={isTablet}
               />
 
-              <Separator className="my-8" />
+              <Separator className="my-6 sm:my-8" />
 
               <ActionButtons
                 isLoading={isLoading}

@@ -16,6 +16,7 @@ import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
 import { useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 export interface ImageEditorProps {
     images: Image[];
@@ -27,6 +28,8 @@ export interface ImageEditorProps {
     onImageDeleteConfirm: () => void;
     imageToDelete: number | null;
     onImageDeleteDialogChange: (open: boolean) => void;
+    isMobile?: boolean;
+    isTablet?: boolean;
 }
 
 export function ImageEditor({
@@ -39,6 +42,8 @@ export function ImageEditor({
     onImageDeleteConfirm,
     imageToDelete,
     onImageDeleteDialogChange,
+    isMobile,
+    isTablet,
 }: ImageEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
@@ -113,7 +118,10 @@ export function ImageEditor({
     };
 
     return (
-        <div className="relative w-[400px]">
+        <div className={cn(
+            "relative w-full",
+            isMobile ? "max-w-full" : isTablet ? "max-w-[350px] mx-auto" : "lg:w-[400px]"
+        )}>
             <input
                 type="file"
                 ref={fileInputRef}
@@ -157,14 +165,14 @@ export function ImageEditor({
                     </>
                 ) : (
                     <div
-                        className="w-full h-full flex flex-col items-center justify-center gap-4 hover:bg-muted/80 transition-colors"
+                        className="w-full h-full flex flex-col items-center justify-center gap-4 hover:bg-muted/80 transition-colors p-4"
                         onClick={handleAddClick}
                     >
-                        <Upload className="h-12 w-12 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
+                        <Upload className="h-8 sm:h-12 w-8 sm:w-12 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground text-center">
                             {t('products.editor.form.images.uploadHint')}
                         </p>
-                        <p className="text-xs text-muted-foreground/70">
+                        <p className="text-xs text-muted-foreground/70 text-center">
                             {t('products.editor.form.images.uploadRequirements')}
                         </p>
                     </div>
@@ -175,7 +183,7 @@ export function ImageEditor({
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="absolute left-2 top-1/2 -translate-y-1/2"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onNavigate('prev');
@@ -187,7 +195,7 @@ export function ImageEditor({
                         <Button
                             variant="secondary"
                             size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onNavigate('next');
@@ -200,57 +208,57 @@ export function ImageEditor({
                 )}
             </div>
 
-            <div className="flex items-center gap-1 mt-5 px-3 py-2 bg-background/90 backdrop-blur-sm rounded-lg border">
+            <div className="flex flex-wrap items-center gap-1 mt-3 sm:mt-5 px-2 py-2 sm:px-3 sm:py-2 bg-background/90 backdrop-blur-sm rounded-lg border">
                 <Button
                     variant="default"
                     size="sm"
-                    className="gap-2 px-3"
+                    className="gap-1 sm:gap-2 px-2 sm:px-3 h-8 text-xs sm:text-sm"
                     onClick={handleAddClick}
                     type="button"
                 >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>{t('products.editor.form.images.addImage')}</span>
                 </Button>
 
-                <Separator orientation="vertical" className="h-6 mx-1" />
+                <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block" />
 
                 <Button
                     variant="destructive"
                     size="sm"
-                    className="gap-2 px-3"
+                    className="gap-1 sm:gap-2 px-2 sm:px-3 h-8 text-xs sm:text-sm"
                     onClick={() => onImageDelete(currentImageIndex)}
                     disabled={images.length === 0}
                     type="button"
                 >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>{t('products.editor.form.images.deleteImage')}</span>
                 </Button>
 
                 {images.length > 1 && (
                     <>
-                        <Separator orientation="vertical" className="h-6 mx-1" />
-                        <div className="flex gap-1">
+                        <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block" />
+                        <div className="flex gap-1 ml-auto sm:ml-0">
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 w-8 p-0"
+                                className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                 onClick={() => onReorder('up')}
                                 disabled={currentImageIndex === images.length - 1}
                                 type="button"
                                 aria-label={t('products.editor.form.images.moveUp')}
                             >
-                                <ChevronUp className="h-4 w-4" />
+                                <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 w-8 p-0"
+                                className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                                 onClick={() => onReorder('down')}
                                 disabled={currentImageIndex === 0}
                                 type="button"
                                 aria-label={t('products.editor.form.images.moveDown')}
                             >
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                         </div>
                     </>
