@@ -25,7 +25,7 @@ export function AppLayout() {
                 'flex flex-col transition-all duration-300 min-h-screen',
                 sidebarOpen ? 'lg:ml-64' : 'lg:ml-20 lg:mr-8'
             )}>
-                <TopBar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} isSidebarOpen={sidebarOpen} />
+                <TopBar isSidebarOpen={sidebarOpen} />
 
                 <main className="flex-1">
                     <div className={cn(

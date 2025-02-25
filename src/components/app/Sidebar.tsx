@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Package,
@@ -11,6 +11,7 @@ import {
     LucideIcon,
     Shield,
     ScrollText,
+    X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ import type { Route } from '@tanstack/react-router';
 import { ROUTES, BASE_PATH } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface NavRoute {
     path: string;
@@ -203,6 +205,30 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const routerState = useRouterState();
     const currentPath = routerState.location.pathname;
     const { hasAccess } = useAuth();
+    const isMobile = useMediaQuery('(max-width: 640px)');
+    const isTablet = useMediaQuery('(max-width: 1224px)');
+    const [showMobileOverlay, setShowMobileOverlay] = useState(false);
+
+    // Handle mobile sidebar visibility
+    useEffect(() => {
+        if (isMobile || isTablet) {
+            setShowMobileOverlay(isOpen);
+
+            // Prevent body scroll when sidebar is open on mobile
+            if (isOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        } else {
+            setShowMobileOverlay(false);
+            document.body.style.overflow = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, isMobile, isTablet]);
 
     const isRouteActive = (path: string) => {
         if (path === BASE_PATH) {
@@ -213,8 +239,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
     const handleNavigate = (path: string) => {
         navigate({ to: path as Route['path'] });
+        // Close sidebar on navigation for mobile and tablet
+        if (isMobile || isTablet) {
+            onToggle();
+        }
     };
-
 
     const filteredNavigation = navigationConfig.filter(item => {
         if (!hasAccess(item.path)) return false;
@@ -225,66 +254,94 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         return true;
     });
 
+    // Determine sidebar width based on screen size
+    const sidebarWidth = isTablet && !isMobile ? 'w-56' : 'w-64';
+    const collapsedWidth = isTablet && !isMobile ? 'w-16' : 'w-20';
+
     return (
-        <aside
-            className={cn(
-                'fixed left-0 top-0 z-40 h-screen border-r bg-backgroundSecondary transition-all duration-300',
-                isOpen ? 'w-64' : 'w-20'
-            )}
-        >
-            <div className="flex h-16 items-center justify-between px-4 border-b">
-                {isOpen && (
-                    <img
-                        src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
-                        alt="Plaza Lama"
-                        className="h-8 object-contain"
-                    />
-                )}
-                <Button
-                    variant="ghost"
-                    size="icon"
+        <>
+            {/* Mobile overlay */}
+            {showMobileOverlay && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30 md:hidden"
                     onClick={onToggle}
-                    className={cn('h-9 w-9', !isOpen && 'mx-auto', 'text-white')}
-                >
-                    <Menu className="h-4 w-4" />
-                </Button>
-            </div>
+                    aria-hidden="true"
+                />
+            )}
 
-            <ScrollArea className="h-[calc(100vh-4rem)] px-3 py-4">
-                <div className="space-y-2">
-                    {filteredNavigation.map((item) => (
-                        <NavItem
-                            key={item.path}
-                            icon={<item.icon className="h-4 w-4 text-white" />}
-                            label={item.label}
-                            isActive={isRouteActive(item.path)}
-                            isCollapsed={!isOpen}
-                            onClick={item.children ? undefined : () => handleNavigate(item.path)}
-                            children={
-                                item.children?.map((child) => ({
-                                    icon: <child.icon className="h-4 w-4 text-white" />,
-                                    label: child.label,
-                                    onClick: () => handleNavigate(child.path),
-                                    isActive: isRouteActive(child.path),
-                                }))
-                            }
-                        />
-                    ))}
-                </div>
-            </ScrollArea>
-
-            {/* Logo at bottom */}
-            <div className="absolute bottom-4 left-0 right-0 px-4">
-                {isOpen ? (
-                    <img
-                        src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
-                        alt="Plaza Lama"
-                        className="h-6 object-contain mx-auto"
-                    />
-                ) : (
-                    <Box className="h-4 w-4 mx-auto text-white" />
+            <aside
+                className={cn(
+                    'fixed left-0 top-0 z-40 h-screen border-r bg-backgroundSecondary transition-all duration-300',
+                    isOpen ? sidebarWidth : `w-0 md:${collapsedWidth}`,
+                    (isMobile || isTablet) && !isOpen && 'translate-x-[-100%]',
+                    (isMobile || isTablet) && isOpen && 'translate-x-0'
                 )}
-            </div>
-        </aside>
+            >
+                <div className="flex h-16 items-center justify-between px-4 border-b">
+                    {isOpen && (
+                        <img
+                            src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
+                            alt="Plaza Lama"
+                            className={cn(
+                                "object-contain",
+                                isTablet ? "h-6 max-w-[140px]" : "h-8 max-w-[180px]"
+                            )}
+                        />
+                    )}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onToggle}
+                        className={cn('h-9 w-9', !isOpen && 'mx-auto', 'text-white')}
+                        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+                    >
+                        {isOpen ? (
+                            <X className="h-4 w-4" />
+                        ) : (
+                            <Menu className="h-4 w-4" />
+                        )}
+                    </Button>
+                </div>
+
+                <ScrollArea className="h-[calc(100vh-4rem)] px-3 py-4">
+                    <div className="space-y-2">
+                        {filteredNavigation.map((item) => (
+                            <NavItem
+                                key={item.path}
+                                icon={<item.icon className="h-4 w-4 text-white" />}
+                                label={item.label}
+                                isActive={isRouteActive(item.path)}
+                                isCollapsed={!isOpen}
+                                onClick={item.children ? undefined : () => handleNavigate(item.path)}
+                                children={
+                                    item.children?.map((child) => ({
+                                        icon: <child.icon className="h-4 w-4 text-white" />,
+                                        label: child.label,
+                                        onClick: () => handleNavigate(child.path),
+                                        isActive: isRouteActive(child.path),
+                                    }))
+                                }
+                            />
+                        ))}
+                    </div>
+                </ScrollArea>
+
+                {/* Logo at bottom */}
+                <div className="absolute bottom-4 left-0 right-0 px-4">
+                    {isOpen ? (
+                        <img
+                            src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
+                            alt="Plaza Lama"
+                            className={cn(
+                                "object-contain mx-auto",
+                                isTablet ? "h-5 max-w-[120px]" : "h-6 max-w-[160px]"
+                            )}
+                        />
+                    ) : (
+                        <Box className="h-4 w-4 mx-auto text-white" />
+                    )}
+                </div>
+            </aside>
+        </>
     );
 }
