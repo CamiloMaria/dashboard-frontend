@@ -1,4 +1,4 @@
-import { useState, useCallback, useTransition } from 'react';
+import { useState, useCallback, useTransition, useEffect } from 'react';
 import {
   Loader2,
   Search,
@@ -11,6 +11,8 @@ import {
   SlidersHorizontal,
   ChevronUp,
   ChevronDown,
+  LayoutList,
+  LayoutGrid,
 } from 'lucide-react';
 import {
   Table,
@@ -48,6 +50,7 @@ import { productsNewRoute } from '@/routes/app/products-new';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 export function ProductsTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,6 +66,20 @@ export function ProductsTable() {
     direction: 'desc' as 'asc' | 'desc',
   });
   const [, startTransition] = useTransition();
+
+  // Responsive state
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 900px)');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+
+  // Set view mode based on screen size
+  useEffect(() => {
+    if (isMobile || isMediumScreen) {
+      setViewMode('grid');
+    } else {
+      setViewMode('table');
+    }
+  }, [isMobile, isMediumScreen]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -248,10 +265,10 @@ export function ProductsTable() {
 
   return (
     <Card className="relative overflow-hidden">
-      <div className="p-6 border-b bg-gradient-to-b from-background to-muted/10">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex-1 w-full sm:w-auto">
+      <div className="p-4 sm:p-6 border-b bg-gradient-to-b from-background to-muted/10">
+        <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-4 items-start justify-between">
+            <div className="flex-1 w-full">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -263,77 +280,100 @@ export function ProductsTable() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-3 self-end sm:self-auto">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-11 w-11 relative">
-                    <Filter className="h-4 w-4" />
-                    {activeFiltersCount > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                      >
-                        {activeFiltersCount}
-                      </Badge>
-                    )}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="flex items-center gap-2">
+                {!isMobile && (
+                  <Button
+                    variant={viewMode === 'table' ? 'default' : 'outline'}
+                    size="icon"
+                    className="h-10 w-10"
+                    onClick={() => setViewMode('table')}
+                  >
+                    <LayoutList className="h-4 w-4" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <SlidersHorizontal className="h-4 w-4" />
-                      {t('products.list.filters.title')}
-                    </span>
-                    {activeFiltersCount > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-xs"
-                        onClick={clearFilters}
-                      >
-                        {t('products.list.filters.clear')}
-                      </Button>
-                    )}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    {t('products.list.filters.status')}
-                  </DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    checked={filters.status.includes('active')}
-                    onCheckedChange={() => toggleFilter('status', 'active')}
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                    {t('products.list.filters.active')}
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={filters.status.includes('inactive')}
-                    onCheckedChange={() => toggleFilter('status', 'inactive')}
-                  >
-                    <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                    {t('products.list.filters.inactive')}
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                    {t('products.list.filters.type')}
-                  </DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    checked={filters.bigItem === true}
-                    onCheckedChange={() => toggleFilter('bigItem', true)}
-                  >
-                    <Package className="mr-2 h-4 w-4 text-blue-500" />
-                    {t('products.list.filters.bigItems')}
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                )}
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
 
-              <Button
-                className="h-11 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                onClick={() => navigate({ to: productsNewRoute.fullPath })}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('products.list.addProduct')}</span>
-              </Button>
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-10 w-10 relative">
+                      <Filter className="h-4 w-4" />
+                      {activeFiltersCount > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                        >
+                          {activeFiltersCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <SlidersHorizontal className="h-4 w-4" />
+                        {t('products.list.filters.title')}
+                      </span>
+                      {activeFiltersCount > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-xs"
+                          onClick={clearFilters}
+                        >
+                          {t('products.list.filters.clear')}
+                        </Button>
+                      )}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                      {t('products.list.filters.status')}
+                    </DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={filters.status.includes('active')}
+                      onCheckedChange={() => toggleFilter('status', 'active')}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                      {t('products.list.filters.active')}
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={filters.status.includes('inactive')}
+                      onCheckedChange={() => toggleFilter('status', 'inactive')}
+                    >
+                      <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                      {t('products.list.filters.inactive')}
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                      {t('products.list.filters.type')}
+                    </DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={filters.bigItem === true}
+                      onCheckedChange={() => toggleFilter('bigItem', true)}
+                    >
+                      <Package className="mr-2 h-4 w-4 text-blue-500" />
+                      {t('products.list.filters.bigItems')}
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button
+                  className="h-10 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  onClick={() => navigate({ to: productsNewRoute.fullPath })}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('products.list.addProduct')}</span>
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -383,138 +423,154 @@ export function ProductsTable() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/60 transition-colors">
-                <TableHead className="w-[100px] py-4">
-                  {t('products.list.columns.thumbnail')}
-                </TableHead>
-                <TableHead
-                  onClick={() => toggleSort('sku')}
-                  className={cn(
-                    "cursor-pointer select-none whitespace-nowrap",
-                    sortConfig.field === 'sku' && "text-primary"
-                  )}
-                >
-                  <div className="flex items-center gap-1">
-                    {t('products.list.columns.sku')}
-                    <div className="flex flex-col ml-1">
-                      <ChevronUp className={cn(
-                        "h-3 w-3 text-muted-foreground/40",
-                        sortConfig.field === 'sku' && sortConfig.direction === 'asc' && "text-primary"
-                      )} />
-                      <ChevronDown className={cn(
-                        "h-3 w-3 text-muted-foreground/40 -mt-1",
-                        sortConfig.field === 'sku' && sortConfig.direction === 'desc' && "text-primary"
-                      )} />
+        {viewMode === 'table' ? (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/60 transition-colors">
+                  <TableHead className="w-[100px] py-4 hidden sm:table-cell">
+                    {t('products.list.columns.thumbnail')}
+                  </TableHead>
+                  <TableHead
+                    onClick={() => toggleSort('sku')}
+                    className={cn(
+                      "cursor-pointer select-none whitespace-nowrap hidden md:table-cell",
+                      sortConfig.field === 'sku' && "text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('products.list.columns.sku')}
+                      <div className="flex flex-col ml-1">
+                        <ChevronUp className={cn(
+                          "h-3 w-3 text-muted-foreground/40",
+                          sortConfig.field === 'sku' && sortConfig.direction === 'asc' && "text-primary"
+                        )} />
+                        <ChevronDown className={cn(
+                          "h-3 w-3 text-muted-foreground/40 -mt-1",
+                          sortConfig.field === 'sku' && sortConfig.direction === 'desc' && "text-primary"
+                        )} />
+                      </div>
                     </div>
-                  </div>
-                </TableHead>
-                <TableHead
-                  onClick={() => toggleSort('title')}
-                  className={cn(
-                    "cursor-pointer select-none whitespace-nowrap",
-                    sortConfig.field === 'title' && "text-primary"
-                  )}
-                >
-                  <div className="flex items-center gap-1">
-                    {t('products.list.columns.title')}
-                    <div className="flex flex-col ml-1">
-                      <ChevronUp className={cn(
-                        "h-3 w-3 text-muted-foreground/40",
-                        sortConfig.field === 'title' && sortConfig.direction === 'asc' && "text-primary"
-                      )} />
-                      <ChevronDown className={cn(
-                        "h-3 w-3 text-muted-foreground/40 -mt-1",
-                        sortConfig.field === 'title' && sortConfig.direction === 'desc' && "text-primary"
-                      )} />
+                  </TableHead>
+                  <TableHead
+                    onClick={() => toggleSort('title')}
+                    className={cn(
+                      "cursor-pointer select-none whitespace-nowrap",
+                      sortConfig.field === 'title' && "text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('products.list.columns.title')}
+                      <div className="flex flex-col ml-1">
+                        <ChevronUp className={cn(
+                          "h-3 w-3 text-muted-foreground/40",
+                          sortConfig.field === 'title' && sortConfig.direction === 'asc' && "text-primary"
+                        )} />
+                        <ChevronDown className={cn(
+                          "h-3 w-3 text-muted-foreground/40 -mt-1",
+                          sortConfig.field === 'title' && sortConfig.direction === 'desc' && "text-primary"
+                        )} />
+                      </div>
                     </div>
-                  </div>
-                </TableHead>
-                <TableHead
-                  onClick={() => toggleSort('matnr')}
-                  className={cn(
-                    "cursor-pointer select-none whitespace-nowrap",
-                    sortConfig.field === 'matnr' && "text-primary"
-                  )}
-                >
-                  <div className="flex items-center gap-1">
-                    {t('products.list.columns.material')}
-                    <div className="flex flex-col ml-1">
-                      <ChevronUp className={cn(
-                        "h-3 w-3 text-muted-foreground/40",
-                        sortConfig.field === 'matnr' && sortConfig.direction === 'asc' && "text-primary"
-                      )} />
-                      <ChevronDown className={cn(
-                        "h-3 w-3 text-muted-foreground/40 -mt-1",
-                        sortConfig.field === 'matnr' && sortConfig.direction === 'desc' && "text-primary"
-                      )} />
+                  </TableHead>
+                  <TableHead
+                    onClick={() => toggleSort('matnr')}
+                    className={cn(
+                      "cursor-pointer select-none whitespace-nowrap hidden lg:table-cell",
+                      sortConfig.field === 'matnr' && "text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('products.list.columns.material')}
+                      <div className="flex flex-col ml-1">
+                        <ChevronUp className={cn(
+                          "h-3 w-3 text-muted-foreground/40",
+                          sortConfig.field === 'matnr' && sortConfig.direction === 'asc' && "text-primary"
+                        )} />
+                        <ChevronDown className={cn(
+                          "h-3 w-3 text-muted-foreground/40 -mt-1",
+                          sortConfig.field === 'matnr' && sortConfig.direction === 'desc' && "text-primary"
+                        )} />
+                      </div>
                     </div>
-                  </div>
-                </TableHead>
-                <TableHead className="whitespace-nowrap">
-                  {t('products.list.columns.bigItem')}
-                </TableHead>
-                <TableHead
-                  onClick={() => toggleSort('borrado')}
-                  className={cn(
-                    "cursor-pointer select-none whitespace-nowrap",
-                    sortConfig.field === 'borrado' && "text-primary"
-                  )}
-                >
-                  <div className="flex items-center gap-1">
-                    {t('products.list.columns.status')}
-                    <div className="flex flex-col ml-1">
-                      <ChevronUp className={cn(
-                        "h-3 w-3 text-muted-foreground/40",
-                        sortConfig.field === 'borrado' && sortConfig.direction === 'asc' && "text-primary"
-                      )} />
-                      <ChevronDown className={cn(
-                        "h-3 w-3 text-muted-foreground/40 -mt-1",
-                        sortConfig.field === 'borrado' && sortConfig.direction === 'desc' && "text-primary"
-                      )} />
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap hidden md:table-cell">
+                    {t('products.list.columns.bigItem')}
+                  </TableHead>
+                  <TableHead
+                    onClick={() => toggleSort('borrado')}
+                    className={cn(
+                      "cursor-pointer select-none whitespace-nowrap",
+                      sortConfig.field === 'borrado' && "text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('products.list.columns.status')}
+                      <div className="flex flex-col ml-1">
+                        <ChevronUp className={cn(
+                          "h-3 w-3 text-muted-foreground/40",
+                          sortConfig.field === 'borrado' && sortConfig.direction === 'asc' && "text-primary"
+                        )} />
+                        <ChevronDown className={cn(
+                          "h-3 w-3 text-muted-foreground/40 -mt-1",
+                          sortConfig.field === 'borrado' && sortConfig.direction === 'desc' && "text-primary"
+                        )} />
+                      </div>
                     </div>
-                  </div>
-                </TableHead>
-                <TableHead
-                  onClick={() => toggleSort('update_at')}
-                  className={cn(
-                    "cursor-pointer select-none whitespace-nowrap",
-                    sortConfig.field === 'update_at' && "text-primary"
-                  )}
-                >
-                  <div className="flex items-center gap-1">
-                    {t('products.list.columns.date')}
-                    <div className="flex flex-col ml-1">
-                      <ChevronUp className={cn(
-                        "h-3 w-3 text-muted-foreground/40",
-                        sortConfig.field === 'update_at' && sortConfig.direction === 'asc' && "text-primary"
-                      )} />
-                      <ChevronDown className={cn(
-                        "h-3 w-3 text-muted-foreground/40 -mt-1",
-                        sortConfig.field === 'update_at' && sortConfig.direction === 'desc' && "text-primary"
-                      )} />
+                  </TableHead>
+                  <TableHead
+                    onClick={() => toggleSort('update_at')}
+                    className={cn(
+                      "cursor-pointer select-none whitespace-nowrap hidden md:table-cell",
+                      sortConfig.field === 'update_at' && "text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      {t('products.list.columns.date')}
+                      <div className="flex flex-col ml-1">
+                        <ChevronUp className={cn(
+                          "h-3 w-3 text-muted-foreground/40",
+                          sortConfig.field === 'update_at' && sortConfig.direction === 'asc' && "text-primary"
+                        )} />
+                        <ChevronDown className={cn(
+                          "h-3 w-3 text-muted-foreground/40 -mt-1",
+                          sortConfig.field === 'update_at' && sortConfig.direction === 'desc' && "text-primary"
+                        )} />
+                      </div>
                     </div>
-                  </div>
-                </TableHead>
-                <TableHead className="text-right whitespace-nowrap">
-                  {t('products.list.columns.actions')}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                  </TableHead>
+                  <TableHead className="text-right whitespace-nowrap w-[80px]">
+                    {t('products.list.columns.actions')}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <ProductRow
+                    key={product.id}
+                    product={product}
+                    onEdit={handleEditProduct}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-4">
               {products.map((product) => (
                 <ProductRow
                   key={product.id}
                   product={product}
                   onEdit={handleEditProduct}
                   onDelete={handleDeleteClick}
+                  isMobileView={true}
                 />
               ))}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+          </div>
+        )}
 
         <ConfirmationDialog
           open={!!productToDelete}
