@@ -9,6 +9,8 @@ import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
 import { useTranslation } from 'react-i18next';
 import { productsApi } from '@/api/products';
 import { AxiosError } from 'axios';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 
 interface KeywordsTabProps {
     keywords: string[];
@@ -23,6 +25,7 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
     const [newKeyword, setNewKeyword] = useState('');
     const { toast } = useToast();
     const { t } = useTranslation();
+    const isMobile = useMediaQuery('(max-width: 640px)');
 
     const handleGenerateClick = () => {
         setShowGenerateConfirm(true);
@@ -68,14 +71,35 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
         onKeywordsChange(updatedKeywords);
     };
 
+    const handleAddKeyword = () => {
+        if (newKeyword.trim()) {
+            const updatedKeywords = [...new Set([...keywords, newKeyword.trim().toLowerCase()])];
+            onKeywordsChange(updatedKeywords);
+            setNewKeyword('');
+        }
+    };
+
     return (
         <>
-            <Card className="flex flex-col h-[400px]">
-                <CardHeader className="pb-2 flex-none">
-                    <div className="flex items-center justify-between">
+            <Card className={cn(
+                "flex flex-col",
+                isMobile ? "h-[350px]" : "h-[400px]"
+            )}>
+                <CardHeader className={cn(
+                    "flex-none",
+                    isMobile ? "p-3 pb-2" : "pb-2"
+                )}>
+                    <div className={cn(
+                        isMobile ? "flex flex-col gap-2" : "flex items-center justify-between"
+                    )}>
                         <div className="space-y-0.5">
-                            <CardTitle>{t('products.editor.form.keywords.title')}</CardTitle>
-                            <p className="text-sm text-muted-foreground">
+                            <CardTitle className={cn(isMobile && "text-base")}>
+                                {t('products.editor.form.keywords.title')}
+                            </CardTitle>
+                            <p className={cn(
+                                "text-muted-foreground",
+                                isMobile ? "text-xs" : "text-sm"
+                            )}>
                                 {t('products.editor.form.keywords.subtitle')}
                             </p>
                         </div>
@@ -84,15 +108,24 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
                             variant="outline"
                             onClick={handleGenerateClick}
                             disabled={isGenerating}
-                            className="gap-2"
+                            className={cn(
+                                "gap-2",
+                                isMobile ? "w-full h-8 text-xs mt-1" : ""
+                            )}
                         >
-                            <Wand2 className="h-4 w-4" />
+                            <Wand2 className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
                             {isGenerating ? t('products.editor.form.keywords.generating') : t('products.editor.form.keywords.generateButton')}
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col space-y-3 min-h-0">
-                    <div className="flex gap-2">
+                <CardContent className={cn(
+                    "flex-1 flex flex-col space-y-3 min-h-0",
+                    isMobile && "p-3"
+                )}>
+                    <div className={cn(
+                        "flex",
+                        isMobile ? "flex-col gap-2" : "gap-2"
+                    )}>
                         <Input
                             placeholder={t('products.editor.form.keywords.addPlaceholder')}
                             value={newKeyword}
@@ -100,24 +133,19 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault();
-                                    if (newKeyword.trim()) {
-                                        const updatedKeywords = [...new Set([...keywords, newKeyword.trim().toLowerCase()])];
-                                        onKeywordsChange(updatedKeywords);
-                                        setNewKeyword('');
-                                    }
+                                    handleAddKeyword();
                                 }
                             }}
-                            className="flex-1"
+                            className={cn(
+                                isMobile ? "h-8 text-sm" : "flex-1"
+                            )}
                         />
                         <Button
                             type="button"
-                            onClick={() => {
-                                if (newKeyword.trim()) {
-                                    const updatedKeywords = [...new Set([...keywords, newKeyword.trim().toLowerCase()])];
-                                    onKeywordsChange(updatedKeywords);
-                                    setNewKeyword('');
-                                }
-                            }}
+                            onClick={handleAddKeyword}
+                            className={cn(
+                                isMobile && "h-8 text-xs"
+                            )}
                         >
                             {t('products.editor.form.keywords.addButton')}
                         </Button>
@@ -129,7 +157,10 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
                                     <Badge
                                         key={`${keyword}-${index}`}
                                         variant="secondary"
-                                        className="px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-secondary/80"
+                                        className={cn(
+                                            "flex items-center gap-2 hover:bg-secondary/80",
+                                            isMobile ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"
+                                        )}
                                     >
                                         {keyword}
                                         <button
@@ -137,11 +168,22 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
                                             className="text-muted-foreground hover:text-foreground transition-colors"
                                             type="button"
                                             title={t('products.editor.form.keywords.removeTooltip')}
+                                            aria-label={t('products.editor.form.keywords.removeTooltip')}
                                         >
-                                            <X className="h-3 w-3" />
+                                            <X className={cn(isMobile ? "h-2.5 w-2.5" : "h-3 w-3")} />
                                         </button>
                                     </Badge>
                                 ))}
+                                {keywords.length === 0 && (
+                                    <div className="w-full h-full flex items-center justify-center p-4">
+                                        <p className={cn(
+                                            "text-center text-muted-foreground",
+                                            isMobile ? "text-xs" : "text-sm"
+                                        )}>
+                                            {t('products.editor.form.keywords.empty') || 'No keywords added yet. Add keywords or use the generate button.'}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

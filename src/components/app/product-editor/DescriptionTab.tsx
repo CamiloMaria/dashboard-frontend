@@ -21,6 +21,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import { useTranslation } from 'react-i18next';
 import { productsApi } from '@/api/products';
 import { AxiosError } from 'axios';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 
 interface DescriptionTabProps {
     description: string | undefined;
@@ -34,16 +36,20 @@ interface ToolbarButtonProps {
     disabled?: boolean;
     children: React.ReactNode;
     title: string;
+    isMobile?: boolean;
 }
 
-function ToolbarButton({ onClick, isActive, disabled, children, title }: ToolbarButtonProps) {
+function ToolbarButton({ onClick, isActive, disabled, children, title, isMobile }: ToolbarButtonProps) {
     return (
         <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={onClick}
-            className={`h-8 w-8 p-0 hover:bg-muted ${isActive ? 'bg-muted' : ''}`}
+            className={cn(
+                `hover:bg-muted ${isActive ? 'bg-muted' : ''}`,
+                isMobile ? "h-7 w-7 p-0" : "h-8 w-8 p-0"
+            )}
             disabled={disabled}
             title={title}
         >
@@ -57,6 +63,7 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
     const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
     const { toast } = useToast();
     const { t } = useTranslation();
+    const isMobile = useMediaQuery('(max-width: 640px)');
 
     const editor = useEditor({
         extensions: [
@@ -69,7 +76,10 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
         content: description || '',
         editorProps: {
             attributes: {
-                class: 'prose prose-sm max-w-none focus:outline-none p-4',
+                class: cn(
+                    'prose max-w-none focus:outline-none',
+                    isMobile ? 'prose-xs p-2' : 'prose-sm p-4'
+                ),
             },
         },
     });
@@ -135,24 +145,43 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
 
     return (
         <>
-            <Card className="h-[calc(100vh-12rem)] flex flex-col">
-                <CardHeader className="pb-3 flex-none">
-                    <div className="flex items-center justify-between">
+            <Card className={cn(
+                "flex flex-col",
+                isMobile ? "h-[calc(100vh-10rem)]" : "h-[calc(100vh-12rem)]"
+            )}>
+                <CardHeader className={cn(
+                    "flex-none",
+                    isMobile ? "p-3 pb-2" : "pb-3"
+                )}>
+                    <div className={cn(
+                        isMobile ? "flex flex-col gap-2" : "flex items-center justify-between"
+                    )}>
                         <div className="space-y-1">
-                            <CardTitle>{t('products.editor.form.description.title')}</CardTitle>
-                            <p className="text-sm text-muted-foreground">
+                            <CardTitle className={cn(isMobile && "text-base")}>
+                                {t('products.editor.form.description.title')}
+                            </CardTitle>
+                            <p className={cn(
+                                "text-muted-foreground",
+                                isMobile ? "text-xs" : "text-sm"
+                            )}>
                                 {t('products.editor.form.description.subtitle')}
                             </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className={cn(
+                            "flex",
+                            isMobile ? "w-full mt-1" : "gap-2"
+                        )}>
                             <Button
                                 variant="outline"
                                 onClick={handleGenerateClick}
                                 disabled={isGenerating}
-                                className="gap-2"
+                                className={cn(
+                                    "gap-2",
+                                    isMobile ? "flex-1 h-8 text-xs" : ""
+                                )}
                                 type="button"
                             >
-                                <Wand2 className="h-4 w-4" />
+                                <Wand2 className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
                                 {isGenerating
                                     ? t('products.editor.form.description.generating')
                                     : t('products.editor.form.description.generateButton')}
@@ -160,6 +189,9 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
                             <Button
                                 onClick={() => handleSave()}
                                 type="button"
+                                className={cn(
+                                    isMobile ? "flex-1 h-8 text-xs ml-2" : ""
+                                )}
                             >
                                 {t('products.editor.form.description.saveChanges')}
                             </Button>
@@ -167,67 +199,81 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
                     </div>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col min-h-0">
-                    <div className="border-b pb-2 flex flex-wrap gap-0.5 flex-none">
+                    <div className={cn(
+                        "border-b pb-2 flex flex-wrap gap-0.5 flex-none",
+                        isMobile && "overflow-x-auto"
+                    )}>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleBold().run()}
                             isActive={editor.isActive('bold')}
                             title={t('products.editor.form.description.toolbar.bold')}
+                            isMobile={isMobile}
                         >
-                            <Bold className="h-4 w-4" />
+                            <Bold className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleItalic().run()}
                             isActive={editor.isActive('italic')}
                             title={t('products.editor.form.description.toolbar.italic')}
+                            isMobile={isMobile}
                         >
-                            <Italic className="h-4 w-4" />
+                            <Italic className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleUnderline().run()}
                             isActive={editor.isActive('underline')}
                             title={t('products.editor.form.description.toolbar.underline')}
+                            isMobile={isMobile}
                         >
-                            <UnderlineIcon className="h-4 w-4" />
+                            <UnderlineIcon className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <div className="mx-2 border-r" />
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('left').run()}
                             isActive={editor.isActive({ textAlign: 'left' })}
                             title={t('products.editor.form.description.toolbar.alignLeft')}
+                            isMobile={isMobile}
                         >
-                            <AlignLeft className="h-4 w-4" />
+                            <AlignLeft className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('center').run()}
                             isActive={editor.isActive({ textAlign: 'center' })}
                             title={t('products.editor.form.description.toolbar.alignCenter')}
+                            isMobile={isMobile}
                         >
-                            <AlignCenter className="h-4 w-4" />
+                            <AlignCenter className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().setTextAlign('right').run()}
                             isActive={editor.isActive({ textAlign: 'right' })}
                             title={t('products.editor.form.description.toolbar.alignRight')}
+                            isMobile={isMobile}
                         >
-                            <AlignRight className="h-4 w-4" />
+                            <AlignRight className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <div className="mx-2 border-r" />
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleBulletList().run()}
                             isActive={editor.isActive('bulletList')}
                             title={t('products.editor.form.description.toolbar.bulletList')}
+                            isMobile={isMobile}
                         >
-                            <List className="h-4 w-4" />
+                            <List className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                         <ToolbarButton
                             onClick={() => editor.chain().focus().toggleOrderedList().run()}
                             isActive={editor.isActive('orderedList')}
                             title={t('products.editor.form.description.toolbar.numberedList')}
+                            isMobile={isMobile}
                         >
-                            <ListOrdered className="h-4 w-4" />
+                            <ListOrdered className={cn(isMobile ? "h-3.5 w-3.5" : "h-4 w-4")} />
                         </ToolbarButton>
                     </div>
-                    <div className="border rounded-md mt-4 flex-1 overflow-y-auto min-h-0">
+                    <div className={cn(
+                        "border rounded-md mt-4 flex-1 overflow-y-auto min-h-0",
+                        isMobile && "mt-2"
+                    )}>
                         <EditorContent editor={editor} className="h-full" />
                     </div>
                 </CardContent>
