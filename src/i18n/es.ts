@@ -12,11 +12,13 @@ export const es = {
         active: 'Activo',
         inactive: 'Inactivo',
         theme: {
+            title: 'Tema',
             light: 'Claro',
             dark: 'Oscuro',
             system: 'Sistema'
         },
         languages: {
+            title: 'Idiomas',
             en: 'Inglés',
             es: 'Español'
         },
