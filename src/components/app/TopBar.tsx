@@ -24,7 +24,7 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
     const { theme, setTheme } = useTheme();
     const { t, i18n } = useTranslation();
     const isMobile = useMediaQuery('(max-width: 640px)');
-    const isTablet = useMediaQuery('(max-width: 1224px)');
+    const isTablet = useMediaQuery('(max-width: 1024px)');
 
     const handleLogout = () => {
         removeAuthToken();
@@ -40,38 +40,38 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-16 items-center px-4 md:container">
+            <div className="flex h-14 sm:h-16 items-center px-3 sm:px-4 md:container">
                 {/* Menu toggle button - only visible on mobile/tablet or when sidebar is closed */}
-                {(isMobile || isTablet) && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="mr-2 flex-shrink-0"
-                        onClick={onToggleSidebar}
-                        aria-label="Toggle sidebar"
-                    >
-                        <Menu className="h-5 w-5" />
-                    </Button>
-                )}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "mr-1 sm:mr-2 flex-shrink-0",
+                        (!isMobile && !isTablet && isSidebarOpen) && "opacity-0 pointer-events-none",
+                        (!isMobile && !isTablet) && "hidden"
+                    )}
+                    onClick={onToggleSidebar}
+                    aria-label="Toggle sidebar"
+                >
+                    <Menu className="h-5 w-5" />
+                </Button>
 
                 {/* Logo container with flex layout for better positioning */}
                 <div className={cn(
-                    "flex items-center h-8 overflow-hidden",
-                    isSidebarOpen && !isMobile && !isTablet ? "ml-0" : "ml-2",
-                    isMobile ? "max-w-[140px]" : isTablet ? "max-w-[160px]" : "max-w-[180px]"
+                    "flex items-center h-7 sm:h-8 overflow-hidden transition-all duration-200",
+                    isSidebarOpen && !isMobile && !isTablet ? "ml-0 opacity-0 w-0" : "ml-1 sm:ml-2 opacity-100 w-auto",
+                    isMobile ? "max-w-[120px]" : isTablet ? "max-w-[160px]" : "max-w-[180px]"
                 )}>
-                    {(!isSidebarOpen || isMobile || isTablet) && (
-                        <img
-                            src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
-                            alt="Plaza Lama"
-                            className="h-full object-contain"
-                        />
-                    )}
+                    <img
+                        src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
+                        alt="Plaza Lama"
+                        className="h-full object-contain"
+                    />
                 </div>
 
                 <div className="flex-1" />
 
-                <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
                     {/* Mobile menu dropdown */}
                     {isMobile && (
                         <DropdownMenu>
@@ -190,7 +190,7 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
                             {/* User Profile */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-9 gap-2 pl-2 pr-1">
+                                    <Button variant="ghost" className="h-9 gap-1 sm:gap-2 pl-1 sm:pl-2 pr-1">
                                         <Avatar className="h-6 w-6">
                                             <AvatarImage src="https://github.com/shadcn.png" />
                                             <AvatarFallback>JD</AvatarFallback>

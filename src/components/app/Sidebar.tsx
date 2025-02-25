@@ -117,6 +117,13 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
     const [isOpen, setIsOpen] = useState(false);
     const { t } = useTranslation();
 
+    // Auto-expand parent items when a child is active
+    useEffect(() => {
+        if (isActive && children) {
+            setIsOpen(true);
+        }
+    }, [isActive, children]);
+
     if (children) {
         return (
             <Collapsible open={isOpen || isActive} onOpenChange={setIsOpen}>
@@ -124,7 +131,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                     <Button
                         variant={isActive ? 'secondary' : 'ghost'}
                         className={cn(
-                            'w-full justify-between h-9 relative',
+                            'w-full justify-between h-10 sm:h-9 relative',
                             isCollapsed && 'justify-center px-2',
                             'hover:[background:hsl(240,3.7%,15.9%)]',
                             'active:[background:hsl(240,3.7%,15.9%)]',
@@ -160,7 +167,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
                             key={index}
                             variant={child.isActive ? 'secondary' : 'ghost'}
                             className={cn(
-                                "w-full justify-start gap-2 h-9 px-2 mb-1 relative",
+                                "w-full justify-start gap-2 h-10 sm:h-9 px-2 mb-1 relative",
                                 'hover:[background:hsl(240,3.7%,15.9%)]',
                                 'active:[background:hsl(240,3.7%,15.9%)]',
                                 child.isActive && "[background:hsl(240,3.7%,15.9%)]",
@@ -184,7 +191,7 @@ function NavItem({ icon, label, isActive, isCollapsed, onClick, children }: NavI
         <Button
             variant={isActive ? 'secondary' : 'ghost'}
             className={cn(
-                'w-full justify-start gap-2 h-9 relative',
+                'w-full justify-start gap-2 h-10 sm:h-9 relative',
                 isCollapsed && 'justify-center px-2',
                 'hover:[background:hsl(240,3.7%,15.9%)]',
                 'active:[background:hsl(240,3.7%,15.9%)]',
@@ -207,7 +214,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const currentPath = routerState.location.pathname;
     const { hasAccess } = useAuth();
     const isMobile = useMediaQuery('(max-width: 640px)');
-    const isTablet = useMediaQuery('(max-width: 1224px)');
+    const isTablet = useMediaQuery('(max-width: 1024px)');
     const { theme } = useTheme();
     const [showMobileOverlay, setShowMobileOverlay] = useState(false);
 
@@ -258,14 +265,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
     // Determine sidebar width based on screen size
     const sidebarWidth = isTablet && !isMobile ? 'w-56' : 'w-64';
-    const collapsedWidth = isTablet && !isMobile ? 'w-16' : 'w-20';
+    const collapsedWidth = isTablet && !isMobile ? 'w-14' : 'w-16';
 
     return (
         <>
             {/* Mobile overlay */}
             {showMobileOverlay && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-30 md:hidden"
+                    className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
                     onClick={onToggle}
                     aria-hidden="true"
                 />
@@ -274,19 +281,20 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <aside
                 className={cn(
                     'fixed left-0 top-0 z-40 h-screen border-r bg-backgroundSecondary transition-all duration-300',
-                    isOpen ? sidebarWidth : `w-0 md:${collapsedWidth}`,
-                    (isMobile || isTablet) && !isOpen && 'translate-x-[-100%]',
-                    (isMobile || isTablet) && isOpen && 'translate-x-0'
+                    isOpen ? sidebarWidth : collapsedWidth,
+                    (isMobile || isTablet) && !isOpen && 'translate-x-[-100%] md:translate-x-0',
+                    (isMobile || isTablet) && isOpen && 'translate-x-0',
+                    'shadow-lg'
                 )}
             >
-                <div className="flex h-16 items-center justify-between px-4 border-b">
+                <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 border-b">
                     {isOpen && (
                         <img
                             src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
                             alt="Plaza Lama"
                             className={cn(
-                                "object-contain",
-                                isTablet ? "h-6 max-w-[140px]" : "h-8 max-w-[180px]"
+                                "object-contain transition-opacity duration-300",
+                                isTablet ? "h-5 max-w-[120px]" : "h-7 max-w-[160px]"
                             )}
                         />
                     )}
@@ -300,13 +308,13 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                         {isOpen ? (
                             <X className="h-4 w-4" />
                         ) : (
-                            <Menu className={cn("h-4 w-4", theme === 'dark' ? 'text-white' : 'text-black')} />
+                            <Menu className={cn("h-4 w-4")} />
                         )}
                     </Button>
                 </div>
 
-                <ScrollArea className="h-[calc(100vh-4rem)] px-3 py-4">
-                    <div className="space-y-2">
+                <ScrollArea className="h-[calc(100vh-4rem)] px-2 sm:px-3 py-3 sm:py-4">
+                    <div className="space-y-1 sm:space-y-2">
                         {filteredNavigation.map((item) => (
                             <NavItem
                                 key={item.path}
@@ -328,21 +336,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     </div>
                 </ScrollArea>
 
-                {/* Logo at bottom */}
-                <div className="absolute bottom-4 left-0 right-0 px-4">
-                    {isOpen ? (
-                        <img
-                            src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
-                            alt="Plaza Lama"
-                            className={cn(
-                                "object-contain mx-auto",
-                                isTablet ? "h-5 max-w-[120px]" : "h-6 max-w-[160px]"
-                            )}
-                        />
-                    ) : (
+                {/* Logo at bottom - only show when sidebar is collapsed on desktop */}
+                {(!isOpen && !isMobile && !isTablet) && (
+                    <div className="absolute bottom-4 left-0 right-0 px-4">
                         <Box className="h-4 w-4 mx-auto text-white" />
-                    )}
-                </div>
+                    </div>
+                )}
             </aside>
         </>
     );
