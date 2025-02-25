@@ -26,7 +26,6 @@ import { ROUTES, BASE_PATH } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useTheme } from '@/hooks/use-theme';
 
 interface NavRoute {
     path: string;
@@ -215,7 +214,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const { hasAccess } = useAuth();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
-    const { theme } = useTheme();
     const [showMobileOverlay, setShowMobileOverlay] = useState(false);
 
     // Handle mobile sidebar visibility
