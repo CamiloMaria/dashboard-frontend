@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Pagination } from '.';
+import { BaseResponse, PaginatedResponse } from '.';
 
 export const productFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -20,10 +20,8 @@ export interface GetProductsParams {
     sortBy?: string;
 }
 
-export interface ProductsResponse {
-    data: Product[];
-    pagination: Pagination;
-}
+export type ProductsResponse = PaginatedResponse<Product[]>;
+export type ProductResponse = BaseResponse<Product>;
 
 export interface Product {
     id: number;
@@ -136,9 +134,19 @@ export interface CreateProductDto {
     images?: string[];
 }
 
-export type ProductStatus = 'created' | 'updated' | 'failed';
-
-export interface CreateProductResult extends Omit<CreateProductDto, 'status'> {
-    status: ProductStatus;
-    error?: string;
+export enum ProductCreationStatus {
+    CREATED = 'CREATED',
+    EXISTING = 'EXISTING',
+    NO_PRICE = 'NO_PRICE',
+    ERROR = 'ERROR',
 }
+
+export interface CreateProductResult {
+    sku: string;
+    product?: CreateProductDto;
+    success: boolean;
+    message: string;
+    status: ProductCreationStatus;
+}
+
+export type CreateProductResponse = BaseResponse<CreateProductResult[]>;

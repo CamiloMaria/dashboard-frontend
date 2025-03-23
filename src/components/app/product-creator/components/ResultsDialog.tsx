@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Download, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { getResultStats } from '../hooks/useProductCreation';
-import { CreateProductResult } from '@/types/product';
+import { CreateProductResult, ProductCreationStatus } from '@/types/product';
 
 interface ResultsDialogProps {
     open: boolean;
@@ -27,11 +27,11 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
 
     const downloadResults = () => {
         const csvContent = [
-            ['SKU', 'Status', 'Error'],
+            ['SKU', 'Status', 'Message'],
             ...results.map(result => [
                 result.sku || '',
-                result.status === 'created' ? 'Created' : result.status === 'updated' ? 'Updated' : 'Failed',
-                result.error || ''
+                result.status,
+                result.message || ''
             ])
         ].map(row => row.join(',')).join('\n');
 
@@ -95,13 +95,13 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
                                 key={index}
                                 className={cn(
                                     "flex items-center justify-between p-2 rounded-lg",
-                                    result.status === 'failed' ? "bg-red-50 dark:bg-red-950/50" : "hover:bg-muted/50"
+                                    result.status === ProductCreationStatus.ERROR ? "bg-red-50 dark:bg-red-950/50" : "hover:bg-muted/50"
                                 )}
                             >
                                 <div className="flex items-center gap-3">
-                                    {result.status === 'created' ? (
+                                    {result.status === ProductCreationStatus.CREATED ? (
                                         <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
-                                    ) : result.status === 'updated' ? (
+                                    ) : result.status === ProductCreationStatus.EXISTING ? (
                                         <RefreshCw className="h-4 w-4 text-indigo-600 dark:text-indigo-500" />
                                     ) : (
                                         <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-500" />
@@ -113,18 +113,16 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
                                         variant="outline"
                                         className={cn(
                                             "font-medium",
-                                            result.status === 'created' && "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-400",
-                                            result.status === 'updated' && "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-950/50 dark:text-indigo-400",
-                                            result.status === 'failed' && "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/50 dark:text-red-400"
+                                            result.status === ProductCreationStatus.CREATED && "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-400",
+                                            result.status === ProductCreationStatus.EXISTING && "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-950/50 dark:text-indigo-400",
+                                            result.status === ProductCreationStatus.ERROR && "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/50 dark:text-red-400"
                                         )}
                                     >
-                                        {result.status === 'created' ? "Created" :
-                                            result.status === 'updated' ? "Updated" :
-                                                "Failed"}
+                                        {result.status}
                                     </Badge>
-                                    {result.error && (
+                                    {result.message && (
                                         <span className="text-sm font-medium text-red-700 dark:text-red-400" role="alert">
-                                            {result.error}
+                                            {result.message}
                                         </span>
                                     )}
                                 </div>

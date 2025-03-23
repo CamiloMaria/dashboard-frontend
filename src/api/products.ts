@@ -1,9 +1,11 @@
-import { type Product, type ProductsResponse, type GetProductsParams, CreateProductResult } from '@/types'
+import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
-  async getProducts({ page, limit: size, search, order, sortBy }: GetProductsParams): Promise<ProductsResponse> {
-    const response = await axios.get<ProductsResponse>('/product', {
+  baseUrl: '/products',
+
+  async getProducts({ page, limit: size, search, order, sortBy }: GetProductsParams) {
+    const response = await axios.get<ProductsResponse>(this.baseUrl, {
       params: {
         page,
         size,
@@ -12,26 +14,27 @@ export const productsApi = {
         sortBy
       }
     });
+
     return response.data;
   },
 
-  async getProduct(id: number): Promise<Product> {
-    const response = await this.getProducts({search: id.toString(), page: 1, limit: 1})
-    return response.data[0];
-  },
-
-  async createProduct(skus: string[]): Promise<CreateProductResult[]> {
-    const response = await axios.post<CreateProductResult[]>('/product', {skus});
+  async getProduct(id: number) {
+    const response = await axios.get<ProductResponse>(`${this.baseUrl}/${id}`);
     return response.data;
   },
 
-  async updateProduct(sku: string, data: Partial<Product>): Promise<Product> {
-    const response = await axios.patch<Product>(`/product/${sku}`, data);
+  async createProduct(skus: string[]) {
+    const response = await axios.post<CreateProductResponse>(this.baseUrl, {skus});
+    return response.data;
+  },
+
+  async updateProduct(id: number, data: Partial<Product>): Promise<Product> {
+    const response = await axios.patch<Product>(`${this.baseUrl}/${id}`, data);
     return response.data;
   },
 
   async deleteProduct(id: number): Promise<void> {
-    await axios.delete(`/product/${id}`);
+    await axios.delete(`${this.baseUrl}/${id}`);
   },
 
   async deleteProductImages(sku: string, ids: number[]): Promise<void> {

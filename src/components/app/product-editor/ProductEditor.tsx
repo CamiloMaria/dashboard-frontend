@@ -78,6 +78,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const { data: product, isLoading } = useQuery({
     queryKey: productKeys.detail(productId),
     queryFn: () => productsApi.getProduct(Number(productId)),
+    select: (data) => data.data,
     enabled: !!productId,
   });
 
@@ -98,7 +99,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   }, [product, form]);
 
   const updateMutation = useMutation({
-    mutationFn: async ({ sku, data, deletedImageIds, newImages }: {
+    mutationFn: async ({ id, sku, data, deletedImageIds, newImages }: {
       id: number;
       sku: string;
       data: Partial<Product>;
@@ -112,7 +113,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         }
 
         // 2. Update product
-        const updatedProduct = await productsApi.updateProduct(sku || '', data);
+        const updatedProduct = await productsApi.updateProduct(id, data);
 
         // 3. Upload new images if any
         if (newImages?.length) {

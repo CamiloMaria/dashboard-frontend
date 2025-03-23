@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/use-debounce';
-import { CreateProductResult } from '@/types';
+import { CreateProductResult, ProductCreationStatus } from '@/types';
 import { productsApi } from '@/api';
 
 const parseSkus = (value: string): string[] => 
@@ -36,15 +36,15 @@ export function useProductCreation() {
             // Optimistic update
             const optimisticResults: CreateProductResult[] = parsedSkus.map(sku => ({
                 sku,
-                title: `Product ${sku}`,
-                status: 'created',
-                isActive: true,
+                success: true,
+                message: 'Product created successfully',
+                status: ProductCreationStatus.CREATED,
             }));
             setResults(optimisticResults);
 
             // Create the products
             const productResults = await productsApi.createProduct(parsedSkus);
-            setResults(productResults);
+            setResults(productResults.data);
             return productResults;
         } catch {
             // Revert optimistic update
@@ -78,8 +78,8 @@ export function useProductCreation() {
 
 export function getResultStats(results: CreateProductResult[]) {
     return {
-        created: results.filter(r => r.status === 'created').length,
-        updated: results.filter(r => r.status === 'updated').length,
-        failed: results.filter(r => r.status === 'failed').length,
+        created: results.filter(r => r.status === ProductCreationStatus.CREATED).length,
+        updated: results.filter(r => r.status === ProductCreationStatus.EXISTING).length,
+        failed: results.filter(r => r.status === ProductCreationStatus.ERROR).length,
     };
 } 

@@ -40,7 +40,7 @@ export function LoginPage() {
 
         try {
             const response = await authApi.signIn(formData);
-            setAuthToken(response.access_token);
+            setAuthToken(response.data.user);
             navigate({ to: ROUTES.INVENTORY.PRODUCTS.LIST });
         } catch (error) {
             console.error('Login failed:', error);
