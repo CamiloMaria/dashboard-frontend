@@ -2,22 +2,15 @@ import { GetProductSetsParams, ProductSetsResponse, CreateSetPayload } from '@/t
 import axios from '@/lib/axios';
 
 export const productSetsApi = {
-    async getProductSets({ page, limit: size, search, order, sortBy }: GetProductSetsParams): Promise<ProductSetsResponse> {
-        const response = await axios.get<ProductSetsResponse>('/product/set', {
-            params: {
-                page,
-                size,
-                search,
-                order,
-                sortBy
-            }
+    async getProductSets(params: GetProductSetsParams): Promise<ProductSetsResponse> {
+        const response = await axios.get<ProductSetsResponse>('/product-sets', {
+            params
         });
+        
         return response.data;
     },
 
     async createProductSet(payload: CreateSetPayload): Promise<void> {
-        await axios.post('/product/set', {
-            data: payload
-        });
+        await axios.post('/product-sets', payload);
     },
 };

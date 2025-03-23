@@ -1,11 +1,10 @@
-import { Pagination } from "./pagination";
-
+import { PaginatedResponse } from "./response";
 
 export interface GetProductSetsParams {
   page: number;
   limit: number;
   search?: string;
-  order?: string;
+  sortOrder?: string;
   sortBy?: string;
 }
 
@@ -20,17 +19,15 @@ export interface CreateSetPayload {
 }
 
 export interface ProductInSet {
-  id: number;
-  sku: string;
-  title: string;
+  productSku: string;
+  is_free: number;
+  title: number;
   price: number;
   compare_price: number | null;
-  grupo: string;
-  depto: string;
 }
 
 export interface ProductSet {
-  setSku: string;
+  set_sku: string;
   title: string;
   price: number;
   compare_price: number | null;
@@ -40,7 +37,4 @@ export interface ProductSet {
   update_at: string;
 }
 
-export interface ProductSetsResponse {
-  data: ProductSet[];
-  pagination: Pagination;
-} 
+export type ProductSetsResponse = PaginatedResponse<ProductSet[]>;

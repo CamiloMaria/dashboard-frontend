@@ -105,16 +105,16 @@ export function ProductSetsTable() {
         <Card className="mb-4 overflow-hidden">
             <div
                 className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => toggleMobileCardExpansion(productSet.setSku)}
+                onClick={() => toggleMobileCardExpansion(productSet.set_sku)}
             >
                 <div className="flex justify-between items-start mb-2">
                     <div>
-                        <div className="font-medium text-base">{productSet.setSku}</div>
+                        <div className="font-medium text-base">{productSet.set_sku}</div>
                         <div className="text-sm line-clamp-1 mt-1">{productSet.title}</div>
                     </div>
                     <div className="transition-transform duration-200"
                         style={{
-                            transform: expandedMobileCards.has(productSet.setSku)
+                            transform: expandedMobileCards.has(productSet.set_sku)
                                 ? 'rotate(180deg)'
                                 : 'rotate(0deg)'
                         }}>
@@ -161,7 +161,7 @@ export function ProductSetsTable() {
                 </div>
             </div>
 
-            {expandedMobileCards.has(productSet.setSku) && (
+            {expandedMobileCards.has(productSet.set_sku) && (
                 <div className="bg-muted/50 p-4 space-y-4 border-t">
                     <h4 className="font-medium text-sm text-muted-foreground">
                         {t('productSets.expandedView.productsInSet')} ({productSet.products.length})
@@ -169,35 +169,30 @@ export function ProductSetsTable() {
                     <div className="space-y-4">
                         {productSet.products.map((product: ProductInSet) => (
                             <Card
-                                key={product.id}
+                                key={product.productSku}
                                 className="p-4 hover:bg-accent transition-colors"
                             >
                                 <div className="space-y-2">
                                     <p className="font-medium line-clamp-2">{product.title}</p>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">
-                                            {t('productSets.expandedView.productInfo.sku')}: {product.sku}
+                                            {t('productSets.expandedView.productInfo.sku')}: {product.productSku}
                                         </span>
                                     </div>
                                     <div className="space-y-0.5">
                                         <div className="font-medium">
-                                            ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                            ${product.price?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </div>
                                         {product.compare_price && (
                                             <>
                                                 <div className="text-sm text-muted-foreground line-through">
-                                                    ${product.compare_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                    ${product.compare_price?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                 </div>
                                                 <div className="text-xs text-green-600 font-medium">
                                                     {Math.round((1 - product.price / product.compare_price) * 100)}% off
                                                 </div>
                                             </>
                                         )}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                        <span>{t('productSets.expandedView.productInfo.grupo')}: {product.grupo}</span>
-                                        <span>•</span>
-                                        <span>{t('productSets.expandedView.productInfo.depto')}: {product.depto}</span>
                                     </div>
                                 </div>
                             </Card>
@@ -295,8 +290,8 @@ export function ProductSetsTable() {
 
     if (!data) return null;
 
-    const { data: productSets, pagination } = data;
-    const totalPages = Math.ceil(pagination.length / itemsPerPage);
+    const { data: productSets, meta } = data;
+    const totalPages = Math.ceil(meta.pagination.totalItems / itemsPerPage);
 
     if (productSets.length === 0) {
         return (
@@ -345,7 +340,7 @@ export function ProductSetsTable() {
                     <div className="space-y-1">
                         {productSets.map((productSet) => (
                             <MobileProductSetCard
-                                key={productSet.setSku}
+                                key={productSet.set_sku}
                                 productSet={productSet}
                             />
                         ))}
@@ -407,22 +402,22 @@ export function ProductSetsTable() {
                         </TableHeader>
                         <TableBody>
                             {productSets.map((productSet) => (
-                                <Fragment key={productSet.setSku}>
+                                <Fragment key={productSet.set_sku}>
                                     <TableRow
                                         className="cursor-pointer hover:bg-muted/50 transition-colors"
-                                        onClick={() => toggleRowExpansion(productSet.setSku)}
+                                        onClick={() => toggleRowExpansion(productSet.set_sku)}
                                     >
                                         <TableCell>
                                             <div className="transition-transform duration-200"
                                                 style={{
-                                                    transform: expandedRows.has(productSet.setSku)
+                                                    transform: expandedRows.has(productSet.set_sku)
                                                         ? 'rotate(180deg)'
                                                         : 'rotate(0deg)'
                                                 }}>
                                                 <ChevronDown className="h-4 w-4" />
                                             </div>
                                         </TableCell>
-                                        <TableCell className="font-medium">{productSet.setSku}</TableCell>
+                                        <TableCell className="font-medium">{productSet.set_sku}</TableCell>
                                         <TableCell className="max-w-[250px] truncate">{productSet.title}</TableCell>
                                         <TableCell>
                                             <div className="space-y-0.5">
@@ -453,7 +448,7 @@ export function ProductSetsTable() {
                                             </>
                                         )}
                                     </TableRow>
-                                    {expandedRows.has(productSet.setSku) && (
+                                    {expandedRows.has(productSet.set_sku) && (
                                         <TableRow>
                                             <TableCell colSpan={isDesktop ? 7 : 5} className="p-0 border-0">
                                                 <div className="bg-muted/50 p-4 space-y-4">
@@ -463,35 +458,30 @@ export function ProductSetsTable() {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                                         {productSet.products.map((product: ProductInSet) => (
                                                             <Card
-                                                                key={product.id}
+                                                                key={product.productSku}
                                                                 className="p-4 hover:bg-accent transition-colors"
                                                             >
                                                                 <div className="space-y-2">
                                                                     <p className="font-medium line-clamp-2">{product.title}</p>
                                                                     <div className="flex items-center justify-between text-sm">
                                                                         <span className="text-muted-foreground">
-                                                                            {t('productSets.expandedView.productInfo.sku')}: {product.sku}
+                                                                            {t('productSets.expandedView.productInfo.sku')}: {product.productSku}
                                                                         </span>
                                                                     </div>
                                                                     <div className="space-y-0.5">
                                                                         <div className="font-medium">
-                                                                            ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                                            ${product.price?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                                         </div>
                                                                         {product.compare_price && (
                                                                             <>
                                                                                 <div className="text-sm text-muted-foreground line-through">
-                                                                                    ${product.compare_price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                                                    ${product.compare_price?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                                                 </div>
                                                                                 <div className="text-xs text-green-600 font-medium">
                                                                                     {Math.round((1 - product.price / product.compare_price) * 100)}% off
                                                                                 </div>
                                                                             </>
                                                                         )}
-                                                                    </div>
-                                                                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-2">
-                                                                        <span>{t('productSets.expandedView.productInfo.grupo')}: {product.grupo}</span>
-                                                                        <span>•</span>
-                                                                        <span>{t('productSets.expandedView.productInfo.depto')}: {product.depto}</span>
                                                                     </div>
                                                                 </div>
                                                             </Card>
