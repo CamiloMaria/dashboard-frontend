@@ -16,8 +16,8 @@ export interface GetProductsParams {
     page: number;
     limit: number;
     search?: string;
-    order?: string;
     sortBy?: string;
+    sortOrder?: string;
 }
 
 export type ProductsResponse = PaginatedResponse<Product[]>;

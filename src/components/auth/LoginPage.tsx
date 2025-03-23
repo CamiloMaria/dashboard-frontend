@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ROUTES } from '@/constants/routes';
 import { Eye, EyeOff } from 'lucide-react';
-import { isAuthenticated, setAuthToken } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth';
 import { authApi } from '@/api/auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -39,11 +39,9 @@ export function LoginPage() {
         setIsLoading(true);
 
         try {
-            const response = await authApi.signIn(formData);
-            setAuthToken(response.data.user);
+            await authApi.signIn(formData);
             navigate({ to: ROUTES.INVENTORY.PRODUCTS.LIST });
-        } catch (error) {
-            console.error('Login failed:', error);
+        } catch {
             toast({
                 title: 'Error',
                 description: 'Invalid username or password',

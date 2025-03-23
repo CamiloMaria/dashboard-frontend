@@ -236,8 +236,7 @@ export function PermissionsPage() {
                 title: "Success",
                 description: "User permissions saved successfully",
             });
-        } catch (err) {
-            console.error('Failed to save permissions:', err);
+        } catch {
             toast({
                 title: "Error",
                 description: "Failed to save user permissions",

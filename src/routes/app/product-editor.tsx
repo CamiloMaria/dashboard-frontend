@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/route-auth';
 export const productEditorRoute = createRoute({
     getParentRoute: () => appRoute,
     path: ROUTES.INVENTORY.PRODUCTS.EDITOR,
-    beforeLoad: () => requireAuth(ROUTES.INVENTORY.PRODUCTS.EDITOR),
+    beforeLoad: async () => {
+        return await requireAuth(ROUTES.INVENTORY.PRODUCTS.EDITOR);
+    },
     component: ProductEditorPage,
 })

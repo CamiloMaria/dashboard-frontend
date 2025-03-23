@@ -39,8 +39,7 @@ const uploadFiles = async (
             await productsApi.uploadProductImages(renamedFiles);
             // Update progress for all files in this batch
             skuFiles.forEach(file => onProgress(file, 100));
-        } catch (error) {
-            console.error(`Failed to upload images for SKU ${sku}:`, error);
+        } catch {
             // Mark failed files with 0 progress
             skuFiles.forEach(file => onProgress(file, 0));
         }

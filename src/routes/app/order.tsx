@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/route-auth';
 export const orderRoute = createRoute({
     getParentRoute: () => appRoute,
     path: ROUTES.ORDERS,
-    beforeLoad: () => requireAuth(ROUTES.ORDERS),
+    beforeLoad: async () => {
+        return await requireAuth(ROUTES.ORDERS);
+    },
     component: OrdersPage,
 }); 

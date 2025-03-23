@@ -4,15 +4,9 @@ import axios from '@/lib/axios';
 export const productsApi = {
   baseUrl: '/products',
 
-  async getProducts({ page, limit: size, search, order, sortBy }: GetProductsParams) {
+  async getProducts(params: GetProductsParams) {
     const response = await axios.get<ProductsResponse>(this.baseUrl, {
-      params: {
-        page,
-        size,
-        search,
-        order,
-        sortBy
-      }
+      params
     });
 
     return response.data;

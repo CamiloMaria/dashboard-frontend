@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/route-auth';
 export const createProductSetRoute = createRoute({
     getParentRoute: () => appRoute,
     path: ROUTES.INVENTORY.PRODUCT_SETS.NEW,
-    beforeLoad: () => requireAuth(ROUTES.INVENTORY.PRODUCT_SETS.NEW),
+    beforeLoad: async () => {
+        return await requireAuth(ROUTES.INVENTORY.PRODUCT_SETS.NEW);
+    },
     component: CreateProductSetPage,
 }); 

@@ -7,6 +7,8 @@ import { requireAuth } from "@/lib/route-auth";
 export const logsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: ROUTES.LOGS,
-    beforeLoad: () => requireAuth(ROUTES.LOGS),
+    beforeLoad: async () => {
+        return await requireAuth(ROUTES.LOGS);
+    },
     component: LogsPage,
 }); 

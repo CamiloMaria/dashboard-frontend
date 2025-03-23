@@ -282,7 +282,8 @@ export const es = {
                 title: '¿Estás seguro de que quieres eliminar este producto?',
                 description: 'Esta acción no se puede deshacer. Esto eliminará permanentemente el producto "{product}" y eliminará sus datos del servidor.',
                 loading: 'Cargando...'
-            }
+            },
+            errorDescription: 'Error al cargar productos. Por favor intenta de nuevo o contacta a soporte si el problema persiste.'
         }
     },
     promotions: {

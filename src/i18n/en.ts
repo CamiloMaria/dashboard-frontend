@@ -282,7 +282,8 @@ export const en = {
         title: 'Are you sure you want to delete this product?',
         description: 'This action cannot be undone. This will permanently delete the product "{{product}}" and remove its data from the server.',
         loading: 'Loading...'
-      }
+      },
+      errorDescription: 'Failed to load products. Please try again or contact support if the problem persists.'
     }
   },
   promotions: {

@@ -9,11 +9,10 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/hooks/use-theme'
-import { ROUTES } from '@/constants/routes'
-import { removeAuthToken } from '@/lib/auth'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
+import { authApi } from '@/api/auth'
 
 interface TopBarProps {
     isSidebarOpen: boolean
@@ -26,10 +25,8 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
 
-    const handleLogout = () => {
-        removeAuthToken();
-        // Force a router state reset before navigation
-        window.location.href = ROUTES.AUTH.LOGIN;
+    const handleLogout = async () => {
+        await authApi.signOut();
     };
 
     const handleLanguageChange = (lang: string) => {

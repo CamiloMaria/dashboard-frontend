@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/route-auth';
 export const permissionsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: ROUTES.PERMISSIONS,
-    beforeLoad: () => requireAuth(ROUTES.PERMISSIONS),
+    beforeLoad: async () => {
+        return await requireAuth(ROUTES.PERMISSIONS);
+    },
     component: PermissionsPage,
 }); 
