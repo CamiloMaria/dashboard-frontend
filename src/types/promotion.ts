@@ -1,25 +1,23 @@
-import { Pagination } from "./pagination";
+import { PaginatedResponse } from "./response";
 
 export interface GetPromotionsParams {
     page: number;
     limit: number;
     search?: string;
-    order?: string;
     sortBy?: string;
+    sortOrder?: string;
 }
-
-export interface PromotionResponse {
-    data: Promotion[];
-    pagination: Pagination;
-}
-
 export interface Promotion {
     no_promo: number;
     sku: string;
     matnr: string;
     price: number;
     compare_price: number;
+    status: number;
     shop: string;
-    status: boolean;
-    created_at: string;
+    product_title: string;
+    promo_mapa: string;
+    create_at: string;
 } 
+
+export type PromotionResponse = PaginatedResponse<Promotion[]>;

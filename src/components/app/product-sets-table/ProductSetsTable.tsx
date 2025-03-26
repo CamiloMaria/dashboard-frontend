@@ -291,7 +291,7 @@ export function ProductSetsTable() {
     if (!data) return null;
 
     const { data: productSets, meta } = data;
-    const totalPages = Math.ceil(meta.pagination.totalItems / itemsPerPage);
+    const totalPages = meta.pagination.totalPages;
 
     if (productSets.length === 0) {
         return (

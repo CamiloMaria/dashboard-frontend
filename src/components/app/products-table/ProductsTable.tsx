@@ -258,7 +258,7 @@ export function ProductsTable() {
   if (!data) return null;
 
   const { data: products, meta } = data;
-  const totalPages = Math.ceil(meta.pagination.totalItems / itemsPerPage);
+  const totalPages = meta.pagination.totalPages;
   const activeFiltersCount = filters.status.length + (filters.bigItem !== null ? 1 : 0);
 
   return (

@@ -98,7 +98,7 @@ export function PromotionsTable() {
                 promo.price,
                 promo.compare_price,
                 promo.status ? t('common.active') : t('common.inactive'),
-                new Date(promo.created_at).toLocaleDateString()
+                new Date(promo.create_at).toLocaleDateString()
             ])
         ].join('\n');
 
@@ -165,7 +165,7 @@ export function PromotionsTable() {
                     <div className="text-muted-foreground">{t('promotions.columns.createdAt')}</div>
                     <div className="flex items-center gap-1.5">
                         <Calendar className="h-3 w-3" />
-                        {format(new Date(promotion.created_at), 'MMM d, yyyy')}
+                        {format(new Date(promotion.create_at), 'MMM d, yyyy')}
                     </div>
                 </div>
             </div>
@@ -260,8 +260,8 @@ export function PromotionsTable() {
 
     if (!data) return null;
 
-    const { data: promotions, pagination } = data;
-    const totalPages = Math.ceil(pagination.length / itemsPerPage);
+    const { data: promotions, meta } = data;
+    const totalPages = meta.pagination.totalPages;
 
     return (
         <Card className="overflow-hidden">
@@ -346,6 +346,14 @@ export function PromotionsTable() {
                                             </div>
                                         </TableHead>
                                     )}
+                                    {isDesktop && (
+                                        <TableHead className="font-semibold">
+                                            <div className="flex items-center gap-2">
+                                                <Tag className="h-4 w-4" />
+                                                {t('promotions.columns.productTitle')}
+                                            </div>
+                                        </TableHead>
+                                    )}
                                     <TableHead className="font-semibold">
                                         <div className="flex items-center gap-2">
                                             <Store className="h-4 w-4" />
@@ -386,6 +394,9 @@ export function PromotionsTable() {
                                         {isDesktop && (
                                             <TableCell className="font-mono text-sm">{promotion.matnr}</TableCell>
                                         )}
+                                        {isDesktop && (
+                                            <TableCell className="font-mono text-sm">{promotion.product_title}</TableCell>
+                                        )}
                                         <TableCell>{promotion.shop}</TableCell>
                                         <TableCell className="tabular-nums">
                                             <div className="flex items-center gap-1">
@@ -418,7 +429,7 @@ export function PromotionsTable() {
                                         <TableCell className="whitespace-nowrap">
                                             <div className="flex items-center gap-1.5">
                                                 <Calendar className="h-3 w-3" />
-                                                {format(new Date(promotion.created_at), 'MMM d, yyyy')}
+                                                {format(new Date(promotion.create_at), 'MMM d, yyyy')}
                                             </div>
                                         </TableCell>
                                     </TableRow>
