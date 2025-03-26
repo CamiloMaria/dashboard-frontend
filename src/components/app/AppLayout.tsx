@@ -1,21 +1,11 @@
 import { Outlet } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/components/app/Sidebar';
 import { TopBar } from '@/components/app/TopBar';
 import { cn } from '@/lib/utils';
-import { useNavigate } from '@tanstack/react-router';
-import { isAuthenticated } from '@/lib/auth';
-import { ROUTES } from '@/constants/routes';
 
 export function AppLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!isAuthenticated()) {
-            navigate({ to: ROUTES.AUTH.LOGIN });
-        }
-    }, [navigate]);
 
     return (
         <div className="min-h-screen bg-background">

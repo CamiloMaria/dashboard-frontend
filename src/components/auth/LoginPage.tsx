@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ROUTES } from '@/constants/routes';
 import { Eye, EyeOff } from 'lucide-react';
-import { isAuthenticated } from '@/lib/auth';
 import { authApi } from '@/api/auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,12 +26,6 @@ export function LoginPage() {
         username: '',
         password: '',
     });
-
-    useEffect(() => {
-        if (isAuthenticated()) {
-            navigate({ to: ROUTES.INVENTORY.PRODUCTS.LIST });
-        }
-    }, [navigate]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
