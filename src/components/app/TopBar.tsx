@@ -24,6 +24,8 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
     const { t, i18n } = useTranslation();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
+    // Combined condition for compact UI view (mobile or tablet)
+    const isCompactView = isMobile || isTablet;
 
     const handleLogout = async () => {
         await authApi.signOut();
@@ -69,8 +71,8 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
                 <div className="flex-1" />
 
                 <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
-                    {/* Mobile menu dropdown */}
-                    {isMobile && (
+                    {/* Compact view menu dropdown (mobile and tablet) */}
+                    {isCompactView && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -137,8 +139,8 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
                         </DropdownMenu>
                     )}
 
-                    {/* Tablet/Desktop controls */}
-                    {!isMobile && (
+                    {/* Desktop controls - only visible on larger screens */}
+                    {!isCompactView && (
                         <>
                             {/* Theme Switcher */}
                             <DropdownMenu>
@@ -179,8 +181,8 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            {/* Notifications - hidden on smaller tablets */}
-                            <Button variant="ghost" size="icon" className={cn("h-9 w-9", isTablet && "hidden sm:flex")}>
+                            {/* Notifications */}
+                            <Button variant="ghost" size="icon" className="h-9 w-9">
                                 <Bell className="h-4 w-4" />
                             </Button>
 

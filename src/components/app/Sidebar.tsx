@@ -214,11 +214,13 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const { hasAccess } = useAuth();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
+    // Combined condition for compact view (mobile or tablet)
+    const isCompactView = isMobile || isTablet;
     const [showMobileOverlay, setShowMobileOverlay] = useState(false);
 
     // Handle mobile sidebar visibility
     useEffect(() => {
-        if (isMobile || isTablet) {
+        if (isCompactView) {
             setShowMobileOverlay(isOpen);
 
             // Prevent body scroll when sidebar is open on mobile
@@ -235,7 +237,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         return () => {
             document.body.style.overflow = '';
         };
-    }, [isOpen, isMobile, isTablet]);
+    }, [isOpen, isCompactView]);
 
     const isRouteActive = (path: string) => {
         if (path === BASE_PATH) {
@@ -247,7 +249,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const handleNavigate = (path: string) => {
         navigate({ to: path as Route['path'] });
         // Close sidebar on navigation for mobile and tablet
-        if (isMobile || isTablet) {
+        if (isCompactView) {
             onToggle();
         }
     };
@@ -280,8 +282,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 className={cn(
                     'fixed left-0 top-0 z-40 h-screen border-r bg-backgroundSecondary transition-all duration-300',
                     isOpen ? sidebarWidth : collapsedWidth,
-                    (isMobile || isTablet) && !isOpen && 'translate-x-[-100%] md:translate-x-0',
-                    (isMobile || isTablet) && isOpen && 'translate-x-0',
+                    isCompactView && !isOpen && 'translate-x-[-100%] md:translate-x-0',
+                    isCompactView && isOpen && 'translate-x-0',
                     'shadow-lg'
                 )}
             >
@@ -335,7 +337,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </ScrollArea>
 
                 {/* Logo at bottom - only show when sidebar is collapsed on desktop */}
-                {(!isOpen && !isMobile && !isTablet) && (
+                {(!isOpen && !isCompactView) && (
                     <div className="absolute bottom-4 left-0 right-0 px-4">
                         <Box className="h-4 w-4 mx-auto text-white" />
                     </div>
