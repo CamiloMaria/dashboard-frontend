@@ -108,9 +108,9 @@ export function DescriptionTab({ description, title, onDescriptionChange }: Desc
         if (!editor) return;
         try {
             setIsGenerating(true);
-            const newDescription = await productsApi.generateDescription(title);
-            editor.commands.setContent(newDescription);
-            onDescriptionChange(newDescription);
+            const response = await productsApi.generateDescription(title);
+            editor.commands.setContent(response.data.description);
+            onDescriptionChange(response.data.description);
             toast({
                 title: t('products.editor.form.description.messages.generated'),
                 description: t('products.editor.form.description.messages.generatedDescription'),

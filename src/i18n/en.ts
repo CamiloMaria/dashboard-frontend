@@ -190,7 +190,7 @@ export const en = {
           },
           generateDialog: {
             title: 'Generate Description',
-            description: 'This will generate a new product description based on the product information. The current description will be replaced. Do you want to continue?',
+            description: 'This will generate a new product description based on the product title and category. The current description will be replaced. Do you want to continue?',
             confirmText: 'Generate'
           },
           messages: {
@@ -211,6 +211,7 @@ export const en = {
           addPlaceholder: 'Add new keyword...',
           addButton: 'Add',
           removeTooltip: 'Remove keyword',
+          empty: 'No keywords added yet',
           messages: {
             duplicate: 'Duplicate keyword',
             duplicateDescription: 'This keyword already exists.',

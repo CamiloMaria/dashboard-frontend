@@ -150,3 +150,15 @@ export interface CreateProductResult {
 }
 
 export type CreateProductResponse = BaseResponse<CreateProductResult[]>;
+
+export interface GenerateKeywordsResult {
+    keywords: string[];
+}
+
+export type GenerateKeywordsResponse = BaseResponse<GenerateKeywordsResult>;
+
+export interface GenerateDescriptionResult {
+    description: string;
+}
+
+export type GenerateDescriptionResponse = BaseResponse<GenerateDescriptionResult>;

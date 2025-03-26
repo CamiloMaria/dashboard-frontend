@@ -521,7 +521,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
               <ProductTabs
                 product={product}
                 title={form.watch('title')}
-                category={product?.category || ''}
+                sku={product?.sku || ''}
                 specifications={specifications}
                 onSpecificationsChange={setSpecifications}
                 description={description}

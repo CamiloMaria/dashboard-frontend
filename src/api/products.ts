@@ -1,4 +1,4 @@
-import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse } from '@/types'
+import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
@@ -63,18 +63,17 @@ export const productsApi = {
     });
   },
 
-  async generateDescription(title: string): Promise<string> {
-    const response = await axios.post<string>('/product/generate/description', {
-      title
+  async generateDescription(productTitle: string): Promise<GenerateDescriptionResponse> {
+    const response = await axios.post<GenerateDescriptionResponse>('/products/generate-description', {
+      productTitle
     });
 
     return response.data;
   },
 
-  async generateKeywords(title: string, category: string): Promise<string[]> {
-    const response = await axios.post<string[]>('/product/generate/keywords', {
-      title,
-      category
+  async generateKeywords(sku: string): Promise<GenerateKeywordsResponse> {
+    const response = await axios.post<GenerateKeywordsResponse>('/products/generate-keywords', {
+      sku
     });
 
     return response.data;

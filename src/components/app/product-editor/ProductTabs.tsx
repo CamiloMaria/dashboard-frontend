@@ -16,7 +16,7 @@ export interface ProductTabsProps {
     description: string;
     onDescriptionChange: (description: string) => void;
     title: string;
-    category: string;
+    sku: string;
     keywords: string[];
     onKeywordsChange: (keywords: string[]) => void;
     isMobile?: boolean;
@@ -30,7 +30,7 @@ export function ProductTabs({
     description,
     onDescriptionChange,
     title,
-    category,
+    sku,
     keywords,
     onKeywordsChange,
     isMobile,
@@ -113,8 +113,7 @@ export function ProductTabs({
                     <TabsContent value="keywords" className="m-0">
                         <KeywordsTab
                             keywords={keywords}
-                            title={title}
-                            category={category}
+                            sku={sku}
                             onKeywordsChange={onKeywordsChange}
                         />
                     </TabsContent>

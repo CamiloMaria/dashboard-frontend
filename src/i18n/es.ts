@@ -211,6 +211,7 @@ export const es = {
                     addPlaceholder: 'Agregar nueva palabra clave...',
                     addButton: 'Agregar',
                     removeTooltip: 'Eliminar palabra clave',
+                    empty: 'No hay palabras clave agregadas',
                     messages: {
                         duplicate: 'Palabra clave duplicada',
                         duplicateDescription: 'Esta palabra clave ya existe.',
@@ -226,7 +227,7 @@ export const es = {
                     },
                     generateDialog: {
                         title: 'Generar Palabras Clave',
-                        description: 'Esto generará nuevas palabras clave basadas en la información del producto. Las palabras clave actuales serán reemplazadas. ¿Deseas continuar?',
+                        description: 'Esto generará nuevas palabras clave basadas en el título y categoría del producto. Las palabras clave actuales serán reemplazadas. ¿Deseas continuar?',
                         confirmText: 'Generar',
                     },
                 },

@@ -14,12 +14,11 @@ import { cn } from '@/lib/utils';
 
 interface KeywordsTabProps {
     keywords: string[];
-    title: string;
-    category: string;
+    sku: string;
     onKeywordsChange: (keywords: string[]) => void;
 }
 
-export function KeywordsTab({ keywords, title, category, onKeywordsChange }: KeywordsTabProps) {
+export function KeywordsTab({ keywords, sku, onKeywordsChange }: KeywordsTabProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
     const [newKeyword, setNewKeyword] = useState('');
@@ -34,10 +33,9 @@ export function KeywordsTab({ keywords, title, category, onKeywordsChange }: Key
     const handleGenerateConfirm = async () => {
         try {
             setIsGenerating(true);
-            const generatedKeywords = await productsApi.generateKeywords(title, category);
+            const response = await productsApi.generateKeywords(sku);
             // Merge existing and new keywords, remove duplicates
-            const updatedKeywords = [...new Set([...keywords, ...generatedKeywords])];
-            onKeywordsChange(updatedKeywords);
+            onKeywordsChange(response.data.keywords);
             toast({
                 title: t('products.editor.form.keywords.messages.generated'),
                 description: t('products.editor.form.keywords.messages.generatedDescription'),
