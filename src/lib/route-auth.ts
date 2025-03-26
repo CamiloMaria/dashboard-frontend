@@ -39,10 +39,15 @@ export async function requireAuth(allowedPath: string) {
   // Check if user has access to the requested path
   const allowedPathWithoutBase = allowedPath.replace(BASE_PATH, '');
   
-  // Check if any permission matches the requested path (exact match or using wildcards)
+  // Check if any permission matches the requested path (exact match or using wildcards or path parameters)
   const hasPermission = permissions.some(path => {
     // Convert glob-style pattern to regex
-    const pattern = path.replace(/\*/g, '.*');
+    // First handle * wildcards
+    let pattern = path.replace(/\*/g, '.*');
+    
+    // Handle route parameters (e.g., $productId) - replace with pattern that matches any value
+    pattern = pattern.replace(/\$\w+/g, '[^/]+');
+    
     const regex = new RegExp(`^${pattern}$`);
     return regex.test(allowedPathWithoutBase);
   });

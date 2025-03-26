@@ -76,17 +76,27 @@ function StockIndicator({ stock, securityStock, isMobile }: StockIndicatorProps)
     );
 }
 
-function PriceChange({ current, previous, isMobile }: { current: number; previous: number | null; isMobile?: boolean }) {
+function PriceChange({ current, previous, isMobile }: { current: number | null; previous: number | null; isMobile?: boolean }) {
+    const currentPrice = Number(current) || 0;
+    const previousPrice = Number(previous) || 0;
+
     if (!previous) return (
         <div className={cn(
             "flex items-center gap-2",
             isMobile ? "min-w-0" : "min-w-[160px] gap-3"
         )}>
-            <span className="tabular-nums font-medium">${current.toFixed(2)}</span>
+            <span className="tabular-nums font-medium">${currentPrice.toFixed(2)}</span>
         </div>
     );
 
-    const percentChange = ((current - previous) / previous) * 100;
+    // Handle case where current or previous could be null or zero
+    let percentChange = 0;
+    if (previousPrice !== 0) {
+        percentChange = ((currentPrice - previousPrice) / previousPrice) * 100;
+    } else if (currentPrice > 0) {
+        // If previous price was zero but current is not, consider it a 100% increase
+        percentChange = 100;
+    }
     const isIncrease = percentChange > 0;
 
     return (
@@ -94,7 +104,7 @@ function PriceChange({ current, previous, isMobile }: { current: number; previou
             "flex items-center",
             isMobile ? "gap-1.5 flex-wrap" : "gap-3 min-w-[160px]"
         )}>
-            <span className="tabular-nums font-medium">${current.toFixed(2)}</span>
+            <span className="tabular-nums font-medium">${currentPrice.toFixed(2)}</span>
             <Badge
                 variant="outline"
                 className={cn(
