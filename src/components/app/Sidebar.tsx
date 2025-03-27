@@ -212,10 +212,17 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     const routerState = useRouterState();
     const currentPath = routerState.location.pathname;
     const { hasAccess } = useAuth();
-    const isMobile = useMediaQuery('(max-width: 640px)');
-    const isTablet = useMediaQuery('(max-width: 1024px)');
-    // Combined condition for compact view (mobile or tablet)
+
+    // Enhanced breakpoint detection with more granular sizes
+    const isMobile = useMediaQuery('(max-width: 767px)');
+    const isMediumTablet = useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
+    const isLargeTablet = useMediaQuery('(min-width: 1024px) and (max-width: 1279px)');
+
+    // Combined conditions for different view types
+    const isTablet = isMediumTablet || isLargeTablet;
+    const isIntermediateView = isMediumTablet; // Specific handling for problematic sizes
     const isCompactView = isMobile || isTablet;
+
     const [showMobileOverlay, setShowMobileOverlay] = useState(false);
 
     // Handle mobile sidebar visibility
@@ -263,16 +270,27 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         return true;
     });
 
-    // Determine sidebar width based on screen size
-    const sidebarWidth = isTablet && !isMobile ? 'w-56' : 'w-64';
-    const collapsedWidth = isTablet && !isMobile ? 'w-14' : 'w-16';
+    // More refined sidebar width calculation based on screen size
+    let sidebarWidth = 'w-64'; // Default full width
+    let collapsedWidth = 'w-16'; // Default collapsed width
+
+    if (isLargeTablet) {
+        sidebarWidth = 'w-56';
+        collapsedWidth = 'w-14';
+    } else if (isMediumTablet) {
+        sidebarWidth = 'w-52';
+        collapsedWidth = 'w-12';
+    } else if (isMobile) {
+        sidebarWidth = 'w-64';
+        collapsedWidth = 'w-0';
+    }
 
     return (
         <>
-            {/* Mobile overlay */}
+            {/* Mobile overlay with improved z-index handling */}
             {showMobileOverlay && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
                     onClick={onToggle}
                     aria-hidden="true"
                 />
@@ -280,9 +298,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             <aside
                 className={cn(
-                    'fixed left-0 top-0 z-40 h-screen border-r bg-backgroundSecondary transition-all duration-300',
+                    'fixed left-0 top-0 z-50 h-screen border-r bg-backgroundSecondary transition-all duration-300',
                     isOpen ? sidebarWidth : collapsedWidth,
-                    isCompactView && !isOpen && 'translate-x-[-100%] md:translate-x-0',
+                    // Enhanced transform logic with better handling for intermediate sizes
+                    isCompactView && !isOpen && 'translate-x-[-100%]',
+                    isIntermediateView && !isOpen && 'sm:translate-x-[-100%] md:translate-x-0',
+                    !isIntermediateView && !isMobile && !isOpen && 'translate-x-0',
                     isCompactView && isOpen && 'translate-x-0',
                     'shadow-lg'
                 )}
@@ -293,8 +314,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                             src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
                             alt="Plaza Lama"
                             className={cn(
-                                "object-contain transition-opacity duration-300",
-                                isTablet ? "h-5 max-w-[120px]" : "h-7 max-w-[160px]"
+                                "h-auto object-contain transition-opacity duration-300",
+                                isMobile ? "max-h-5 max-w-[100px]" :
+                                    isMediumTablet ? "max-h-6 max-w-[120px]" :
+                                        "max-h-7 max-w-[140px]"
                             )}
                         />
                     )}

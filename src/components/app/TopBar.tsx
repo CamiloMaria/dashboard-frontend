@@ -22,9 +22,14 @@ interface TopBarProps {
 export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
     const { theme, setTheme } = useTheme();
     const { t, i18n } = useTranslation();
-    const isMobile = useMediaQuery('(max-width: 640px)');
-    const isTablet = useMediaQuery('(max-width: 1024px)');
-    // Combined condition for compact UI view (mobile or tablet)
+
+    // Enhanced media queries for more precise breakpoint handling
+    const isMobile = useMediaQuery('(max-width: 767px)');
+    const isMediumTablet = useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
+    const isLargeTablet = useMediaQuery('(min-width: 1024px) and (max-width: 1279px)');
+
+    // Combined conditions for different view types
+    const isTablet = isMediumTablet || isLargeTablet;
     const isCompactView = isMobile || isTablet;
 
     const handleLogout = async () => {
@@ -37,36 +42,42 @@ export function TopBar({ isSidebarOpen, onToggleSidebar }: TopBarProps) {
         localStorage.setItem('preferredLanguage', lang);
     };
 
-    return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-14 sm:h-16 items-center px-3 sm:px-4 md:container">
-                {/* Menu toggle button - only visible on mobile/tablet or when sidebar is closed */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                        "mr-1 sm:mr-2 flex-shrink-0",
-                        (!isMobile && !isTablet && isSidebarOpen) && "opacity-0 pointer-events-none",
-                        (!isMobile && !isTablet) && "hidden"
-                    )}
-                    onClick={onToggleSidebar}
-                    aria-label="Toggle sidebar"
-                >
-                    <Menu className="h-5 w-5" />
-                </Button>
+    // Calculate if the sidebar toggle should be visible
+    const showSidebarToggle = isMobile || isTablet || !isSidebarOpen;
 
-                {/* Logo container with flex layout for better positioning */}
-                <div className={cn(
-                    "flex items-center h-7 sm:h-8 overflow-hidden transition-all duration-200",
-                    isSidebarOpen && !isMobile && !isTablet ? "ml-0 opacity-0 w-0" : "ml-1 sm:ml-2 opacity-100 w-auto",
-                    isMobile ? "max-w-[120px]" : isTablet ? "max-w-[160px]" : "max-w-[180px]"
-                )}>
-                    <img
-                        src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
-                        alt="Plaza Lama"
-                        className="h-full object-contain"
-                    />
-                </div>
+    return (
+        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-14 sm:h-16 items-center px-3 sm:px-4 md:container">
+                {/* Menu toggle button - improved visibility logic */}
+                {isMobile && (
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                                "mr-1 flex-shrink-0",
+                                !showSidebarToggle && "opacity-0 pointer-events-none"
+                            )}
+                            onClick={onToggleSidebar}
+                            aria-label="Toggle sidebar"
+                        >
+                            <Menu className="h-5 w-5" />
+                        </Button>
+
+                        {/* Logo container with enhanced responsive behavior */}
+                        <div className={cn(
+                            "flex items-center h-7 overflow-hidden transition-all duration-200",
+                            "ml-1 opacity-100 w-auto",
+                            "max-w-[100px]"
+                        )}>
+                            <img
+                                src="https://ecommerce-image-catalog.s3.amazonaws.com/Plaza+Lama/Logo+Plaza+Lama+Border+Blanco.png"
+                                alt="Plaza Lama"
+                                className="h-full object-contain"
+                            />
+                        </div>
+                    </>
+                )}
 
                 <div className="flex-1" />
 
