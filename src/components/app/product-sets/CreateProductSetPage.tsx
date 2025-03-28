@@ -40,7 +40,7 @@ export function CreateProductSetPage() {
     const { data: products = [], isLoading } = useQuery({
         queryKey: productKeys.search(debouncedSearch),
         queryFn: () => productsApi.getProducts({ search: debouncedSearch, page: 1, limit: 25 }),
-        select: (data) => data.data.filter(product => product.bigItems === 1),
+        select: (data) => data.data.filter(product => product.category?.bigItems === 1),
     });
 
     const createMutation = useMutation({
@@ -123,7 +123,7 @@ export function CreateProductSetPage() {
             title: title.trim(),
             selected_products: selectedProducts.map(product => ({
                 sku: product.sku,
-                price: product.catalogs[0]?.price ?? 0,
+                price: product.catalogs?.[0].price ?? 0,
                 is_free: freeProducts.has(product.id),
                 grupo: product.grupo,
             })),
@@ -133,11 +133,11 @@ export function CreateProductSetPage() {
     };
 
     const getProductPrice = (product: Product) => {
-        return product.catalogs[0]?.price || 0;
+        return product.catalogs?.[0].price || 0;
     };
 
     const getProductComparePrice = (product: Product) => {
-        return product.catalogs[0]?.compare_price || null;
+        return product.catalogs?.[0].compare_price || null;
     };
 
     return (

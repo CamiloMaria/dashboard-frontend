@@ -31,11 +31,11 @@ export function ProductInfoFields({ product, isMobile }: ProductInfoFieldsProps)
             </div>
             <div>
                 <Label className="text-muted-foreground">{t('products.editor.form.info.category')}</Label>
-                <p className="text-sm font-medium mt-1 break-words">{product?.category || notSet}</p>
+                <p className="text-sm font-medium mt-1 break-words">{product?.category?.cat_app || notSet}</p>
             </div>
             <div>
                 <Label className="text-muted-foreground">{t('products.editor.form.info.bigItem')}</Label>
-                <p className="text-sm font-medium mt-1">{product?.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}</p>
+                <p className="text-sm font-medium mt-1">{product?.category?.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}</p>
             </div>
             <div>
                 <Label className="text-muted-foreground">{t('products.editor.form.info.withoutStock')}</Label>

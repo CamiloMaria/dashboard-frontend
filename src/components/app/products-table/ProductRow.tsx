@@ -86,15 +86,15 @@ export function ProductRow({ product, onEdit, onDelete, isMobileView = false }: 
                             <div>
                                 <div className="text-xs text-muted-foreground mb-1">{t('products.list.columns.bigItem')}</div>
                                 <Badge
-                                    variant={product.bigItems ? 'default' : 'secondary'}
+                                    variant={product.category?.bigItems ? 'default' : 'secondary'}
                                     className={cn(
                                         "font-normal transition-colors",
-                                        product.bigItems
+                                        product.category?.bigItems
                                             ? "bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 border-blue-500/20"
                                             : "bg-background/50"
                                     )}
                                 >
-                                    {product.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}
+                                    {product.category?.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}
                                 </Badge>
                             </div>
                             <div>
@@ -203,15 +203,15 @@ export function ProductRow({ product, onEdit, onDelete, isMobileView = false }: 
             </TableCell>
             <TableCell className="hidden md:table-cell">
                 <Badge
-                    variant={product.bigItems ? 'default' : 'secondary'}
+                    variant={product.category?.bigItems ? 'default' : 'secondary'}
                     className={cn(
                         "font-normal transition-colors",
-                        product.bigItems
+                        product.category?.bigItems
                             ? "bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 border-blue-500/20"
                             : "bg-background/50 group-hover:bg-background"
                     )}
                 >
-                    {product.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}
+                    {product.category?.bigItems ? t('products.list.row.yes') : t('products.list.row.no')}
                 </Badge>
             </TableCell>
             <TableCell>

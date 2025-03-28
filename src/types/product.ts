@@ -13,12 +13,19 @@ export const productFormSchema = z.object({
 
 export type ProductFormValues = z.infer<typeof productFormSchema> 
 
+export enum ProductStatus {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive',
+}
+
 export interface GetProductsParams {
     page: number;
     limit: number;
     search?: string;
     sortBy?: string;
     sortOrder?: string;
+    status?: ProductStatus;
+    bigItem?: boolean;
 }
 
 export type ProductsResponse = PaginatedResponse<Product[]>;
@@ -34,8 +41,6 @@ export interface Product {
     type_tax: number;
     description: string;
     description_instaleap: string;
-    category: string;
-    bigItems: number;
     image_url: string;
     unit: string;
     isActive: boolean;
@@ -52,9 +57,10 @@ export interface Product {
     search_keywords: string[];
     create_at: string;
     update_at: string;
-    images: Image[];
-    specifications: Specification[];
-    catalogs: Catalog[];
+    images: Image[] | null;
+    specifications: Specification[] | null;
+    catalogs: Catalog[] | null;
+    category: Category | null;
 }
 
 export interface Image {
@@ -85,6 +91,28 @@ export interface Catalog {
     status_changed_by: string;
     updated_at: Date;
 }
+
+
+export interface Category {
+    id: number;
+    description: string;
+    group_sap: string;
+    depto: string | null;
+    depto_sap: string | null;
+    area: string | null;
+    cat_app: string | null;
+    shops_stock: string | null;
+    status: number;
+    level2: string | null;
+    level3: string | null;
+    level1_instaleap: string | null;
+    level2_instaleap: string | null;
+    level3_instaleap: string | null;
+    bigItems: number;
+    delivery: string;
+    delivery_depto: string | null;
+}
+
 
 export interface Specification {
     title: string;
