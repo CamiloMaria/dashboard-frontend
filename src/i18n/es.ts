@@ -1,6 +1,7 @@
 export const es = {
     common: {
         save: 'Guardar',
+        confirm: 'Confirmar',
         cancel: 'Cancelar',
         delete: 'Eliminar',
         edit: 'Editar',
@@ -144,6 +145,13 @@ export const es = {
                             description: 'Cambio promedio de precio'
                         }
                     },
+                    disable: {
+                        title: 'Desactivar Inventario',
+                        description: 'Desactivar inventario para este producto en la tienda seleccionada.',
+                        reasonLabel: 'Razón',
+                        selectReason: 'Selecciona una razón',
+                        disableReason: 'Razón de Desactivación',
+                    }
                 },
                 images: {
                     imageCount: 'Imagen {{current}} de {{total}}',

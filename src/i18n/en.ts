@@ -1,6 +1,7 @@
 export const en = {
   common: {
     save: 'Save',
+    confirm: 'Confirm',
     cancel: 'Cancel',
     delete: 'Delete',
     edit: 'Edit',
@@ -143,7 +144,14 @@ export const en = {
               description: 'Average price change'
             }
           },
-          title: 'Inventory'
+          title: 'Inventory',
+          disable: {
+            title: 'Disable Inventory',
+            description: 'Disable inventory for this product in the selected shop.',
+            disableReason: 'Disable Reason',
+            reasonLabel: 'Reason',
+            selectReason: 'Select a reason',
+          }
         },
         images: {
           imageCount: 'Image {{current}} of {{total}}',

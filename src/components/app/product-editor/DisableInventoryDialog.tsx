@@ -17,15 +17,23 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DISABLE_REASONS, type DisableReason } from '@/constants/product';
+import { useTranslation } from 'react-i18next';
 
-interface DisableReasonDialogProps {
+interface DisableInventoryDialogProps {
     open: boolean;
+    shopName: string;
     onConfirm: (reason: DisableReason) => void;
     onCancel: () => void;
 }
 
-export function DisableReasonDialog({ open, onConfirm, onCancel }: DisableReasonDialogProps) {
+export function DisableInventoryDialog({
+    open,
+    shopName,
+    onConfirm,
+    onCancel
+}: DisableInventoryDialogProps) {
     const [selectedReason, setSelectedReason] = useState<DisableReason | ''>('');
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!open) {
@@ -49,20 +57,20 @@ export function DisableReasonDialog({ open, onConfirm, onCancel }: DisableReason
         <AlertDialog open={open}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Disable Product</AlertDialogTitle>
+                    <AlertDialogTitle>{t('products.editor.form.inventory.disable.title')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Please select a reason where this product should be disabled.
+                        {t('products.editor.form.inventory.disable.description', { shop: shopName })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <div className="space-y-2">
-                    <Label>Disable Reason</Label>
+                    <Label>{t('products.editor.form.inventory.disable.reasonLabel')}</Label>
                     <Select
                         value={selectedReason}
                         onValueChange={(value: DisableReason | '') => setSelectedReason(value)}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a reason" />
+                            <SelectValue placeholder={t('products.editor.form.inventory.disable.selectReason')} />
                         </SelectTrigger>
                         <SelectContent>
                             {DISABLE_REASONS.map((reason) => (
@@ -76,16 +84,16 @@ export function DisableReasonDialog({ open, onConfirm, onCancel }: DisableReason
 
                 <AlertDialogFooter>
                     <Button variant="outline" onClick={handleCancel}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         onClick={handleConfirm}
                         disabled={!selectedReason}
                     >
-                        Confirm
+                        {t('common.confirm')}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
     );
-}
+} 

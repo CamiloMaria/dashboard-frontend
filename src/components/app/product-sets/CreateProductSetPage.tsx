@@ -123,7 +123,7 @@ export function CreateProductSetPage() {
             title: title.trim(),
             selected_products: selectedProducts.map(product => ({
                 sku: product.sku,
-                price: product.inventory[0]?.price ?? 0,
+                price: product.catalogs[0]?.price ?? 0,
                 is_free: freeProducts.has(product.id),
                 grupo: product.grupo,
             })),
@@ -133,11 +133,11 @@ export function CreateProductSetPage() {
     };
 
     const getProductPrice = (product: Product) => {
-        return product.inventory[0]?.price || 0;
+        return product.catalogs[0]?.price || 0;
     };
 
     const getProductComparePrice = (product: Product) => {
-        return product.inventory[0]?.compare_price || null;
+        return product.catalogs[0]?.compare_price || null;
     };
 
     return (

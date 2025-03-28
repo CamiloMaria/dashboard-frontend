@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type Product } from '@/types/product';
+import { type Product, type Catalog } from '@/types/product';
 import { ProductInventoryTable } from './ProductInventoryTable';
 import { AlertCircle, ArrowDown, ArrowUp, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useState, useEffect, useCallback } from 'react';
 
 interface StatCardProps {
     title: string;
@@ -66,15 +67,28 @@ function StatCard({ title, value, description, icon, trend, isMobile }: StatCard
 
 interface InventoryTabProps {
     product: Product | undefined;
+    onInventoryUpdate?: (inventory: Catalog[]) => void;
+    readOnly?: boolean;
 }
 
-export function InventoryTab({ product }: InventoryTabProps) {
-    const inventory = product?.inventory || [];
+export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: InventoryTabProps) {
     const { t } = useTranslation();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
 
-    // Calculate inventory statistics
+    // Maintain a local state of the inventory for immediate UI updates
+    const [inventory, setInventory] = useState<Catalog[]>([]);
+
+    // Update local inventory when product changes
+    useEffect(() => {
+        if (product?.catalogs) {
+            setInventory(product.catalogs);
+        } else {
+            setInventory([]);
+        }
+    }, [product?.catalogs]);
+
+    // Calculate inventory statistics based on local state
     const totalStock = inventory.reduce((sum, inv) => sum + inv.stock, 0);
     const lowStockCount = inventory.filter(inv => inv.stock < (product?.security_stock || 20)).length;
     const activeListings = inventory.filter(inv => inv.status === 1).length;
@@ -87,6 +101,18 @@ export function InventoryTab({ product }: InventoryTabProps) {
     const avgPriceChange = priceChanges.length
         ? priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length
         : 0;
+
+    const handleInventoryUpdate = useCallback((updatedInventory: Catalog[]) => {
+        // Update local state first for immediate UI feedback
+        setInventory(updatedInventory);
+
+        // Then propagate to parent
+        if (onInventoryUpdate) {
+            onInventoryUpdate(updatedInventory);
+        }
+
+        // Debug log
+    }, [onInventoryUpdate]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -146,6 +172,8 @@ export function InventoryTab({ product }: InventoryTabProps) {
                     <ProductInventoryTable
                         inventory={inventory}
                         securityStock={product?.security_stock || 10}
+                        onInventoryUpdate={handleInventoryUpdate}
+                        readOnly={readOnly}
                     />
                 </CardContent>
             </Card>

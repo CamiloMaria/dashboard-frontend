@@ -5,6 +5,7 @@ export * from './ProductTabs';
 export * from './LoadingOverlay';
 export * from './ActionButtons';
 export * from './DisableReasonDialog';
+export * from './DisableInventoryDialog';
 export * from './ProductEditor';
 export * from './DescriptionTab';
 export * from './InventoryTab';

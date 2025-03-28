@@ -6,30 +6,39 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { type Inventory } from '@/types/product';
+import { type Catalog } from '@/types/product';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
+    AlertCircle,
     ChevronDown,
     ChevronUp,
+    Info,
     Search,
     Store,
     TrendingDown,
     TrendingUp,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { DisableInventoryDialog } from './DisableInventoryDialog';
+import { type DisableReason } from '@/constants/product';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
 
 export interface ProductInventoryTableProps {
-    inventory: Inventory[];
+    inventory: Catalog[];
     securityStock?: number | undefined;
+    onInventoryUpdate?: (updatedInventory: Catalog[]) => void;
+    readOnly?: boolean;
 }
 
 interface SortConfig {
-    key: keyof Inventory | null;
+    key: keyof Catalog | null;
     direction: 'asc' | 'desc';
 }
 
@@ -124,26 +133,134 @@ function PriceChange({ current, previous, isMobile }: { current: number | null; 
     );
 }
 
+interface StatusBadgeProps {
+    status: number;
+    statusComment?: string;
+    onChange?: (newStatus: number) => void;
+    isMobile?: boolean;
+    readOnly?: boolean;
+}
+
+function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = false }: StatusBadgeProps) {
+    const { t } = useTranslation();
+    const [isActive, setIsActive] = useState(status === 1);
+
+    // Update local state when status prop changes
+    useEffect(() => {
+        setIsActive(status === 1);
+    }, [status]);
+
+    const handleStatusChange = (checked: boolean) => {
+        if (!readOnly && onChange) {
+            // Update local state for immediate feedback
+            setIsActive(checked);
+            // Then propagate change to parent
+            onChange(checked ? 1 : 0);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+                <Badge
+                    variant={isActive ? 'default' : 'destructive'}
+                    className={cn(
+                        "font-normal justify-center",
+                        isMobile ? "text-xs px-1.5 py-0.5 min-w-[60px]" : "min-w-[72px]",
+                        !isActive && "bg-destructive/10 text-destructive"
+                    )}
+                >
+                    {isActive ? t('products.list.row.active') : t('products.list.row.inactive')}
+                </Badge>
+
+                <Switch
+                    checked={isActive}
+                    onCheckedChange={handleStatusChange}
+                    disabled={readOnly}
+                    className={cn(
+                        "data-[state=checked]:bg-green-600",
+                        readOnly && "opacity-60 cursor-not-allowed"
+                    )}
+                />
+            </div>
+
+            {!isActive && statusComment && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{t('products.inventory.status.reason')}: {statusComment}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+        </div>
+    );
+}
+
 // Mobile card view for inventory items
 function InventoryCard({
     item,
     securityStock,
-    t
+    t,
+    onStatusChange,
+    readOnly,
+    recentlyChanged = []
 }: {
-    item: Inventory;
+    item: Catalog;
     securityStock: number;
     t: (key: string, options?: Record<string, unknown>) => string;
+    onStatusChange?: (id: number, newStatus: number, comment?: string) => void;
+    readOnly?: boolean;
+    recentlyChanged?: number[];
 }) {
+    const handleStatusToggle = useCallback((newStatus: number) => {
+        if (readOnly || !onStatusChange) return;
+
+        // If changing to inactive, show dialog
+        if (newStatus === 0) {
+            onStatusChange(item.id, 0);
+        } else {
+            // If changing to active, toggle directly
+            onStatusChange(item.id, 1);
+        }
+    }, [item.id, onStatusChange, readOnly]);
+
+    // Use computed property instead of local state for consistency
+    const isInactive = item.status === 0;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{
+                opacity: 1,
+                y: 0,
+                backgroundColor: recentlyChanged.includes(item.id)
+                    ? item.status === 1 ? 'rgba(132, 204, 22, 0.1)' : 'rgba(239, 68, 68, 0.1)'
+                    : item.status === 0 ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 1)'
+            }}
+            transition={{
+                backgroundColor: { duration: 2 }
+            }}
             exit={{ opacity: 0, y: -10 }}
-            className="p-3 border rounded-md mb-3 bg-card"
+            className={cn(
+                "p-3 border rounded-md mb-3",
+                isInactive
+                    ? "bg-muted/50 border-muted text-muted-foreground"
+                    : "bg-card",
+                recentlyChanged.includes(item.id) && "shadow-sm"
+            )}
         >
             <div className="flex items-center gap-2 mb-2">
                 <Store className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span className="font-medium">{item.centro}</span>
+                <span className={cn(
+                    "font-medium",
+                    isInactive && "line-through opacity-70"
+                )}>
+                    {item.shop}
+                </span>
             </div>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">
@@ -182,19 +299,51 @@ function InventoryCard({
                     <div className="text-xs text-muted-foreground mb-1">
                         {t('products.editor.form.inventory.columns.status')}
                     </div>
-                    <Badge
-                        variant={item.status === 1 ? 'default' : 'secondary'}
-                        className="font-normal text-xs px-1.5 py-0.5 min-w-[60px] justify-center"
-                    >
-                        {item.status === 1 ? t('products.list.row.active') : t('products.list.row.inactive')}
-                    </Badge>
+                    <StatusBadge
+                        key={`status-${item.id}-${item.status}`}
+                        status={item.status}
+                        statusComment={item.status_comment}
+                        onChange={handleStatusToggle}
+                        isMobile={true}
+                        readOnly={readOnly}
+                    />
                 </div>
             </div>
+
+            {item.status === 0 && item.status_comment && (
+                <Alert variant="destructive" className="mt-3 py-2 bg-destructive/5 text-destructive border-destructive/20">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <AlertDescription className="text-xs mt-1">
+                        <span className="font-medium block">
+                            {t('products.editor.form.inventory.disable.disableReason')}
+                        </span>
+                        <span className="block mt-0.5">
+                            {item.status_comment}
+                        </span>
+                    </AlertDescription>
+                </Alert>
+            )}
         </motion.div>
     );
 }
 
-export function ProductInventoryTable({ inventory, securityStock = 10 }: ProductInventoryTableProps) {
+export function ProductInventoryTable({
+    inventory,
+    securityStock = 10,
+    onInventoryUpdate,
+    readOnly = false
+}: ProductInventoryTableProps) {
+    // Store local copy of inventory to ensure we can track changes
+    const [localInventory, setLocalInventory] = useState<Catalog[]>([]);
+    const initialRenderRef = useRef(true);
+
+    // Update local inventory when props change
+    useEffect(() => {
+        if (inventory && inventory.length > 0) {
+            setLocalInventory(inventory);
+        }
+    }, [inventory]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<SortConfig>({
         key: null,
@@ -204,7 +353,26 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
 
-    const handleSort = (key: keyof Inventory) => {
+    // Dialog state
+    const [showDisableDialog, setShowDisableDialog] = useState(false);
+    const [selectedInventoryId, setSelectedInventoryId] = useState<number | null>(null);
+    const [selectedShopName, setSelectedShopName] = useState('');
+
+    // Add state to track recently changed items
+    const [recentlyChanged, setRecentlyChanged] = useState<number[]>([]);
+
+    // Reset the recently changed items after animation completes
+    useEffect(() => {
+        if (recentlyChanged.length > 0) {
+            const timer = setTimeout(() => {
+                setRecentlyChanged([]);
+            }, 2000); // 2 seconds
+
+            return () => clearTimeout(timer);
+        }
+    }, [recentlyChanged]);
+
+    const handleSort = (key: keyof Catalog) => {
         setSortConfig((current) => ({
             key,
             direction:
@@ -219,14 +387,73 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
         setSearchTerm(value);
     };
 
+    const handleStatusClick = useCallback((id: number, shopName: string, newStatus: number) => {
+        if (readOnly) return;
+
+        // If changing to inactive, show dialog
+        if (newStatus === 0) {
+            setSelectedInventoryId(id);
+            setSelectedShopName(shopName);
+            setShowDisableDialog(true);
+        } else {
+            // If changing to active, update directly
+            updateInventoryStatus(id, 1);
+        }
+    }, [readOnly]);
+
+    const handleDisableConfirm = useCallback((reason: DisableReason) => {
+        if (selectedInventoryId !== null) {
+            updateInventoryStatus(selectedInventoryId, 0, reason);
+            setShowDisableDialog(false);
+            setSelectedInventoryId(null);
+            setSelectedShopName('');
+        }
+    }, [selectedInventoryId]);
+
+    const handleDisableCancel = useCallback(() => {
+        setShowDisableDialog(false);
+        setSelectedInventoryId(null);
+        setSelectedShopName('');
+    }, []);
+
+    const updateInventoryStatus = useCallback((id: number, newStatus: number, comment?: string) => {
+        // Create a new copy of the inventory to track our changes
+        const updatedInventory = localInventory.map(item => {
+            if (item.id === id) {
+                // Apply the changes to this item
+                return {
+                    ...item,
+                    status: newStatus,
+                    status_comment: newStatus === 0 ? comment || '' : '',
+                    manual_override: true,
+                    status_changed_at: new Date(),
+                    status_changed_by: 'user',
+                    updated_at: new Date()
+                };
+            }
+            return item;
+        });
+
+        // Update local state first for immediate UI feedback
+        setLocalInventory(updatedInventory);
+
+        // Mark this item as recently changed for animation
+        setRecentlyChanged(prev => [...prev, id]);
+
+        // Then propagate changes to parent
+        if (onInventoryUpdate) {
+            onInventoryUpdate(updatedInventory);
+        }
+    }, [localInventory, onInventoryUpdate]);
+
     const sortedAndFilteredInventory = useMemo(() => {
-        let result = [...inventory];
+        let result = [...localInventory]; // Use local inventory instead of props
 
         // Apply search filter
         if (searchTerm) {
             const lowerSearch = searchTerm.toLowerCase();
             result = result.filter((item) =>
-                item.centro.toLowerCase().includes(lowerSearch)
+                item.shop.toLowerCase().includes(lowerSearch)
             );
         }
 
@@ -245,9 +472,17 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
         }
 
         return result;
-    }, [inventory, searchTerm, sortConfig]);
+    }, [localInventory, searchTerm, sortConfig]);
 
-    const SortIndicator = ({ columnKey }: { columnKey: keyof Inventory }) => {
+    // Add debugging for UI updates
+    useEffect(() => {
+        if (initialRenderRef.current) {
+            initialRenderRef.current = false;
+            return;
+        }
+    }, [localInventory]);
+
+    const SortIndicator = ({ columnKey }: { columnKey: keyof Catalog }) => {
         if (sortConfig.key !== columnKey) return null;
         return sortConfig.direction === 'asc' ? (
             <ChevronUp className="h-4 w-4" />
@@ -295,6 +530,13 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                                     item={item}
                                     securityStock={securityStock}
                                     t={t}
+                                    onStatusChange={
+                                        !readOnly
+                                            ? (id, newStatus) => handleStatusClick(id, item.shop, newStatus)
+                                            : undefined
+                                    }
+                                    readOnly={readOnly}
+                                    recentlyChanged={recentlyChanged}
                                 />
                             ))
                         ) : (
@@ -312,11 +554,11 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                             <TableRow className="hover:bg-transparent">
                                 <TableHead
                                     className="cursor-pointer whitespace-nowrap"
-                                    onClick={() => handleSort('centro')}
+                                    onClick={() => handleSort('shop')}
                                 >
                                     <div className="flex items-center gap-2">
                                         {t('products.editor.form.inventory.columns.center')}
-                                        <SortIndicator columnKey="centro" />
+                                        <SortIndicator columnKey="shop" />
                                     </div>
                                 </TableHead>
                                 <TableHead
@@ -359,55 +601,94 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                         </TableHeader>
                         <TableBody>
                             <AnimatePresence>
-                                {sortedAndFilteredInventory.map((inv) => (
-                                    <motion.tr
-                                        key={inv.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="group"
-                                    >
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Store className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                                <span className="font-medium">{inv.centro}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <StockIndicator
-                                                stock={inv.stock}
-                                                securityStock={securityStock}
-                                                isMobile={isTablet}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <PriceChange
-                                                current={inv.price}
-                                                previous={inv.compare_price ?? inv.price}
-                                                isMobile={isTablet}
-                                            />
-                                        </TableCell>
-                                        <TableCell className={cn(
-                                            "text-muted-foreground tabular-nums font-medium",
-                                            isTablet ? "pr-4" : "pr-8"
-                                        )}>
-                                            ${inv.compare_price?.toFixed(2) ?? '0.00'}
-                                        </TableCell>
-                                        <TableCell className={cn(
-                                            isTablet ? "pl-4" : "pl-8"
-                                        )}>
-                                            <Badge
-                                                variant={inv.status === 1 ? 'default' : 'secondary'}
-                                                className={cn(
-                                                    "font-normal justify-center",
-                                                    isTablet ? "text-xs px-1.5 py-0.5 min-w-[60px]" : "min-w-[72px]"
-                                                )}
-                                            >
-                                                {inv.status === 1 ? t('products.list.row.active') : t('products.list.row.inactive')}
-                                            </Badge>
-                                        </TableCell>
-                                    </motion.tr>
-                                ))}
+                                {sortedAndFilteredInventory.map((inv) => {
+                                    const isInactive = inv.status === 0;
+                                    const wasRecentlyChanged = recentlyChanged.includes(inv.id);
+
+                                    return (
+                                        <motion.tr
+                                            key={inv.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{
+                                                opacity: 1,
+                                                y: 0,
+                                                backgroundColor: wasRecentlyChanged
+                                                    ? inv.status === 1 ? 'rgba(132, 204, 22, 0.1)' : 'rgba(239, 68, 68, 0.1)'
+                                                    : isInactive ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0)'
+                                            }}
+                                            transition={{
+                                                backgroundColor: { duration: 2 }
+                                            }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className={cn(
+                                                "group",
+                                                isInactive && "bg-muted/30",
+                                                wasRecentlyChanged && "shadow-sm"
+                                            )}
+                                        >
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Store className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                    <span className={cn(
+                                                        "font-medium",
+                                                        isInactive && "line-through opacity-70"
+                                                    )}>
+                                                        {inv.shop}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className={cn(isInactive && "opacity-70")}>
+                                                <StockIndicator
+                                                    stock={inv.stock}
+                                                    securityStock={securityStock}
+                                                    isMobile={isTablet}
+                                                />
+                                            </TableCell>
+                                            <TableCell className={cn(isInactive && "opacity-70")}>
+                                                <PriceChange
+                                                    current={inv.price}
+                                                    previous={inv.compare_price ?? inv.price}
+                                                    isMobile={isTablet}
+                                                />
+                                            </TableCell>
+                                            <TableCell className={cn(
+                                                "text-muted-foreground tabular-nums font-medium",
+                                                isTablet ? "pr-4" : "pr-8",
+                                                isInactive && "opacity-70"
+                                            )}>
+                                                ${inv.compare_price?.toFixed(2) ?? '0.00'}
+                                            </TableCell>
+                                            <TableCell className={cn(
+                                                isTablet ? "pl-4" : "pl-8"
+                                            )}>
+                                                <div className="space-y-2">
+                                                    <StatusBadge
+                                                        key={`status-${inv.id}-${inv.status}`}
+                                                        status={inv.status}
+                                                        statusComment={inv.status_comment}
+                                                        onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
+                                                        isMobile={isTablet}
+                                                        readOnly={readOnly}
+                                                    />
+
+                                                    {isInactive && inv.status_comment && (
+                                                        <Alert variant="destructive" className="py-2 bg-destructive/5 text-destructive border-destructive/20">
+                                                            <AlertCircle className="h-3.5 w-3.5" />
+                                                            <AlertDescription className="text-xs mt-1">
+                                                                <span className="font-medium block">
+                                                                    {t('products.editor.form.inventory.disable.disableReason')}
+                                                                </span>
+                                                                <span className="block mt-0.5">
+                                                                    {inv.status_comment}
+                                                                </span>
+                                                            </AlertDescription>
+                                                        </Alert>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                        </motion.tr>
+                                    );
+                                })}
                             </AnimatePresence>
                             {sortedAndFilteredInventory.length === 0 && (
                                 <TableRow>
@@ -423,6 +704,13 @@ export function ProductInventoryTable({ inventory, securityStock = 10 }: Product
                     </Table>
                 </div>
             )}
+
+            <DisableInventoryDialog
+                open={showDisableDialog}
+                shopName={selectedShopName}
+                onConfirm={handleDisableConfirm}
+                onCancel={handleDisableCancel}
+            />
         </div>
     );
 } 

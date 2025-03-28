@@ -1,6 +1,6 @@
 import { Boxes, FileText, Tags } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type Product, type Specification } from '@/types/product';
+import { type Product, type Specification, type Catalog } from '@/types/product';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SpecificationsTab } from './SpecificationsTab';
 import { InventoryTab } from './InventoryTab';
@@ -19,6 +19,7 @@ export interface ProductTabsProps {
     sku: string;
     keywords: string[];
     onKeywordsChange: (keywords: string[]) => void;
+    onInventoryUpdate?: (inventory: Catalog[]) => void;
     isMobile?: boolean;
     isTablet?: boolean;
 }
@@ -33,6 +34,7 @@ export function ProductTabs({
     sku,
     keywords,
     onKeywordsChange,
+    onInventoryUpdate,
     isMobile,
     isTablet
 }: ProductTabsProps) {
@@ -101,6 +103,7 @@ export function ProductTabs({
                     <TabsContent value="catalog" className="m-0">
                         <InventoryTab
                             product={product}
+                            onInventoryUpdate={onInventoryUpdate}
                         />
                     </TabsContent>
                     <TabsContent value="description" className="m-0">

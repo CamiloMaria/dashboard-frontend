@@ -23,11 +23,13 @@ import {
   productFormSchema,
   ProductsResponse,
   Specification,
+  UpdateProductResult,
+  type Catalog,
+  type ProductResponse,
 } from '@/types/product';
 import { productsApi } from '@/api/products';
 import { productKeys } from '@/api/query-keys';
 import { type DisableReason } from '@/constants/product';
-import { SHOPS } from '@/constants/shops';
 import {
   ImageEditor,
   ProductInfoFields,
@@ -59,6 +61,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [specifications, setSpecifications] = useState<Specification[]>([]);
   const [description, setDescription] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [updatedInventory, setUpdatedInventory] = useState<Catalog[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -102,7 +105,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     mutationFn: async ({ id, sku, data, deletedImageIds, newImages }: {
       id: number;
       sku: string;
-      data: Partial<Product>;
+      data: Partial<UpdateProductResult>;
       deletedImageIds?: number[];
       newImages?: File[];
     }) => {
@@ -321,13 +324,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     }
   };
 
-  const handleDisableConfirm = (reason: DisableReason, shops: string[]) => {
-    const isAllShopsSelected = SHOPS.every(shop => shops.includes(shop));
-
+  const handleDisableConfirm = (reason: DisableReason) => {
     form.setValue('isActive', false);
-    form.setValue('disabledShops', shops);
-    form.setValue('disabledShopsComment', reason);
-    form.setValue('borrado', isAllShopsSelected ? 1 : 0);
+    form.setValue('borrado', 1);
+    form.setValue('borrado_comment', reason);
     setShowDisableDialog(false);
     setPendingActiveState(null);
   };
@@ -339,23 +339,103 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     form.setValue('isActive', !pendingActiveState);
   };
 
+  const handleInventoryUpdate = (inventory: Catalog[]) => {
+    setUpdatedInventory(inventory);
+
+    // Find changed items for optimistic UI update
+    const changedItems = inventory.filter(item => item.manual_override);
+
+    if (changedItems.length > 0 && productId) {
+      // Optimistically update the query cache to reflect changes immediately
+      queryClient.setQueryData<ProductResponse>(
+        productKeys.detail(productId),
+        (oldData: ProductResponse | undefined) => {
+          if (!oldData) return oldData;
+
+          // Create a new product object with updated catalogs
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              catalogs: inventory
+            }
+          };
+        }
+      );
+
+      // Also update any list data that might be displayed elsewhere
+      queryClient.setQueriesData<ProductsResponse>(
+        { queryKey: productKeys.all },
+        (oldData: ProductsResponse | undefined) => {
+          if (!oldData) return oldData;
+
+          // Update the product in lists if found
+          if (oldData.data && Array.isArray(oldData.data)) {
+            return {
+              ...oldData,
+              data: oldData.data.map((p: Product) =>
+                p.id === Number(productId)
+                  ? { ...p, catalogs: inventory }
+                  : p
+              )
+            };
+          }
+
+          return oldData;
+        }
+      );
+    }
+  };
+
   const onSubmit = (values: ProductFormValues) => {
-    const productData = {
-      ...values,
-      images: images.map(img => ({
-        ...img,
-        position: img.position
-      })),
-      specifications,
-      description_instaleap: description,
-      search_keywords: keywords,
+    // Create a proper UpdateProductResult object with the right structure
+    const productUpdateData: Partial<UpdateProductResult> = {
+      product: {
+        title: values.title,
+        description_instaleap: description,
+        specifications: specifications as unknown as JSON,
+        search_keywords: keywords as unknown as JSON,
+        security_stock: values.security_stock,
+        click_multiplier: 1, // Default value, adjust if needed
+        borrado: values.borrado === 1,
+        borrado_comment: values.borrado_comment || '',
+      }
     };
+
+    // If we have updated inventory with changes, update the first changed item's status through catalog
+    if (updatedInventory.length > 0) {
+      // Find all modified inventory items
+      const modifiedItems = updatedInventory.filter(inv => inv.manual_override);
+
+      if (modifiedItems.length > 0) {
+        // Use the most recently modified item for the update
+        const mostRecentItem = modifiedItems.reduce((most, current) => {
+          const mostDate = most.status_changed_at instanceof Date
+            ? most.status_changed_at
+            : new Date(most.status_changed_at);
+
+          const currentDate = current.status_changed_at instanceof Date
+            ? current.status_changed_at
+            : new Date(current.status_changed_at);
+
+          return currentDate > mostDate ? current : most;
+        }, modifiedItems[0]);
+
+        // Add to update data
+        productUpdateData.catalog = {
+          id: mostRecentItem.id,
+          status: mostRecentItem.status,
+          status_comment: mostRecentItem.status_comment || '',
+          manual_override: mostRecentItem.manual_override
+        };
+      }
+    }
 
     if (productId) {
       updateMutation.mutate({
         id: Number(productId),
         sku: product?.sku || '',
-        data: productData,
+        data: productUpdateData,
         deletedImageIds: deletedImageIds.length > 0 ? deletedImageIds : undefined,
         newImages: newImages.length > 0 ? newImages : undefined,
       });
@@ -456,8 +536,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                         control={form.control}
                         name="isActive"
                         render={({ field }) => {
-                          const disabledShopsComment = form.watch('disabledShopsComment');
-                          const disabledShops = form.watch('disabledShops');
+                          const borradoComment = form.watch('borrado_comment');
                           return (
                             <FormItem className="rounded-lg border p-3 sm:p-4 space-y-3 sm:space-y-4 bg-muted/5">
                               <div className="flex items-center justify-between">
@@ -477,7 +556,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                                   />
                                 </FormControl>
                               </div>
-                              {(!field.value && disabledShopsComment) && (
+                              {(!field.value && borradoComment) && (
                                 <div className="pt-3 sm:pt-4 border-t space-y-3 sm:space-y-4">
                                   <Alert variant="destructive" className="bg-destructive/5 text-destructive border-destructive/20">
                                     <AlertCircle className="h-4 w-4" />
@@ -486,27 +565,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                                         {t('products.editor.form.activeStatus.disableReason')}
                                       </span>
                                       <span className="block mt-1">
-                                        {disabledShopsComment}
+                                        {borradoComment}
                                       </span>
                                     </AlertDescription>
                                   </Alert>
-                                  {disabledShops?.length > 0 && (
-                                    <div className="space-y-2">
-                                      <p className="text-sm font-medium text-muted-foreground">
-                                        {t('products.editor.form.activeStatus.disabledShops')}
-                                      </p>
-                                      <div className="flex flex-wrap gap-2">
-                                        {disabledShops.map((shop) => (
-                                          <span
-                                            key={shop}
-                                            className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-destructive border-destructive/20 bg-destructive/5"
-                                          >
-                                            {shop}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               )}
                             </FormItem>
@@ -528,6 +590,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 onDescriptionChange={setDescription}
                 keywords={keywords}
                 onKeywordsChange={setKeywords}
+                onInventoryUpdate={handleInventoryUpdate}
                 isMobile={isMobile}
                 isTablet={isTablet}
               />

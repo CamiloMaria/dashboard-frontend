@@ -7,6 +7,7 @@ export const productFormSchema = z.object({
   disabledShops: z.array(z.string()).default([]),
   disabledShopsComment: z.string().optional(),
   borrado: z.number().default(0),
+  borrado_comment: z.string().optional(),
   security_stock: z.number().min(0, 'Security stock must be 0 or greater').default(20),
 })
 
@@ -53,7 +54,7 @@ export interface Product {
     update_at: string;
     images: Image[];
     specifications: Specification[];
-    inventory: Inventory[];
+    catalogs: Catalog[];
 }
 
 export interface Image {
@@ -71,14 +72,18 @@ export interface Image {
     status: null;
 }
 
-export interface Inventory {
+export interface Catalog {
     id: number;
     stock: number;
-    centro: string;
+    shop: string;
     price: number;
     compare_price: number | null;
     status: number;
-    fecha: string;
+    status_comment: string;
+    manual_override: boolean;
+    status_changed_at: Date;
+    status_changed_by: string;
+    updated_at: Date;
 }
 
 export interface Specification {
@@ -150,6 +155,39 @@ export interface CreateProductResult {
 }
 
 export type CreateProductResponse = BaseResponse<CreateProductResult[]>;
+
+interface ProductUpdate {
+    title: string;
+    description_instaleap: string;
+    /**
+     * Array of objects
+     * example: [{title: 'Color', description: 'Rojo'}, {title: 'Tamaño', description: '100x100cm'}]
+     */
+    specifications: JSON;
+    /**
+     * Array of strings
+     * example: ['2157909', 'Simmons', 'colchón', 'colchones']
+     */
+    search_keywords: JSON;
+    security_stock: number;
+    click_multiplier: number;
+    borrado: boolean;
+    borrado_comment: string;
+}
+
+interface CatalogUpdate {
+    id: number;
+    status: number;
+    status_comment: string;
+    manual_override: boolean;
+}
+
+export interface UpdateProductResult {
+    product: ProductUpdate;
+    catalog: CatalogUpdate;
+}
+
+export type UpdateProductResponse = BaseResponse<UpdateProductResult>;
 
 export interface GenerateKeywordsResult {
     keywords: string[];

@@ -1,4 +1,4 @@
-import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse } from '@/types'
+import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
@@ -22,8 +22,8 @@ export const productsApi = {
     return response.data;
   },
 
-  async updateProduct(id: number, data: Partial<Product>): Promise<Product> {
-    const response = await axios.patch<Product>(`${this.baseUrl}/${id}`, data);
+  async updateProduct(id: number, data: Partial<UpdateProductResult>): Promise<UpdateProductResponse> {
+    const response = await axios.patch<UpdateProductResponse>(`${this.baseUrl}/${id}`, data);
     return response.data;
   },
 
