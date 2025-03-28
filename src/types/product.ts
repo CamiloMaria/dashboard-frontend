@@ -221,6 +221,8 @@ export interface GenerateKeywordsResult {
     keywords: string[];
 }
 
+export type DeleteProductResponse = BaseResponse<void>;
+
 export type GenerateKeywordsResponse = BaseResponse<GenerateKeywordsResult>;
 
 export interface GenerateDescriptionResult {

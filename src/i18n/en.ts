@@ -69,6 +69,7 @@ export const en = {
       backToProducts: 'Back to Products',
       form: {
         productName: 'Product Name',
+        productNamePlaceholder: 'Enter product name...',
         securityStock: {
           label: 'Security Stock',
           description: 'Set the minimum stock level for inventory alerts. When stock falls below this threshold, the system will display low stock warnings.'

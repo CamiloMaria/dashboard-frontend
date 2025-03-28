@@ -1,11 +1,9 @@
-import { type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult } from '@/types'
+import { type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult, DeleteProductResponse } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
-  baseUrl: '/products',
-
   async getProducts(params: GetProductsParams) {
-    const response = await axios.get<ProductsResponse>(this.baseUrl, {
+    const response = await axios.get<ProductsResponse>('/products', {
       params
     });
 
@@ -13,22 +11,23 @@ export const productsApi = {
   },
 
   async getProduct(id: number) {
-    const response = await axios.get<ProductResponse>(`${this.baseUrl}/${id}`);
+    const response = await axios.get<ProductResponse>(`/products/${id}`);
     return response.data;
   },
 
   async createProduct(skus: string[]) {
-    const response = await axios.post<CreateProductResponse>(this.baseUrl, {skus});
+    const response = await axios.post<CreateProductResponse>('/products', {skus});
     return response.data;
   },
 
   async updateProduct(id: number, data: Partial<UpdateProductResult>): Promise<UpdateProductResponse> {
-    const response = await axios.patch<UpdateProductResponse>(`${this.baseUrl}/${id}`, data);
+    const response = await axios.patch<UpdateProductResponse>(`/products/${id}`, data);
     return response.data;
   },
 
-  async deleteProduct(id: number): Promise<void> {
-    await axios.delete(`${this.baseUrl}/${id}`);
+  async deleteProduct(id: number): Promise<DeleteProductResponse> {
+    const response = await axios.delete<DeleteProductResponse>(`/products/${id}`);
+    return response.data;
   },
 
   async deleteProductImages(sku: string, ids: number[]): Promise<void> {

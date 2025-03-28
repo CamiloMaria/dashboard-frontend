@@ -69,6 +69,7 @@ export const es = {
             backToProducts: 'Volver a Productos',
             form: {
                 productName: 'Nombre del Producto',
+                productNamePlaceholder: 'Ingresa el nombre del producto...',
                 securityStock: {
                     label: 'Stock de Seguridad',
                     description: 'Establece el nivel mínimo de stock para las alertas de inventario. Cuando el stock cae por debajo de este, el sistema mostrará advertencias de stock bajo y se desactivará el producto en las tiendas.'

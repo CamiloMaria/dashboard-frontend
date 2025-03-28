@@ -52,6 +52,16 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
+interface ApiError extends Error {
+  response?: {
+    status: number;
+    data?: {
+      error: string;
+      message: string;
+    }
+  }
+}
+
 export function ProductsTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -71,6 +81,7 @@ export function ProductsTable() {
   const isMobile = useMediaQuery('(max-width: 640px)');
   const isMediumScreen = useMediaQuery('(min-width: 641px) and (max-width: 900px)');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [is404Error, setIs404Error] = useState(false);
 
   // Set view mode based on screen size
   useEffect(() => {
@@ -93,7 +104,7 @@ export function ProductsTable() {
     setSearchTerm(value);
     if (value !== searchTerm) {
       setCurrentPage(1);
-      setItemsPerPage(5);
+      setItemsPerPage(10);
     }
   };
 
@@ -116,7 +127,7 @@ export function ProductsTable() {
     });
   };
 
-  const { data, isLoading, isError, isFetching } = useQuery({
+  const { data, isLoading, isError, error, isFetching } = useQuery({
     queryKey: productKeys.list({
       page: currentPage,
       limit: itemsPerPage,
@@ -136,7 +147,15 @@ export function ProductsTable() {
       bigItem: filters.bigItem === null ? undefined : filters.bigItem,
     }),
     placeholderData: keepPreviousData,
-    staleTime: 5000,
+    retry: (failureCount, error: ApiError) => {
+      // Don't retry for "No products found" 404 errors
+      if (error?.response?.status === 404 && error?.response?.data?.error === "NOT_FOUND") {
+        setIs404Error(true);
+        return false;
+      }
+      // Default retry logic for other errors
+      return failureCount < 3;
+    }
   });
 
   const deleteMutation = useMutation({
@@ -217,6 +236,25 @@ export function ProductsTable() {
     }));
   };
 
+  const handleResetAndRetry = () => {
+    if (is404Error) {
+      // Reset search and filters
+      setSearchTerm('');
+      setFilters({
+        status: null,
+        bigItem: null,
+      });
+      setCurrentPage(1);
+      setItemsPerPage(10);
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      setIs404Error(false)
+    } else {
+      // Standard retry without resetting (existing behavior)
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="w-full h-[600px] flex items-center justify-center bg-gradient-to-b from-background to-muted/20">
@@ -233,6 +271,29 @@ export function ProductsTable() {
   }
 
   if (isError) {
+    if (error.response?.status === 404 && error.response?.data?.error === "NOT_FOUND") {
+      return (
+        <Card className="w-full h-[600px] flex items-center justify-center bg-gradient-to-b from-background to-muted/20">
+          <div className="flex flex-col items-center justify-center gap-6 text-center">
+            <div className="rounded-full bg-red-50 p-4">
+              <Package2 className="h-8 w-8 text-red-500" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xl text-foreground">
+                Producto no encontrado
+              </h3>
+              <Button
+                onClick={handleResetAndRetry}
+                className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Reiniciar búsqueda
+              </Button>
+            </div>
+          </div>
+        </Card>
+      );
+    }
+
     return (
       <Card className="w-full h-[600px] flex items-center justify-center bg-gradient-to-b from-background to-muted/20">
         <div className="flex flex-col items-center justify-center gap-6 text-center">
