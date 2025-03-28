@@ -141,10 +141,19 @@ interface StatusBadgeProps {
     onChange?: (newStatus: number) => void;
     isMobile?: boolean;
     readOnly?: boolean;
+    pendingStatusChange?: boolean;
 }
 
-function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = false }: StatusBadgeProps) {
+function StatusBadge({
+    status,
+    statusComment,
+    onChange,
+    isMobile,
+    readOnly = false,
+    pendingStatusChange = false
+}: StatusBadgeProps) {
     const { t } = useTranslation();
+    // Track the actual status from props separately from visual state
     const [isActive, setIsActive] = useState(status === 1);
 
     // Update local state when status prop changes
@@ -152,12 +161,20 @@ function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = fal
         setIsActive(status === 1);
     }, [status]);
 
+    // Handle status toggle
     const handleStatusChange = (checked: boolean) => {
-        if (!readOnly && onChange) {
-            // Update local state for immediate feedback
-            setIsActive(checked);
-            // Then propagate change to parent
-            onChange(checked ? 1 : 0);
+        if (readOnly || !onChange) return;
+
+        // Only update local state immediately if activating (not deactivating)
+        // For deactivation, we'll wait for confirmation
+        if (checked) {
+            setIsActive(true);
+            onChange(1);
+        } else {
+            // For deactivation, don't update local state yet, just propagate to parent
+            // The parent will show the confirmation dialog
+            onChange(0);
+            // Don't set isActive to false here - wait for parent to update status
         }
     };
 
@@ -175,7 +192,7 @@ function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = fal
                         scale: [1, 1.05, 1]
                     }}
                     transition={{ duration: animationDuration, times: [0, 0.5, 1] }}
-                    key={`badge-${isActive}`}
+                    key={`badge-${isActive}-${pendingStatusChange}`}
                     className="flex items-center"
                 >
                     <Badge
@@ -183,7 +200,8 @@ function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = fal
                         className={cn(
                             "font-normal justify-center flex items-center gap-1",
                             isMobile ? "text-xs px-1.5 py-0.5 min-w-[64px]" : "min-w-[80px] py-1",
-                            isActive ? "bg-green-600 hover:bg-green-700" : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                            isActive ? "bg-green-600 hover:bg-green-700" : "bg-destructive/10 text-destructive hover:bg-destructive/20",
+                            pendingStatusChange && "opacity-60"
                         )}
                     >
                         {isActive ? (
@@ -198,11 +216,11 @@ function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = fal
                 <Switch
                     checked={isActive}
                     onCheckedChange={handleStatusChange}
-                    disabled={readOnly}
+                    disabled={readOnly || pendingStatusChange}
                     className={cn(
                         "data-[state=checked]:bg-green-600 data-[state=checked]:hover:bg-green-700",
                         "transition-colors duration-200",
-                        readOnly && "opacity-60 cursor-not-allowed"
+                        (readOnly || pendingStatusChange) && "opacity-60 cursor-not-allowed"
                     )}
                     aria-label={isActive ? t('products.list.row.setInactive') : t('products.list.row.setActive')}
                 />
@@ -250,7 +268,8 @@ function InventoryCard({
     t,
     onStatusChange,
     readOnly,
-    recentlyChanged = []
+    recentlyChanged = [],
+    pendingStatusChange = false
 }: {
     item: Catalog;
     securityStock: number;
@@ -258,9 +277,10 @@ function InventoryCard({
     onStatusChange?: (id: number, newStatus: number, comment?: string) => void;
     readOnly?: boolean;
     recentlyChanged?: number[];
+    pendingStatusChange?: boolean;
 }) {
     const handleStatusToggle = useCallback((newStatus: number) => {
-        if (readOnly || !onStatusChange) return;
+        if (readOnly || !onStatusChange || pendingStatusChange) return;
 
         // If changing to inactive, show dialog
         if (newStatus === 0) {
@@ -269,7 +289,7 @@ function InventoryCard({
             // If changing to active, toggle directly
             onStatusChange(item.id, 1);
         }
-    }, [item.id, onStatusChange, readOnly]);
+    }, [item.id, onStatusChange, readOnly, pendingStatusChange]);
 
     // Use computed property instead of local state for consistency
     const isInactive = item.status === 0;
@@ -278,7 +298,7 @@ function InventoryCard({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{
-                opacity: 1,
+                opacity: pendingStatusChange ? 0.8 : 1,
                 y: 0,
                 backgroundColor: recentlyChanged.includes(item.id)
                     ? item.status === 1 ? 'rgba(132, 204, 22, 0.1)' : 'rgba(239, 68, 68, 0.1)'
@@ -293,7 +313,8 @@ function InventoryCard({
                 isInactive
                     ? "bg-muted/50 border-muted text-muted-foreground"
                     : "bg-card",
-                recentlyChanged.includes(item.id) && "shadow-sm"
+                recentlyChanged.includes(item.id) && "shadow-sm",
+                pendingStatusChange && "opacity-80"
             )}
         >
             <div className="flex items-center gap-2 mb-2">
@@ -343,12 +364,13 @@ function InventoryCard({
                         {t('products.editor.form.inventory.columns.status')}
                     </div>
                     <StatusBadge
-                        key={`status-${item.id}-${item.status}`}
+                        key={`status-${item.id}-${item.status}-${pendingStatusChange ? 'pending' : 'normal'}`}
                         status={item.status}
                         statusComment={item.status_comment}
                         onChange={handleStatusToggle}
                         isMobile={true}
                         readOnly={readOnly}
+                        pendingStatusChange={pendingStatusChange}
                     />
                 </div>
             </div>
@@ -400,6 +422,8 @@ export function ProductInventoryTable({
     const [showDisableDialog, setShowDisableDialog] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<number | null>(null);
     const [selectedShopName, setSelectedShopName] = useState('');
+    // Add a state to track pending status changes
+    const [pendingStatusChange, setPendingStatusChange] = useState<boolean>(false);
 
     // Add state to track recently changed items
     const [recentlyChanged, setRecentlyChanged] = useState<number[]>([]);
@@ -430,36 +454,8 @@ export function ProductInventoryTable({
         setSearchTerm(value);
     };
 
-    const handleStatusClick = useCallback((id: number, shopName: string, newStatus: number) => {
-        if (readOnly) return;
-
-        // If changing to inactive, show dialog
-        if (newStatus === 0) {
-            setSelectedInventoryId(id);
-            setSelectedShopName(shopName);
-            setShowDisableDialog(true);
-        } else {
-            // If changing to active, update directly
-            updateInventoryStatus(id, 1);
-        }
-    }, [readOnly]);
-
-    const handleDisableConfirm = useCallback((reason: DisableReason) => {
-        if (selectedInventoryId !== null) {
-            updateInventoryStatus(selectedInventoryId, 0, reason);
-            setShowDisableDialog(false);
-            setSelectedInventoryId(null);
-            setSelectedShopName('');
-        }
-    }, [selectedInventoryId]);
-
-    const handleDisableCancel = useCallback(() => {
-        setShowDisableDialog(false);
-        setSelectedInventoryId(null);
-        setSelectedShopName('');
-    }, []);
-
-    const updateInventoryStatus = useCallback((id: number, newStatus: number, comment?: string) => {
+    // Define updateInventoryStatus function
+    function updateInventoryStatus(id: number, newStatus: number, comment?: string) {
         // Create a new copy of the inventory to track our changes
         const updatedInventory = localInventory.map(item => {
             if (item.id === id) {
@@ -487,7 +483,41 @@ export function ProductInventoryTable({
         if (onInventoryUpdate) {
             onInventoryUpdate(updatedInventory);
         }
-    }, [localInventory, onInventoryUpdate]);
+    }
+
+    const handleStatusClick = useCallback((id: number, shopName: string, newStatus: number) => {
+        if (readOnly) return;
+
+        // If changing to inactive, show dialog
+        if (newStatus === 0) {
+            setSelectedInventoryId(id);
+            setSelectedShopName(shopName);
+            setPendingStatusChange(true); // Mark that we have a pending change
+            setShowDisableDialog(true);
+        } else {
+            // If changing to active, update directly
+            updateInventoryStatus(id, 1);
+        }
+    }, [readOnly, updateInventoryStatus]);
+
+    const handleDisableConfirm = useCallback((reason: DisableReason) => {
+        if (selectedInventoryId !== null) {
+            updateInventoryStatus(selectedInventoryId, 0, reason);
+            setShowDisableDialog(false);
+            setSelectedInventoryId(null);
+            setSelectedShopName('');
+            setPendingStatusChange(false); // Clear pending status
+        }
+    }, [selectedInventoryId, updateInventoryStatus]);
+
+    const handleDisableCancel = useCallback(() => {
+        // On cancel, do NOT update the inventory status
+        setShowDisableDialog(false);
+        setSelectedInventoryId(null);
+        setSelectedShopName('');
+        setPendingStatusChange(false); // Clear pending status
+        // No need to call updateInventoryStatus here
+    }, []);
 
     const sortedAndFilteredInventory = useMemo(() => {
         let result = [...localInventory]; // Use local inventory instead of props
@@ -580,6 +610,7 @@ export function ProductInventoryTable({
                                     }
                                     readOnly={readOnly}
                                     recentlyChanged={recentlyChanged}
+                                    pendingStatusChange={pendingStatusChange && selectedInventoryId === item.id}
                                 />
                             ))
                         ) : (
@@ -647,6 +678,7 @@ export function ProductInventoryTable({
                                 {sortedAndFilteredInventory.map((inv) => {
                                     const isInactive = inv.status === 0;
                                     const wasRecentlyChanged = recentlyChanged.includes(inv.id);
+                                    const isPendingChange = pendingStatusChange && selectedInventoryId === inv.id;
 
                                     return (
                                         <motion.tr
@@ -666,7 +698,8 @@ export function ProductInventoryTable({
                                             className={cn(
                                                 "group",
                                                 isInactive && "bg-muted/30",
-                                                wasRecentlyChanged && "shadow-sm"
+                                                wasRecentlyChanged && "shadow-sm",
+                                                isPendingChange && "opacity-80"
                                             )}
                                         >
                                             <TableCell>
@@ -705,12 +738,13 @@ export function ProductInventoryTable({
                                                 isTablet ? "pl-4" : "pl-8"
                                             )}>
                                                 <StatusBadge
-                                                    key={`status-${inv.id}-${inv.status}`}
+                                                    key={`status-${inv.id}-${inv.status}-${isPendingChange ? 'pending' : 'normal'}`}
                                                     status={inv.status}
                                                     statusComment={inv.status_comment}
                                                     onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
                                                     isMobile={isTablet}
                                                     readOnly={readOnly}
+                                                    pendingStatusChange={isPendingChange}
                                                 />
                                             </TableCell>
                                         </motion.tr>
