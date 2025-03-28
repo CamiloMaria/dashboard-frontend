@@ -255,6 +255,7 @@ export const en = {
         inactive: 'Inactive',
         type: 'Type',
         bigItems: 'Big Items',
+        clear: 'Clear',
       },
       sort: {
         title: 'Sort',
@@ -305,6 +306,7 @@ export const en = {
       tryAgain: 'Try Again'
     },
     columns: {
+      productTitle: 'Product Title',
       promoNumber: 'Promo Number',
       sku: 'SKU',
       material: 'Material',

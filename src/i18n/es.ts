@@ -255,6 +255,7 @@ export const es = {
                 inactive: 'Inactivo',
                 type: 'Tipo',
                 bigItems: 'Big Items',
+                clear: 'Limpiar',
             },
             sort: {
                 title: 'Ordenar',
@@ -289,7 +290,7 @@ export const es = {
             tryAgain: 'Intentar de Nuevo',
             deleteConfirmation: {
                 title: '¿Estás seguro de que quieres eliminar este producto?',
-                description: 'Esta acción no se puede deshacer. Esto eliminará permanentemente el producto "{product}" y eliminará sus datos del servidor.',
+                description: 'Esta acción no se puede deshacer. Esto eliminará permanentemente el producto "{{product}}" y eliminará sus datos del servidor.',
                 loading: 'Cargando...'
             },
             errorDescription: 'Error al cargar productos. Por favor intenta de nuevo o contacta a soporte si el problema persiste.'
@@ -305,6 +306,7 @@ export const es = {
             tryAgain: 'Intentar de Nuevo'
         },
         columns: {
+            productTitle: 'Título del Producto',
             promoNumber: 'Número de Promoción',
             sku: 'SKU',
             material: 'Material',
