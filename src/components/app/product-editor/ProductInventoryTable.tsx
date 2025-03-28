@@ -18,6 +18,8 @@ import {
     Store,
     TrendingDown,
     TrendingUp,
+    CheckCircle,
+    XCircle,
 } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -159,42 +161,83 @@ function StatusBadge({ status, statusComment, onChange, isMobile, readOnly = fal
         }
     };
 
+    // Determine if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animationDuration = prefersReducedMotion ? 0 : 0.3;
+
     return (
-        <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-                <Badge
-                    variant={isActive ? 'default' : 'destructive'}
-                    className={cn(
-                        "font-normal justify-center",
-                        isMobile ? "text-xs px-1.5 py-0.5 min-w-[60px]" : "min-w-[72px]",
-                        !isActive && "bg-destructive/10 text-destructive"
-                    )}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+                <motion.div
+                    initial={{ opacity: 1 }}
+                    animate={{
+                        opacity: [1, 0.8, 1],
+                        scale: [1, 1.05, 1]
+                    }}
+                    transition={{ duration: animationDuration, times: [0, 0.5, 1] }}
+                    key={`badge-${isActive}`}
+                    className="flex items-center"
                 >
-                    {isActive ? t('products.list.row.active') : t('products.list.row.inactive')}
-                </Badge>
+                    <Badge
+                        variant={isActive ? 'default' : 'destructive'}
+                        className={cn(
+                            "font-normal justify-center flex items-center gap-1",
+                            isMobile ? "text-xs px-1.5 py-0.5 min-w-[64px]" : "min-w-[80px] py-1",
+                            isActive ? "bg-green-600 hover:bg-green-700" : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                        )}
+                    >
+                        {isActive ? (
+                            <CheckCircle className={cn(isMobile ? "h-3 w-3" : "h-3.5 w-3.5")} />
+                        ) : (
+                            <XCircle className={cn(isMobile ? "h-3 w-3" : "h-3.5 w-3.5")} />
+                        )}
+                        {isActive ? t('products.list.row.active') : t('products.list.row.inactive')}
+                    </Badge>
+                </motion.div>
 
                 <Switch
                     checked={isActive}
                     onCheckedChange={handleStatusChange}
                     disabled={readOnly}
                     className={cn(
-                        "data-[state=checked]:bg-green-600",
+                        "data-[state=checked]:bg-green-600 data-[state=checked]:hover:bg-green-700",
+                        "transition-colors duration-200",
                         readOnly && "opacity-60 cursor-not-allowed"
                     )}
+                    aria-label={isActive ? t('products.list.row.setInactive') : t('products.list.row.setActive')}
                 />
             </div>
 
             {!isActive && statusComment && (
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{t('products.inventory.status.reason')}: {statusComment}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: animationDuration }}
+                    className={cn(
+                        "flex items-start gap-1.5 max-w-[300px] text-sm",
+                        isMobile ? "ml-0 mt-1" : "mt-0"
+                    )}
+                >
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1.5 cursor-help py-1 px-2 rounded hover:bg-muted/50 border border-dashed border-muted-foreground/30">
+                                    <Info className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                                    <span className="text-xs text-muted-foreground line-clamp-1">
+                                        {statusComment.length > 20 ? `${statusComment.substring(0, 20)}...` : statusComment}
+                                    </span>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-[300px]">
+                                <div className="space-y-1">
+                                    <p className="font-medium text-sm">{t('products.inventory.status.reason')}:</p>
+                                    <p className="text-sm">{statusComment}</p>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </motion.div>
             )}
         </div>
     );
@@ -661,30 +704,14 @@ export function ProductInventoryTable({
                                             <TableCell className={cn(
                                                 isTablet ? "pl-4" : "pl-8"
                                             )}>
-                                                <div className="space-y-2">
-                                                    <StatusBadge
-                                                        key={`status-${inv.id}-${inv.status}`}
-                                                        status={inv.status}
-                                                        statusComment={inv.status_comment}
-                                                        onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
-                                                        isMobile={isTablet}
-                                                        readOnly={readOnly}
-                                                    />
-
-                                                    {isInactive && inv.status_comment && (
-                                                        <Alert variant="destructive" className="py-2 bg-destructive/5 text-destructive border-destructive/20">
-                                                            <AlertCircle className="h-3.5 w-3.5" />
-                                                            <AlertDescription className="text-xs mt-1">
-                                                                <span className="font-medium block">
-                                                                    {t('products.editor.form.inventory.disable.disableReason')}
-                                                                </span>
-                                                                <span className="block mt-0.5">
-                                                                    {inv.status_comment}
-                                                                </span>
-                                                            </AlertDescription>
-                                                        </Alert>
-                                                    )}
-                                                </div>
+                                                <StatusBadge
+                                                    key={`status-${inv.id}-${inv.status}`}
+                                                    status={inv.status}
+                                                    statusComment={inv.status_comment}
+                                                    onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
+                                                    isMobile={isTablet}
+                                                    readOnly={readOnly}
+                                                />
                                             </TableCell>
                                         </motion.tr>
                                     );
