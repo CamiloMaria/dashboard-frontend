@@ -11,9 +11,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Download, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Download, CheckCircle2, AlertCircle, RefreshCw, Info } from 'lucide-react';
 import { getResultStats } from '../hooks/useProductCreation';
 import { CreateProductResult, ProductCreationStatus } from '@/types/product';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from '@/components/ui/tooltip';
 
 interface ResultsDialogProps {
     open: boolean;
@@ -46,6 +52,47 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
         URL.revokeObjectURL(url);
     };
 
+    // Helper function to extract product title from results
+    const getProductTitle = (result: CreateProductResult): string => {
+        if (result.status === ProductCreationStatus.CREATED) {
+            return result.product?.title || 'Product created successfully';
+        }
+        if (result.status === ProductCreationStatus.EXISTING) {
+            return 'Product already exists';
+        }
+        return result.message || 'Error creating product';
+    };
+
+    // Helper to get status color classes
+    const getStatusColors = (status: ProductCreationStatus) => {
+        switch (status) {
+            case ProductCreationStatus.CREATED:
+                return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-400";
+            case ProductCreationStatus.EXISTING:
+                return "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-950/50 dark:text-indigo-400";
+            case ProductCreationStatus.NO_PRICE:
+            case ProductCreationStatus.ERROR:
+                return "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/50 dark:text-red-400";
+            default:
+                return "";
+        }
+    };
+
+    // Helper to get icon based on status
+    const getStatusIcon = (status: ProductCreationStatus) => {
+        switch (status) {
+            case ProductCreationStatus.CREATED:
+                return <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-500 flex-shrink-0" />;
+            case ProductCreationStatus.EXISTING:
+                return <RefreshCw className="h-4 w-4 text-indigo-600 dark:text-indigo-500 flex-shrink-0" />;
+            case ProductCreationStatus.NO_PRICE:
+            case ProductCreationStatus.ERROR:
+                return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-500 flex-shrink-0" />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl">
@@ -57,7 +104,7 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
                 </DialogHeader>
 
                 <div className="flex items-center justify-between mb-4">
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                             <span className="text-sm font-medium">
@@ -89,49 +136,65 @@ export function ResultsDialog({ open, onOpenChange, results }: ResultsDialogProp
                 </div>
 
                 <ScrollArea className="h-[300px] rounded-md border p-4">
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {results.map((result, index) => (
                             <div
                                 key={index}
                                 className={cn(
-                                    "flex items-center justify-between p-2 rounded-lg",
-                                    result.status === ProductCreationStatus.ERROR ? "bg-red-50 dark:bg-red-950/50" : "hover:bg-muted/50"
+                                    "p-3 rounded-lg border",
+                                    result.status === ProductCreationStatus.CREATED && "border-emerald-200 bg-emerald-50/30 dark:bg-emerald-950/20",
+                                    result.status === ProductCreationStatus.EXISTING && "border-indigo-200 bg-indigo-50/30 dark:bg-indigo-950/20",
+                                    result.status === ProductCreationStatus.ERROR && "border-red-200 bg-red-50/30 dark:bg-red-950/20"
                                 )}
                             >
-                                <div className="flex items-center gap-3">
-                                    {result.status === ProductCreationStatus.CREATED ? (
-                                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
-                                    ) : result.status === ProductCreationStatus.EXISTING ? (
-                                        <RefreshCw className="h-4 w-4 text-indigo-600 dark:text-indigo-500" />
-                                    ) : (
-                                        <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-500" />
-                                    )}
-                                    <span className="font-mono">{result.sku}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Badge
-                                        variant="outline"
-                                        className={cn(
-                                            "font-medium",
-                                            result.status === ProductCreationStatus.CREATED && "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-400",
-                                            result.status === ProductCreationStatus.EXISTING && "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-950/50 dark:text-indigo-400",
-                                            result.status === ProductCreationStatus.ERROR && "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/50 dark:text-red-400"
-                                        )}
-                                    >
-                                        {result.status}
-                                    </Badge>
-                                    {result.message && (
-                                        <span className="text-sm font-medium text-red-700 dark:text-red-400" role="alert">
-                                            {result.message}
-                                        </span>
-                                    )}
+                                <div className="flex flex-col space-y-2">
+                                    {/* Header with SKU and status */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            {getStatusIcon(result.status)}
+                                            <span className="font-mono font-medium">{result.sku}</span>
+                                        </div>
+                                        <Badge
+                                            variant="outline"
+                                            className={cn(
+                                                "font-medium",
+                                                getStatusColors(result.status)
+                                            )}
+                                        >
+                                            {result.status}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Product details with proper overflow handling */}
+                                    <div className="ml-6">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="flex items-start gap-1.5 max-w-full">
+                                                        <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                                        <p className="text-sm text-muted-foreground line-clamp-2">
+                                                            {result.status === ProductCreationStatus.CREATED
+                                                                ? `Product created successfully: ${result.product?.title || ''}`
+                                                                : getProductTitle(result)}
+                                                        </p>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="bottom" className="max-w-xs">
+                                                    <p>{result.status === ProductCreationStatus.CREATED
+                                                        ? `Product created successfully: ${result.product?.title || ''}`
+                                                        : getProductTitle(result)}
+                                                    </p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </ScrollArea>
 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 mt-2">
                     <Button
                         onClick={() => {
                             onOpenChange(false);

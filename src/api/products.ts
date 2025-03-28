@@ -1,4 +1,4 @@
-import { type Product, type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult } from '@/types'
+import { type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
