@@ -26,6 +26,7 @@ import {
   UpdateProductResult,
   type Catalog,
   type ProductResponse,
+  type CatalogUpdate,
 } from '@/types/product';
 import { productsApi } from '@/api/products';
 import { productKeys } from '@/api/query-keys';
@@ -150,8 +151,30 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           productKeys.detail(String(id)),
           {
             ...previousProduct,
-            ...data,
+            ...(data.product ? {
+              title: data.product.title || previousProduct.title,
+              description_instaleap: data.product.description_instaleap || previousProduct.description_instaleap,
+              security_stock: data.product.security_stock !== undefined ? data.product.security_stock : previousProduct.security_stock,
+              // Handle parsed JSON fields properly
+              specifications: data.product.specifications
+                ? (typeof data.product.specifications === 'string'
+                  ? JSON.parse(data.product.specifications)
+                  : data.product.specifications)
+                : previousProduct.specifications,
+              search_keywords: data.product.search_keywords
+                ? (typeof data.product.search_keywords === 'string'
+                  ? JSON.parse(data.product.search_keywords)
+                  : data.product.search_keywords)
+                : previousProduct.search_keywords,
+            } : {}),
             images: images,
+            // Convert CatalogUpdate to Catalog for optimistic UI if catalogs exist
+            ...(data.catalogs && previousProduct.catalogs ? {
+              catalogs: previousProduct.catalogs.map(catalog => {
+                const update = data.catalogs?.find(cu => cu.id === catalog.id);
+                return update ? { ...catalog, ...update } : catalog;
+              })
+            } : {})
           }
         );
       }
@@ -163,7 +186,33 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           {
             ...previousProducts,
             data: previousProducts.data.map((p) =>
-              p.id === id ? { ...p, ...data, images } : p
+              p.id === id ? {
+                ...p,
+                ...(data.product ? {
+                  title: data.product.title || p.title,
+                  description_instaleap: data.product.description_instaleap || p.description_instaleap,
+                  security_stock: data.product.security_stock !== undefined ? data.product.security_stock : p.security_stock,
+                  // Handle parsed JSON fields properly
+                  specifications: data.product.specifications
+                    ? (typeof data.product.specifications === 'string'
+                      ? JSON.parse(data.product.specifications)
+                      : data.product.specifications)
+                    : p.specifications,
+                  search_keywords: data.product.search_keywords
+                    ? (typeof data.product.search_keywords === 'string'
+                      ? JSON.parse(data.product.search_keywords)
+                      : data.product.search_keywords)
+                    : p.search_keywords,
+                } : {}),
+                images,
+                // Convert CatalogUpdate to Catalog for optimistic UI if catalogs exist
+                ...(data.catalogs && p.catalogs ? {
+                  catalogs: p.catalogs.map(catalog => {
+                    const update = data.catalogs?.find(cu => cu.id === catalog.id);
+                    return update ? { ...catalog, ...update } : catalog;
+                  })
+                } : {})
+              } : p
             ),
           }
         );
@@ -392,13 +441,13 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     const productUpdateData: Partial<UpdateProductResult> = {
       product: {
         title: values.title,
-        description_instaleap: description,
-        specifications: specifications as unknown as JSON,
-        search_keywords: keywords as unknown as JSON,
+        description_instaleap: description || undefined,
+        specifications: JSON.stringify(specifications) || undefined,
+        search_keywords: JSON.stringify(keywords) || undefined,
         security_stock: values.security_stock,
-        click_multiplier: 1, // Default value, adjust if needed
+        click_multiplier: 1,
         borrado: values.borrado === 1,
-        borrado_comment: values.borrado_comment || '',
+        borrado_comment: values.borrado_comment || undefined,
       }
     };
 
@@ -408,26 +457,16 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       const modifiedItems = updatedInventory.filter(inv => inv.manual_override);
 
       if (modifiedItems.length > 0) {
-        // Use the most recently modified item for the update
-        const mostRecentItem = modifiedItems.reduce((most, current) => {
-          const mostDate = most.status_changed_at instanceof Date
-            ? most.status_changed_at
-            : new Date(most.status_changed_at);
-
-          const currentDate = current.status_changed_at instanceof Date
-            ? current.status_changed_at
-            : new Date(current.status_changed_at);
-
-          return currentDate > mostDate ? current : most;
-        }, modifiedItems[0]);
+        // Convert all modified items to catalog updates
+        const catalogUpdates: CatalogUpdate[] = modifiedItems.map(item => ({
+          id: item.id,
+          status: item.status,
+          status_comment: item.status_comment || '',
+          manual_override: item.manual_override
+        }));
 
         // Add to update data
-        productUpdateData.catalog = {
-          id: mostRecentItem.id,
-          status: mostRecentItem.status,
-          status_comment: mostRecentItem.status_comment || '',
-          manual_override: mostRecentItem.manual_override
-        };
+        productUpdateData.catalogs = catalogUpdates;
       }
     }
 

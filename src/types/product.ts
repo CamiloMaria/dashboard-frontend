@@ -185,34 +185,34 @@ export interface CreateProductResult {
 export type CreateProductResponse = BaseResponse<CreateProductResult[]>;
 
 interface ProductUpdate {
-    title: string;
-    description_instaleap: string;
+    title?: string;
+    description_instaleap?: string;
     /**
-     * Array of objects
+     * Array of objects in JSON format
      * example: [{title: 'Color', description: 'Rojo'}, {title: 'Tamaño', description: '100x100cm'}]
      */
-    specifications: JSON;
+    specifications?: string;
     /**
      * Array of strings
      * example: ['2157909', 'Simmons', 'colchón', 'colchones']
      */
-    search_keywords: JSON;
-    security_stock: number;
-    click_multiplier: number;
-    borrado: boolean;
-    borrado_comment: string;
+    search_keywords?: string;
+    security_stock?: number;
+    click_multiplier?: number;
+    borrado?: boolean;
+    borrado_comment?: string;
 }
 
-interface CatalogUpdate {
+export interface CatalogUpdate {
     id: number;
-    status: number;
-    status_comment: string;
-    manual_override: boolean;
+    status?: number;
+    status_comment?: string;
+    manual_override?: boolean;
 }
 
 export interface UpdateProductResult {
     product: ProductUpdate;
-    catalog: CatalogUpdate;
+    catalogs?: CatalogUpdate[];
 }
 
 export type UpdateProductResponse = BaseResponse<UpdateProductResult>;
