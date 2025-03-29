@@ -63,6 +63,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [description, setDescription] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [updatedInventory, setUpdatedInventory] = useState<Catalog[]>([]);
+  const [changedInventoryIds, setChangedInventoryIds] = useState<number[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -388,11 +389,27 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     form.setValue('isActive', !pendingActiveState);
   };
 
-  const handleInventoryUpdate = (inventory: Catalog[]) => {
+  const handleInventoryUpdate = (inventory: Catalog[], changedIds?: number[]) => {
     setUpdatedInventory(inventory);
 
+    // Update the changed item IDs if provided
+    if (changedIds && changedIds.length > 0) {
+      // Use functional update pattern to merge with existing IDs
+      setChangedInventoryIds(prevIds => {
+        const mergedIds = [...prevIds];
+        changedIds.forEach(id => {
+          if (!mergedIds.includes(id)) {
+            mergedIds.push(id);
+          }
+        });
+        return mergedIds;
+      });
+    }
+
     // Find changed items for optimistic UI update
-    const changedItems = inventory.filter(item => item.manual_override);
+    const changedItems = changedIds
+      ? inventory.filter(item => changedIds.includes(item.id))
+      : inventory.filter(item => item.manual_override);
 
     if (changedItems.length > 0 && productId) {
       // Optimistically update the query cache to reflect changes immediately
@@ -451,13 +468,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       }
     };
 
-    // If we have updated inventory with changes, update the first changed item's status through catalog
-    if (updatedInventory.length > 0) {
-      // Find all modified inventory items
-      const modifiedItems = updatedInventory.filter(inv => inv.manual_override);
+    // If we have updated inventory with changes, use them in the update
+    if (updatedInventory.length > 0 && changedInventoryIds.length > 0) {
+      // Log for debugging
+      console.log('Submitting with changed inventory IDs:', changedInventoryIds);
+
+      // Get all items that were modified, regardless of manual override status
+      const modifiedItems = updatedInventory.filter(inv => changedInventoryIds.includes(inv.id));
+
+      console.log('Modified inventory items:', modifiedItems);
 
       if (modifiedItems.length > 0) {
-        // Convert all modified items to catalog updates
+        // Convert all modified items to catalog updates, preserving their manual_override status
         const catalogUpdates: CatalogUpdate[] = modifiedItems.map(item => ({
           id: item.id,
           status: item.status,
@@ -467,6 +489,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
         // Add to update data
         productUpdateData.catalogs = catalogUpdates;
+
+        // Log the final payload for debugging
+        console.log('Catalogs in final payload:', productUpdateData.catalogs);
       }
     }
 

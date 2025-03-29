@@ -19,7 +19,7 @@ export interface ProductTabsProps {
     sku: string;
     keywords: string[];
     onKeywordsChange: (keywords: string[]) => void;
-    onInventoryUpdate?: (inventory: Catalog[]) => void;
+    onInventoryUpdate?: (inventory: Catalog[], changedItemIds?: number[]) => void;
     isMobile?: boolean;
     isTablet?: boolean;
 }

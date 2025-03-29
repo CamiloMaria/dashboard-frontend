@@ -20,6 +20,7 @@ import {
     TrendingUp,
     CheckCircle,
     XCircle,
+    InfoIcon,
 } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -31,11 +32,13 @@ import { type DisableReason } from '@/constants/product';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export interface ProductInventoryTableProps {
     inventory: Catalog[];
     securityStock?: number | undefined;
-    onInventoryUpdate?: (updatedInventory: Catalog[]) => void;
+    onInventoryUpdate?: (updatedInventory: Catalog[], changedIds?: number[]) => void;
     readOnly?: boolean;
 }
 
@@ -142,6 +145,8 @@ interface StatusBadgeProps {
     isMobile?: boolean;
     readOnly?: boolean;
     pendingStatusChange?: boolean;
+    manualOverride?: boolean;
+    onManualOverrideChange?: (manualOverride: boolean) => void;
 }
 
 function StatusBadge({
@@ -150,7 +155,9 @@ function StatusBadge({
     onChange,
     isMobile,
     readOnly = false,
-    pendingStatusChange = false
+    pendingStatusChange = false,
+    manualOverride = false,
+    onManualOverrideChange
 }: StatusBadgeProps) {
     const { t } = useTranslation();
     // Track the actual status from props separately from visual state
@@ -176,6 +183,12 @@ function StatusBadge({
             onChange(0);
             // Don't set isActive to false here - wait for parent to update status
         }
+    };
+
+    // Handle manual override toggle
+    const handleManualOverrideChange = (checked: boolean) => {
+        if (readOnly || !onManualOverrideChange) return;
+        onManualOverrideChange(checked);
     };
 
     // Determine if user prefers reduced motion
@@ -224,7 +237,51 @@ function StatusBadge({
                     )}
                     aria-label={isActive ? t('products.list.row.setInactive') : t('products.list.row.setActive')}
                 />
+
+                {manualOverride && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center">
+                                    <Badge
+                                        variant="outline"
+                                        className={cn(
+                                            "bg-amber-50 text-amber-700 border-amber-200 px-1 h-5",
+                                            isMobile ? "ml-0" : "ml-1"
+                                        )}
+                                    >
+                                        <span className="sr-only">Manual Override</span>
+                                        <InfoIcon className="h-3 w-3" />
+                                    </Badge>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-xs max-w-[200px]">
+                                    This inventory status has been manually overridden and won't be automatically updated by the system.
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
             </div>
+
+            {onManualOverrideChange && (
+                <div className="flex items-center gap-1.5 mt-1 sm:mt-0">
+                    <Checkbox
+                        id={`manual-override-${status}`}
+                        checked={manualOverride}
+                        onCheckedChange={handleManualOverrideChange}
+                        disabled={readOnly || pendingStatusChange}
+                        className="h-3.5 w-3.5"
+                    />
+                    <Label
+                        htmlFor={`manual-override-${status}`}
+                        className="text-xs text-muted-foreground cursor-pointer"
+                    >
+                        Manual Override
+                    </Label>
+                </div>
+            )}
 
             {!isActive && statusComment && (
                 <motion.div
@@ -267,6 +324,7 @@ function InventoryCard({
     securityStock,
     t,
     onStatusChange,
+    onManualOverrideChange,
     readOnly,
     recentlyChanged = [],
     pendingStatusChange = false
@@ -275,6 +333,7 @@ function InventoryCard({
     securityStock: number;
     t: (key: string, options?: Record<string, unknown>) => string;
     onStatusChange?: (id: number, newStatus: number, comment?: string) => void;
+    onManualOverrideChange?: (manualOverride: boolean) => void;
     readOnly?: boolean;
     recentlyChanged?: number[];
     pendingStatusChange?: boolean;
@@ -290,6 +349,11 @@ function InventoryCard({
             onStatusChange(item.id, 1);
         }
     }, [item.id, onStatusChange, readOnly, pendingStatusChange]);
+
+    const handleManualOverrideChange = useCallback((checked: boolean) => {
+        if (readOnly || !onManualOverrideChange || pendingStatusChange) return;
+        onManualOverrideChange(checked);
+    }, [onManualOverrideChange, readOnly, pendingStatusChange]);
 
     // Use computed property instead of local state for consistency
     const isInactive = item.status === 0;
@@ -325,6 +389,27 @@ function InventoryCard({
                 )}>
                     {item.shop}
                 </span>
+
+                {item.manual_override && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Badge
+                                    variant="outline"
+                                    className="bg-amber-50 text-amber-700 border-amber-200 px-1 h-5"
+                                >
+                                    <span className="sr-only">Manual Override</span>
+                                    <InfoIcon className="h-3 w-3" />
+                                </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="text-xs max-w-[200px]">
+                                    This inventory status has been manually overridden and won't be automatically updated by the system.
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
             </div>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">
@@ -368,6 +453,11 @@ function InventoryCard({
                         status={item.status}
                         statusComment={item.status_comment}
                         onChange={handleStatusToggle}
+                        manualOverride={item.manual_override}
+                        onManualOverrideChange={onManualOverrideChange
+                            ? handleManualOverrideChange
+                            : undefined
+                        }
                         isMobile={true}
                         readOnly={readOnly}
                         pendingStatusChange={pendingStatusChange}
@@ -402,10 +492,15 @@ export function ProductInventoryTable({
     const [localInventory, setLocalInventory] = useState<Catalog[]>([]);
     const initialRenderRef = useRef(true);
 
+    // Add a new state to track changed items regardless of manual override status
+    const [changedItemIds, setChangedItemIds] = useState<number[]>([]);
+
     // Update local inventory when props change
     useEffect(() => {
         if (inventory && inventory.length > 0) {
             setLocalInventory(inventory);
+            // Reset changed items tracking on inventory update from props
+            setChangedItemIds([]);
         }
     }, [inventory]);
 
@@ -455,7 +550,7 @@ export function ProductInventoryTable({
     };
 
     // Define updateInventoryStatus function
-    function updateInventoryStatus(id: number, newStatus: number, comment?: string) {
+    const updateInventoryStatus = useCallback((id: number, newStatus: number, comment?: string, manualOverride: boolean = true) => {
         // Create a new copy of the inventory to track our changes
         const updatedInventory = localInventory.map(item => {
             if (item.id === id) {
@@ -464,7 +559,7 @@ export function ProductInventoryTable({
                     ...item,
                     status: newStatus,
                     status_comment: newStatus === 0 ? comment || '' : '',
-                    manual_override: true,
+                    manual_override: manualOverride,
                     status_changed_at: new Date(),
                     status_changed_by: 'user',
                     updated_at: new Date()
@@ -479,11 +574,72 @@ export function ProductInventoryTable({
         // Mark this item as recently changed for animation
         setRecentlyChanged(prev => [...prev, id]);
 
+        // Track this item as changed regardless of manual override setting
+        // Use functional state update to ensure we work with the latest state
+        setChangedItemIds(prevIds => {
+            // Make sure we don't add duplicates
+            if (!prevIds.includes(id)) {
+                return [...prevIds, id];
+            }
+            return prevIds;
+        });
+
         // Then propagate changes to parent
         if (onInventoryUpdate) {
-            onInventoryUpdate(updatedInventory);
+            // Get latest changed IDs including the current one
+            // We don't use changedItemIds directly as it might not have the latest value due to closures
+            const updatedChangedIds = changedItemIds.includes(id)
+                ? changedItemIds
+                : [...changedItemIds, id];
+
+            onInventoryUpdate(updatedInventory, updatedChangedIds);
         }
-    }
+    }, [localInventory, onInventoryUpdate, changedItemIds]);
+
+    // Add function to handle manual override toggle
+    const handleManualOverrideToggle = useCallback((id: number, manualOverride: boolean) => {
+        if (readOnly) return;
+
+        // Update the item with the new manual override setting
+        // But keep the other properties the same
+        const updatedInventory = localInventory.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    manual_override: manualOverride,
+                    status_changed_at: new Date(),
+                    status_changed_by: 'user',
+                    updated_at: new Date()
+                };
+            }
+            return item;
+        });
+
+        // Update local state
+        setLocalInventory(updatedInventory);
+
+        // Mark as recently changed for animation
+        setRecentlyChanged(prev => [...prev, id]);
+
+        // Track this item as changed regardless of manual override setting
+        // Use functional state update to ensure we work with the latest state
+        setChangedItemIds(prevIds => {
+            if (!prevIds.includes(id)) {
+                return [...prevIds, id];
+            }
+            return prevIds;
+        });
+
+        // Propagate to parent
+        if (onInventoryUpdate) {
+            // Use functional reference to get latest state
+            const updatedChangedIds = changedItemIds.includes(id)
+                ? changedItemIds
+                : [...changedItemIds, id];
+
+            onInventoryUpdate(updatedInventory, updatedChangedIds);
+        }
+    }, [localInventory, onInventoryUpdate, readOnly, changedItemIds]);
 
     const handleStatusClick = useCallback((id: number, shopName: string, newStatus: number) => {
         if (readOnly) return;
@@ -500,9 +656,9 @@ export function ProductInventoryTable({
         }
     }, [readOnly, updateInventoryStatus]);
 
-    const handleDisableConfirm = useCallback((reason: DisableReason) => {
+    const handleDisableConfirm = useCallback((reason: DisableReason, manualOverride: boolean = true) => {
         if (selectedInventoryId !== null) {
-            updateInventoryStatus(selectedInventoryId, 0, reason);
+            updateInventoryStatus(selectedInventoryId, 0, reason, manualOverride);
             setShowDisableDialog(false);
             setSelectedInventoryId(null);
             setSelectedShopName('');
@@ -606,6 +762,11 @@ export function ProductInventoryTable({
                                     onStatusChange={
                                         !readOnly
                                             ? (id, newStatus) => handleStatusClick(id, item.shop, newStatus)
+                                            : undefined
+                                    }
+                                    onManualOverrideChange={
+                                        !readOnly
+                                            ? (manualOverride) => handleManualOverrideToggle(item.id, manualOverride)
                                             : undefined
                                     }
                                     readOnly={readOnly}
@@ -742,6 +903,11 @@ export function ProductInventoryTable({
                                                     status={inv.status}
                                                     statusComment={inv.status_comment}
                                                     onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
+                                                    manualOverride={inv.manual_override}
+                                                    onManualOverrideChange={!readOnly
+                                                        ? (manualOverride) => handleManualOverrideToggle(inv.id, manualOverride)
+                                                        : undefined
+                                                    }
                                                     isMobile={isTablet}
                                                     readOnly={readOnly}
                                                     pendingStatusChange={isPendingChange}

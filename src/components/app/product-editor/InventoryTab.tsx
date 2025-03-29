@@ -67,7 +67,7 @@ function StatCard({ title, value, description, icon, trend, isMobile }: StatCard
 
 interface InventoryTabProps {
     product: Product | undefined;
-    onInventoryUpdate?: (inventory: Catalog[]) => void;
+    onInventoryUpdate?: (inventory: Catalog[], changedItemIds?: number[]) => void;
     readOnly?: boolean;
 }
 
@@ -78,11 +78,15 @@ export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: I
 
     // Maintain a local state of the inventory for immediate UI updates
     const [inventory, setInventory] = useState<Catalog[]>([]);
+    // Track changed item IDs
+    const [changedItemIds, setChangedItemIds] = useState<number[]>([]);
 
     // Update local inventory when product changes
     useEffect(() => {
         if (product?.catalogs) {
             setInventory(product.catalogs);
+            // Reset changed items tracking when product changes
+            setChangedItemIds([]);
         } else {
             setInventory([]);
         }
@@ -102,17 +106,44 @@ export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: I
         ? priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length
         : 0;
 
-    const handleInventoryUpdate = useCallback((updatedInventory: Catalog[]) => {
+    const handleInventoryUpdate = useCallback((updatedInventory: Catalog[], changedIds?: number[]) => {
         // Update local state first for immediate UI feedback
         setInventory(updatedInventory);
 
-        // Then propagate to parent
-        if (onInventoryUpdate) {
-            onInventoryUpdate(updatedInventory);
+        // Update changed items tracking
+        if (changedIds && changedIds.length > 0) {
+            // Use functional update to ensure we're working with latest state
+            setChangedItemIds(prevIds => {
+                // Merge previous IDs with new changed IDs without duplicates
+                const mergedIds = [...prevIds];
+                changedIds.forEach(id => {
+                    if (!mergedIds.includes(id)) {
+                        mergedIds.push(id);
+                    }
+                });
+                return mergedIds;
+            });
         }
 
-        // Debug log
-    }, [onInventoryUpdate]);
+        // Then propagate to parent with all tracked changes
+        if (onInventoryUpdate) {
+            // If we have new changedIds, make sure to include both those and previously tracked ones
+            if (changedIds && changedIds.length > 0) {
+                const mergedIds = [...changedItemIds];
+                changedIds.forEach(id => {
+                    if (!mergedIds.includes(id)) {
+                        mergedIds.push(id);
+                    }
+                });
+                // Log for debugging
+                console.log('Propagating inventory update with changed IDs:', mergedIds);
+                onInventoryUpdate(updatedInventory, mergedIds);
+            } else {
+                // No new changes, just pass existing ones
+                onInventoryUpdate(updatedInventory, changedItemIds);
+            }
+        }
+    }, [onInventoryUpdate, changedItemIds]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
