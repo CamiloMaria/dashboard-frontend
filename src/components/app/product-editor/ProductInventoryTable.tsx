@@ -238,7 +238,7 @@ function StatusBadge({
                     aria-label={isActive ? t('products.list.row.setInactive') : t('products.list.row.setActive')}
                 />
 
-                {manualOverride && (
+                {/* {manualOverride && (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -262,7 +262,7 @@ function StatusBadge({
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                )}
+                )} */}
             </div>
 
             {onManualOverrideChange && (
