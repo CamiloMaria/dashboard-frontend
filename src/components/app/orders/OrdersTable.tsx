@@ -154,7 +154,7 @@ export function OrdersTable() {
     if (!data) return null;
 
     const { data: orders, pagination } = data;
-    const totalPages = Math.ceil(pagination.length / itemsPerPage);
+    const totalPages = pagination.totalPages;
 
     // Mobile card view for each order
     const MobileOrderCard = ({ order }: { order: Order }) => (

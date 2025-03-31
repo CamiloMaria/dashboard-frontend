@@ -39,7 +39,7 @@ export function LogsPage() {
     };
 
     const totalPages = data?.pagination
-        ? Math.ceil(data.pagination.length / itemsPerPage)
+        ? data.pagination.totalPages
         : 0;
 
     return (

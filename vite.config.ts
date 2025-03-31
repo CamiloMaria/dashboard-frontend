@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': env
     },
-    base: '/dashboard/',
+    base: '/dashboard/v2',
     plugins: [react()],
     resolve: {
       alias: {

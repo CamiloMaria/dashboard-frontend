@@ -1,4 +1,4 @@
-export const BASE_PATH = '/dashboard';
+export const BASE_PATH = '/dashboard/v2';
 
 const removeBasePath = (path: string) => path.replace(BASE_PATH, '');
 
