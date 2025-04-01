@@ -92,9 +92,9 @@ export function InventoryTab({ product, catalogs, onInventoryUpdate, readOnly = 
             });
         });
         setOriginalCatalogs(newOriginalValues);
-        // Reset changed IDs when catalogs are refreshed
+        // Reset changed IDs when product or catalogs change
         setChangedItemIds([]);
-    }, [product?.id, catalogs]); // Only reset when product changes, not on every catalogs change
+    }, [product?.id, catalogs]);
 
     // Calculate inventory statistics based on local state
     const totalStock = catalogs.reduce((sum, inv) => sum + inv.stock, 0);

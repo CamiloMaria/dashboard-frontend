@@ -1,4 +1,4 @@
-import { type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult, DeleteProductResponse } from '@/types'
+import { type ProductsResponse, type GetProductsParams, type ProductResponse, CreateProductResponse, GenerateKeywordsResponse, GenerateDescriptionResponse, UpdateProductResponse, UpdateProductResult, DeleteProductResponse, AtomicProductUpdate, AtomicProductUpdateResponse } from '@/types'
 import axios from '@/lib/axios';
 
 export const productsApi = {
@@ -60,6 +60,35 @@ export const productsApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+
+  async atomicProductUpdate(
+    data: AtomicProductUpdate,
+    files?: File[]
+  ): Promise<AtomicProductUpdateResponse> {
+    const formData = new FormData();
+    
+    // Add the JSON data
+    formData.append('data', JSON.stringify(data));
+    
+    // Add the files if any
+    if (files && files.length > 0) {
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+    }
+    
+    const response = await axios.post<AtomicProductUpdateResponse>(
+      '/products/atomic-update',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    
+    return response.data;
   },
 
   async generateDescription(productTitle: string): Promise<GenerateDescriptionResponse> {

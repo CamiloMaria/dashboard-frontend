@@ -23,9 +23,10 @@ import {
   productFormSchema,
   ProductsResponse,
   Specification,
-  UpdateProductResult,
   type Catalog,
   type CatalogUpdate,
+  type ImagePositionChange,
+  type AtomicProductUpdate,
 } from '@/types/product';
 import { productsApi } from '@/api/products';
 import { productKeys } from '@/api/query-keys';
@@ -64,6 +65,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
   // Track modified catalog IDs
   const [modifiedCatalogIds, setModifiedCatalogIds] = useState<number[]>([]);
+  // Track image operations for atomic update
+  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+  const [imagesToReorder, setImagesToReorder] = useState<ImagePositionChange[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -101,49 +106,33 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       setDescription(product.description_instaleap || '');
       setKeywords(product.search_keywords || []);
       setCatalogs(product.catalogs || []);
-      // Reset modified catalog IDs when product data is loaded
+      // Reset tracking states when product data is loaded
       setModifiedCatalogIds([]);
+      setImagesToDelete([]);
+      setImagesToReorder([]);
+      setNewImages([]);
     }
   }, [product, form]);
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, sku, data, deletedImageIds, newImages }: {
-      id: number;
-      sku: string;
-      data: Partial<UpdateProductResult>;
-      deletedImageIds?: number[];
-      newImages?: File[];
+  // New atomic update mutation
+  const atomicUpdateMutation = useMutation({
+    mutationFn: async ({
+      data,
+      files
+    }: {
+      data: AtomicProductUpdate;
+      files?: File[];
     }) => {
-      try {
-        // 1. Delete images if any
-        if (deletedImageIds?.length) {
-          await productsApi.deleteProductImages(sku || '', deletedImageIds);
-        }
-
-        // 2. Update product
-        const updatedProduct = await productsApi.updateProduct(id, data);
-
-        // 3. Upload new images if any
-        if (newImages?.length) {
-          await productsApi.updateProductImages(sku || '', newImages);
-        }
-
-        return updatedProduct;
-      } catch (error) {
-        // Clean up arrays on error
-        setDeletedImageIds([]);
-        setNewImages([]);
-        throw error;
-      }
+      return productsApi.atomicProductUpdate(data, files);
     },
-    onMutate: async ({ id, data }) => {
+    onMutate: async ({ data }) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: productKeys.detail(String(id)) });
+      await queryClient.cancelQueries({ queryKey: productKeys.detail(productId) });
       await queryClient.cancelQueries({ queryKey: productKeys.all });
 
       // Snapshot the previous values
       const previousProduct = queryClient.getQueryData<Product>(
-        productKeys.detail(String(id))
+        productKeys.detail(productId)
       );
       const previousProducts = queryClient.getQueryData<ProductsResponse>(
         productKeys.list({ page: 1, limit: 5 })
@@ -151,34 +140,66 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
       // Optimistically update the product detail
       if (previousProduct) {
-        queryClient.setQueryData<Product>(
-          productKeys.detail(String(id)),
+        // Create a copy of images with deletions and reordering applied
+        let updatedImages = [...(previousProduct.images || [])];
+
+        // Apply deletions
+        if (data.imagesToDelete && data.imagesToDelete.length > 0) {
+          updatedImages = updatedImages.filter(img =>
+            !data.imagesToDelete?.includes(img.position)
+          );
+        }
+
+        // Apply reordering
+        if (data.imagesToReorder && data.imagesToReorder.length > 0) {
+          // Create a position map
+          const positionMap = new Map<number, number>();
+          data.imagesToReorder.forEach(change => {
+            positionMap.set(change.currentPosition, change.newPosition);
+          });
+
+          // Apply new positions
+          updatedImages = updatedImages.map(img => {
+            const newPosition = positionMap.get(img.position);
+            if (newPosition !== undefined) {
+              return { ...img, position: newPosition };
+            }
+            return img;
+          });
+
+          // Sort by position
+          updatedImages.sort((a, b) => a.position - b.position);
+        }
+
+        queryClient.setQueryData(
+          productKeys.detail(productId),
           {
             ...previousProduct,
-            ...(data.product ? {
-              title: data.product.title || previousProduct.title,
-              description_instaleap: data.product.description_instaleap || previousProduct.description_instaleap,
-              security_stock: data.product.security_stock !== undefined ? data.product.security_stock : previousProduct.security_stock,
-              // Handle parsed JSON fields properly
-              specifications: data.product.specifications
-                ? (typeof data.product.specifications === 'string'
-                  ? JSON.parse(data.product.specifications)
-                  : data.product.specifications)
+            ...(data.metadata ? {
+              title: data.metadata.title || previousProduct.title,
+              description_instaleap: data.metadata.description_instaleap || previousProduct.description_instaleap,
+              security_stock: data.metadata.security_stock !== undefined ? data.metadata.security_stock : previousProduct.security_stock,
+              specifications: data.metadata.specifications
+                ? (typeof data.metadata.specifications === 'string'
+                  ? JSON.parse(data.metadata.specifications)
+                  : data.metadata.specifications)
                 : previousProduct.specifications,
-              search_keywords: data.product.search_keywords
-                ? (typeof data.product.search_keywords === 'string'
-                  ? JSON.parse(data.product.search_keywords)
-                  : data.product.search_keywords)
+              search_keywords: data.metadata.search_keywords
+                ? (typeof data.metadata.search_keywords === 'string'
+                  ? JSON.parse(data.metadata.search_keywords)
+                  : data.metadata.search_keywords)
                 : previousProduct.search_keywords,
+              isActive: data.metadata.borrado !== undefined ? !data.metadata.borrado : previousProduct.isActive,
+              borrado_comment: data.metadata.borrado_comment || previousProduct.borrado_comment,
             } : {}),
-            images: images,
-            // Convert CatalogUpdate to Catalog for optimistic UI if catalogs exist
-            ...(data.catalogs && previousProduct.catalogs ? {
-              catalogs: previousProduct.catalogs.map(catalog => {
+            images: updatedImages,
+            // Update catalogs if provided
+            catalogs: data.catalogs && previousProduct.catalogs
+              ? previousProduct.catalogs.map(catalog => {
                 const update = data.catalogs?.find(cu => cu.id === catalog.id);
                 return update ? { ...catalog, ...update } : catalog;
               })
-            } : {})
+              : previousProduct.catalogs,
           }
         );
       }
@@ -190,32 +211,33 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           {
             ...previousProducts,
             data: previousProducts.data.map((p) =>
-              p.id === id ? {
+              p.id === Number(productId) ? {
                 ...p,
-                ...(data.product ? {
-                  title: data.product.title || p.title,
-                  description_instaleap: data.product.description_instaleap || p.description_instaleap,
-                  security_stock: data.product.security_stock !== undefined ? data.product.security_stock : p.security_stock,
+                ...(data.metadata ? {
+                  title: data.metadata.title || p.title,
+                  description_instaleap: data.metadata.description_instaleap || p.description_instaleap,
+                  security_stock: data.metadata.security_stock !== undefined ? data.metadata.security_stock : p.security_stock,
                   // Handle parsed JSON fields properly
-                  specifications: data.product.specifications
-                    ? (typeof data.product.specifications === 'string'
-                      ? JSON.parse(data.product.specifications)
-                      : data.product.specifications)
+                  specifications: data.metadata.specifications
+                    ? (typeof data.metadata.specifications === 'string'
+                      ? JSON.parse(data.metadata.specifications)
+                      : data.metadata.specifications)
                     : p.specifications,
-                  search_keywords: data.product.search_keywords
-                    ? (typeof data.product.search_keywords === 'string'
-                      ? JSON.parse(data.product.search_keywords)
-                      : data.product.search_keywords)
+                  search_keywords: data.metadata.search_keywords
+                    ? (typeof data.metadata.search_keywords === 'string'
+                      ? JSON.parse(data.metadata.search_keywords)
+                      : data.metadata.search_keywords)
                     : p.search_keywords,
+                  isActive: data.metadata.borrado !== undefined ? !data.metadata.borrado : p.isActive,
+                  borrado_comment: data.metadata.borrado_comment || p.borrado_comment,
                 } : {}),
-                images,
-                // Convert CatalogUpdate to Catalog for optimistic UI if catalogs exist
-                ...(data.catalogs && p.catalogs ? {
-                  catalogs: p.catalogs.map(catalog => {
+                // Update catalogs if provided
+                catalogs: data.catalogs && p.catalogs
+                  ? p.catalogs.map(catalog => {
                     const update = data.catalogs?.find(cu => cu.id === catalog.id);
                     return update ? { ...catalog, ...update } : catalog;
                   })
-                } : {})
+                  : p.catalogs,
               } : p
             ),
           }
@@ -224,11 +246,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
       return { previousProduct, previousProducts };
     },
-    onError: (err, variables, context) => {
+    onError: (err, _, context) => {
       // Rollback to the previous values
       if (context?.previousProduct) {
         queryClient.setQueryData(
-          productKeys.detail(String(variables.id)),
+          productKeys.detail(productId),
           context.previousProduct
         );
       }
@@ -238,6 +260,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           context.previousProducts
         );
       }
+
       toast({
         title: 'Error',
         description: err instanceof Error ? err.message : 'Failed to update the product. Please try again.',
@@ -245,34 +268,44 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       });
     },
     onSuccess: () => {
-      // Clean up arrays on success
-      setDeletedImageIds([]);
+      // Reset all tracking states
+      setImagesToDelete([]);
+      setImagesToReorder([]);
       setNewImages([]);
-      // Reset modified catalog IDs
       setModifiedCatalogIds([]);
+
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: productKeys.all });
+
       toast({
         title: 'Product updated',
         description: 'The product has been updated successfully.',
       });
+
       navigate({ to: productsListRoute.fullPath });
     },
   });
 
-  // Track deleted and new images
-  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);
-
   const handleImageUpload = (file: File, replaceIndex?: number) => {
     // Create a temporary URL for preview
     const previewUrl = URL.createObjectURL(file);
-    const position = (replaceIndex !== undefined ? images[replaceIndex].position : images.length) + 1;
+
+    // Calculate the position for the new image
+    let position = 1; // Default position if no images
+
+    if (replaceIndex !== undefined) {
+      // Use the existing position if replacing an image
+      position = images[replaceIndex].position;
+    } else if (images.length > 0) {
+      // For a new image, use a position one higher than the current max
+      position = Math.max(...images.map(img => img.position || 0)) + 1;
+    }
 
     const newImage = {
-      id: replaceIndex !== undefined ? images[replaceIndex].id : images.length + 1,
+      id: replaceIndex !== undefined ? images[replaceIndex].id : Date.now(), // Use timestamp for temp ID
       product_id: Number(productId) || 0,
-      sku: '',
-      position,
+      sku: product?.sku || '',
+      position: position,
       width: 800,
       height: 800,
       alt: file.name,
@@ -286,23 +319,31 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     if (replaceIndex !== undefined) {
       // Replace existing image
       const newImagesArray = [...images];
-      // Store the old image ID for deletion
+
+      // If replacing, mark the old image position for deletion
       const oldImage = images[replaceIndex];
-      if (oldImage.id) {
-        setDeletedImageIds(prev => [...prev, oldImage.id]);
+      if (oldImage.position) {
+        setImagesToDelete(prev => [...prev, oldImage.position]);
       }
+
       // Revoke the old URL to prevent memory leaks
       URL.revokeObjectURL(images[replaceIndex].src);
+
+      // Update the image array
       newImagesArray[replaceIndex] = newImage;
       setImages(newImagesArray);
     } else {
-      // Add new image
-      setImages([...images, newImage]);
+      // Add new image to the end
+      setImages(prev => {
+        const updated = [...prev, newImage];
+        // Sort by position to maintain order
+        return updated.sort((a, b) => a.position - b.position);
+      });
     }
 
     // Create a new File with position in the name
-    const extension = file.name.split('.').pop();
-    const newFile = new File([file], `${position}.${extension}`, { type: file.type });
+    const extension = file.name.split('.').pop() || 'jpg';
+    const newFile = new File([file], `${product?.sku}.${extension}`, { type: file.type });
 
     // Store the new file for upload
     setNewImages(prev => [...prev, newFile]);
@@ -315,9 +356,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
   const handleImageDelete = (index: number) => {
     const imageToDelete = images[index];
-    if (imageToDelete.id) {
-      setDeletedImageIds(prev => [...prev, imageToDelete.id]);
+    // Track image position for deletion in atomic update
+    if (imageToDelete.position) {
+      setImagesToDelete(prev => [...prev, imageToDelete.position]);
     }
+
     const newImagesArray = images.filter((_, i) => i !== index);
     setImages(newImagesArray);
 
@@ -339,21 +382,65 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
   const reorderImage = (direction: 'up' | 'down') => {
     if (images.length < 2) return;
-    const newIndex = direction === 'up'
-      ? Math.min(images.length - 1, currentImageIndex + 1)
-      : Math.max(0, currentImageIndex - 1)
 
-    if (newIndex !== currentImageIndex) {
-      const newImages = [...images];
-      const [movedImage] = newImages.splice(currentImageIndex, 1);
-      newImages.splice(newIndex, 0, movedImage);
-      // Update positions
-      newImages.forEach((img, idx) => {
-        img.position = idx;
-      });
-      setImages(newImages);
-      setCurrentImageIndex(newIndex);
+    // For image reordering, 'up' means moving image earlier in the sequence (decreasing position)
+    // 'down' means moving image later in the sequence (increasing position)
+    const targetIndex = direction === 'down'
+      ? Math.max(0, currentImageIndex - 1)
+      : Math.min(images.length - 1, currentImageIndex + 1);
+
+    // Skip if we can't move in this direction (already at the end)
+    if (targetIndex === currentImageIndex) return;
+
+    // Get the current image and target image
+    const currentImage = images[currentImageIndex];
+    const targetImage = images[targetIndex];
+
+    // Validate both images have positions
+    if (currentImage.position === undefined || targetImage.position === undefined) return;
+
+    // Add to imagesToReorder for API update
+    const existingReorderIndex = imagesToReorder.findIndex(
+      change => change.currentPosition === currentImage.position
+    );
+
+    if (existingReorderIndex >= 0) {
+      // Update existing reordering entry
+      const updatedReorders = [...imagesToReorder];
+      updatedReorders[existingReorderIndex] = {
+        currentPosition: currentImage.position,
+        newPosition: targetImage.position
+      };
+      setImagesToReorder(updatedReorders);
+    } else {
+      // Add new reordering entry
+      setImagesToReorder(prev => [
+        ...prev,
+        {
+          currentPosition: currentImage.position,
+          newPosition: targetImage.position
+        }
+      ]);
     }
+
+    // Create copy of images array for UI update
+    const newImagesArray = [...images];
+
+    // Swap positions between the images for UI display
+    const tempPosition = currentImage.position;
+    currentImage.position = targetImage.position;
+    targetImage.position = tempPosition;
+
+    // Move the current image in the array for UI display
+    const [movedImage] = newImagesArray.splice(currentImageIndex, 1);
+    newImagesArray.splice(targetIndex, 0, movedImage);
+
+    // Sort images by position for consistent display
+    newImagesArray.sort((a, b) => a.position - b.position);
+
+    // Update UI
+    setImages(newImagesArray);
+    setCurrentImageIndex(targetIndex);
   };
 
   const handleImageDeleteClick = (index: number) => {
@@ -407,22 +494,58 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     }
   };
 
+  // Helper function to handle array fields properly
+  const serializeArrayField = <T extends unknown[]>(array: T): string | undefined => {
+    if (array.length === 0) {
+      return undefined;
+    }
+    return JSON.stringify(array);
+  };
+
   const onSubmit = (values: ProductFormValues) => {
-    // Create a proper UpdateProductResult object with the right structure
-    const productUpdateData: Partial<UpdateProductResult> = {
-      product: {
+    if (!product || !product.sku) {
+      toast({
+        title: 'Error',
+        description: 'Product SKU is required for updates.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Create the atomic update payload
+    const atomicUpdateData: AtomicProductUpdate = {
+      sku: product.sku,
+      // Only include metadata if there are changes
+      metadata: {
         title: values.title,
         description_instaleap: description || undefined,
-        specifications: JSON.stringify(specifications) || undefined,
-        search_keywords: JSON.stringify(keywords) || undefined,
+        // Use the helper function to handle empty arrays
+        specifications: serializeArrayField(specifications),
+        search_keywords: serializeArrayField(keywords),
         security_stock: values.security_stock,
         click_multiplier: 1,
         borrado: values.isActive ? false : true,
         borrado_comment: values.borrado_comment || undefined,
-      }
+      },
     };
 
-    // If we have catalogs with tracked modifications, include them in the update
+    // Add image operations if necessary
+    if (imagesToDelete.length > 0) {
+      atomicUpdateData.imagesToDelete = imagesToDelete;
+    }
+
+    if (imagesToReorder.length > 0) {
+      // Filter out any reorderings with the same source and target position
+      const validReorderings = imagesToReorder.filter(
+        item => item.currentPosition !== item.newPosition
+      );
+
+      if (validReorderings.length > 0) {
+        atomicUpdateData.imagesToReorder = validReorderings;
+      }
+    }
+
+    // Add catalog updates if any were modified
     if (modifiedCatalogIds.length > 0 && catalogs.length > 0) {
       // Filter catalogs to only include those with IDs in the modifiedCatalogIds array
       const modifiedItems = catalogs.filter(item => modifiedCatalogIds.includes(item.id));
@@ -437,26 +560,22 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         }));
 
         // Add to update data
-        productUpdateData.catalogs = catalogUpdates;
+        atomicUpdateData.catalogs = catalogUpdates;
       }
     }
 
-    if (productId) {
-      updateMutation.mutate({
-        id: Number(productId),
-        sku: product?.sku || '',
-        data: productUpdateData,
-        deletedImageIds: deletedImageIds.length > 0 ? deletedImageIds : undefined,
-        newImages: newImages.length > 0 ? newImages : undefined,
-      });
-    }
+    // Call the atomic update mutation
+    atomicUpdateMutation.mutate({
+      data: atomicUpdateData,
+      files: newImages.length > 0 ? newImages : undefined
+    });
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <LoadingOverlay
-          isLoading={updateMutation.isPending}
+          isLoading={atomicUpdateMutation.isPending}
           message={productId ? t('products.updating') : ''}
         />
 
@@ -610,7 +729,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
               <ActionButtons
                 isLoading={isLoading}
-                isPending={updateMutation.isPending}
+                isPending={atomicUpdateMutation.isPending}
                 onCancel={() => navigate({ to: productsListRoute.fullPath })}
               />
             </>

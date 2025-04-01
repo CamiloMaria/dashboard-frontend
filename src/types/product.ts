@@ -227,3 +227,27 @@ export interface GenerateDescriptionResult {
 }
 
 export type GenerateDescriptionResponse = BaseResponse<GenerateDescriptionResult>;
+
+/**
+ * DTO for image position changes in atomic updates
+ */
+export interface ImagePositionChange {
+    currentPosition: number;
+    newPosition: number;
+}
+
+/**
+ * DTO for atomic product updates
+ */
+export interface AtomicProductUpdate {
+    sku: string;
+    imagesToDelete?: number[];
+    imagesToReorder?: ImagePositionChange[];
+    metadata?: ProductUpdate;
+    catalogs?: CatalogUpdate[];
+}
+
+/**
+ * Response type for atomic product updates
+ */
+export type AtomicProductUpdateResponse = BaseResponse<Product>;
