@@ -4,10 +4,7 @@ import { BaseResponse, PaginatedResponse } from '.';
 export const productFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   isActive: z.boolean(),
-  disabledShops: z.array(z.string()).default([]),
-  disabledShopsComment: z.string().optional(),
-  borrado: z.number().default(0),
-  borrado_comment: z.string().optional(),
+  borrado_comment: z.string().nullable(),
   security_stock: z.number().min(0, 'Security stock must be 0 or greater').default(20),
 })
 
@@ -85,10 +82,10 @@ export interface Catalog {
     price: number;
     compare_price: number | null;
     status: number;
-    status_comment: string;
+    status_comment: string | null;
     manual_override: boolean;
-    status_changed_at: Date;
-    status_changed_by: string;
+    status_changed_at: Date | null;
+    status_changed_by: string | null;
     updated_at: Date;
 }
 

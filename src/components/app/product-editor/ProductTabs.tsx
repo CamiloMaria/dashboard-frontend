@@ -20,6 +20,7 @@ export interface ProductTabsProps {
     keywords: string[];
     onKeywordsChange: (keywords: string[]) => void;
     onInventoryUpdate?: (inventory: Catalog[], changedItemIds?: number[]) => void;
+    catalogs: Catalog[];
     isMobile?: boolean;
     isTablet?: boolean;
 }
@@ -34,6 +35,7 @@ export function ProductTabs({
     sku,
     keywords,
     onKeywordsChange,
+    catalogs,
     onInventoryUpdate,
     isMobile,
     isTablet
@@ -103,6 +105,7 @@ export function ProductTabs({
                     <TabsContent value="catalog" className="m-0">
                         <InventoryTab
                             product={product}
+                            catalogs={catalogs}
                             onInventoryUpdate={onInventoryUpdate}
                         />
                     </TabsContent>

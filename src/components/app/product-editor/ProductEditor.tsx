@@ -25,7 +25,6 @@ import {
   Specification,
   UpdateProductResult,
   type Catalog,
-  type ProductResponse,
   type CatalogUpdate,
 } from '@/types/product';
 import { productsApi } from '@/api/products';
@@ -62,8 +61,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [specifications, setSpecifications] = useState<Specification[]>([]);
   const [description, setDescription] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [updatedInventory, setUpdatedInventory] = useState<Catalog[]>([]);
-  const [changedInventoryIds, setChangedInventoryIds] = useState<number[]>([]);
+  const [catalogs, setCatalogs] = useState<Catalog[]>([]);
+  // Track modified catalog IDs
+  const [modifiedCatalogIds, setModifiedCatalogIds] = useState<number[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -74,9 +74,9 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     defaultValues: {
       title: '',
       isActive: false,
-      disabledShops: [],
-      disabledShopsComment: '',
+      borrado_comment: '',
       security_stock: 10,
+      // catalogs: [],
     },
   });
 
@@ -92,14 +92,17 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       form.reset({
         title: product.title || '',
         isActive: !!product.isActive,
-        disabledShops: product.disabledShops || [],
-        disabledShopsComment: product.disabledShopsComment || '',
+        borrado_comment: product.borrado_comment || '',
         security_stock: product.security_stock || 10,
+        // catalogs: product.catalogs || [],
       });
       setImages(product.images || []);
       setSpecifications(product.specifications || []);
       setDescription(product.description_instaleap || '');
       setKeywords(product.search_keywords || []);
+      setCatalogs(product.catalogs || []);
+      // Reset modified catalog IDs when product data is loaded
+      setModifiedCatalogIds([]);
     }
   }, [product, form]);
 
@@ -245,6 +248,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       // Clean up arrays on success
       setDeletedImageIds([]);
       setNewImages([]);
+      // Reset modified catalog IDs
+      setModifiedCatalogIds([]);
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       toast({
         title: 'Product updated',
@@ -368,15 +373,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       setShowDisableDialog(true);
     } else {
       form.setValue('isActive', checked);
-      form.setValue('disabledShops', []);
-      form.setValue('disabledShopsComment', '');
-      form.setValue('borrado', 0);
     }
   };
 
   const handleDisableConfirm = (reason: DisableReason) => {
     form.setValue('isActive', false);
-    form.setValue('borrado', 1);
     form.setValue('borrado_comment', reason);
     setShowDisableDialog(false);
     setPendingActiveState(null);
@@ -389,67 +390,20 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     form.setValue('isActive', !pendingActiveState);
   };
 
-  const handleInventoryUpdate = (inventory: Catalog[], changedIds?: number[]) => {
-    setUpdatedInventory(inventory);
-
-    // Update the changed item IDs if provided
-    if (changedIds && changedIds.length > 0) {
-      // Use functional update pattern to merge with existing IDs
-      setChangedInventoryIds(prevIds => {
-        const mergedIds = [...prevIds];
-        changedIds.forEach(id => {
-          if (!mergedIds.includes(id)) {
-            mergedIds.push(id);
+  // Handler for inventory updates from the InventoryTab
+  const handleInventoryUpdate = (updatedCatalogs: Catalog[], changedItemIds?: number[]) => {
+    setCatalogs(updatedCatalogs);
+    if (changedItemIds && changedItemIds.length > 0) {
+      // Update the list of modified catalog IDs
+      setModifiedCatalogIds(prev => {
+        const newIds = [...prev];
+        changedItemIds.forEach(id => {
+          if (!newIds.includes(id)) {
+            newIds.push(id);
           }
         });
-        return mergedIds;
+        return newIds;
       });
-    }
-
-    // Find changed items for optimistic UI update
-    const changedItems = changedIds
-      ? inventory.filter(item => changedIds.includes(item.id))
-      : inventory.filter(item => item.manual_override);
-
-    if (changedItems.length > 0 && productId) {
-      // Optimistically update the query cache to reflect changes immediately
-      queryClient.setQueryData<ProductResponse>(
-        productKeys.detail(productId),
-        (oldData: ProductResponse | undefined) => {
-          if (!oldData) return oldData;
-
-          // Create a new product object with updated catalogs
-          return {
-            ...oldData,
-            data: {
-              ...oldData.data,
-              catalogs: inventory
-            }
-          };
-        }
-      );
-
-      // Also update any list data that might be displayed elsewhere
-      queryClient.setQueriesData<ProductsResponse>(
-        { queryKey: productKeys.all },
-        (oldData: ProductsResponse | undefined) => {
-          if (!oldData) return oldData;
-
-          // Update the product in lists if found
-          if (oldData.data && Array.isArray(oldData.data)) {
-            return {
-              ...oldData,
-              data: oldData.data.map((p: Product) =>
-                p.id === Number(productId)
-                  ? { ...p, catalogs: inventory }
-                  : p
-              )
-            };
-          }
-
-          return oldData;
-        }
-      );
     }
   };
 
@@ -463,23 +417,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         search_keywords: JSON.stringify(keywords) || undefined,
         security_stock: values.security_stock,
         click_multiplier: 1,
-        borrado: values.borrado === 1,
+        borrado: values.isActive ? false : true,
         borrado_comment: values.borrado_comment || undefined,
       }
     };
 
-    // If we have updated inventory with changes, use them in the update
-    if (updatedInventory.length > 0 && changedInventoryIds.length > 0) {
-      // Log for debugging
-      console.log('Submitting with changed inventory IDs:', changedInventoryIds);
-
-      // Get all items that were modified, regardless of manual override status
-      const modifiedItems = updatedInventory.filter(inv => changedInventoryIds.includes(inv.id));
-
-      console.log('Modified inventory items:', modifiedItems);
+    // If we have catalogs with tracked modifications, include them in the update
+    if (modifiedCatalogIds.length > 0 && catalogs.length > 0) {
+      // Filter catalogs to only include those with IDs in the modifiedCatalogIds array
+      const modifiedItems = catalogs.filter(item => modifiedCatalogIds.includes(item.id));
 
       if (modifiedItems.length > 0) {
-        // Convert all modified items to catalog updates, preserving their manual_override status
+        // Convert modified items to catalog updates
         const catalogUpdates: CatalogUpdate[] = modifiedItems.map(item => ({
           id: item.id,
           status: item.status,
@@ -489,9 +438,6 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
         // Add to update data
         productUpdateData.catalogs = catalogUpdates;
-
-        // Log the final payload for debugging
-        console.log('Catalogs in final payload:', productUpdateData.catalogs);
       }
     }
 
@@ -654,6 +600,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
                 onDescriptionChange={setDescription}
                 keywords={keywords}
                 onKeywordsChange={setKeywords}
+                catalogs={catalogs}
                 onInventoryUpdate={handleInventoryUpdate}
                 isMobile={isMobile}
                 isTablet={isTablet}

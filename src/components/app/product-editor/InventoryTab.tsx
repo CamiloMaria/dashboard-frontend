@@ -5,7 +5,7 @@ import { AlertCircle, ArrowDown, ArrowUp, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface StatCardProps {
     title: string;
@@ -67,38 +67,42 @@ function StatCard({ title, value, description, icon, trend, isMobile }: StatCard
 
 interface InventoryTabProps {
     product: Product | undefined;
+    catalogs: Catalog[];
     onInventoryUpdate?: (inventory: Catalog[], changedItemIds?: number[]) => void;
     readOnly?: boolean;
 }
 
-export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: InventoryTabProps) {
+export function InventoryTab({ product, catalogs, onInventoryUpdate, readOnly = false }: InventoryTabProps) {
     const { t } = useTranslation();
     const isMobile = useMediaQuery('(max-width: 640px)');
     const isTablet = useMediaQuery('(max-width: 1024px)');
 
-    // Maintain a local state of the inventory for immediate UI updates
-    const [inventory, setInventory] = useState<Catalog[]>([]);
     // Track changed item IDs
     const [changedItemIds, setChangedItemIds] = useState<number[]>([]);
+    // Keep a reference to the original catalog values
+    const [originalCatalogs, setOriginalCatalogs] = useState<Map<number, { status: number, manual_override: boolean }>>(new Map());
 
-    // Update local inventory when product changes
+    // Initialize original values when catalogs change
     useEffect(() => {
-        if (product?.catalogs) {
-            setInventory(product.catalogs);
-            // Reset changed items tracking when product changes
-            setChangedItemIds([]);
-        } else {
-            setInventory([]);
-        }
-    }, [product?.catalogs]);
+        const newOriginalValues = new Map<number, { status: number, manual_override: boolean }>();
+        catalogs.forEach(item => {
+            newOriginalValues.set(item.id, {
+                status: item.status,
+                manual_override: item.manual_override
+            });
+        });
+        setOriginalCatalogs(newOriginalValues);
+        // Reset changed IDs when catalogs are refreshed
+        setChangedItemIds([]);
+    }, [product?.id, catalogs]); // Only reset when product changes, not on every catalogs change
 
     // Calculate inventory statistics based on local state
-    const totalStock = inventory.reduce((sum, inv) => sum + inv.stock, 0);
-    const lowStockCount = inventory.filter(inv => inv.stock < (product?.security_stock || 20)).length;
-    const activeListings = inventory.filter(inv => inv.status === 1).length;
+    const totalStock = catalogs.reduce((sum, inv) => sum + inv.stock, 0);
+    const lowStockCount = catalogs.filter(inv => inv.stock < (product?.security_stock || 20)).length;
+    const activeListings = catalogs.filter(inv => inv.status === 1).length;
 
     // Calculate average price change
-    const priceChanges = inventory
+    const priceChanges = catalogs
         .filter(inv => inv.compare_price && inv.compare_price > 0)
         .map(inv => ((inv.price - inv.compare_price!) / inv.compare_price!) * 100);
 
@@ -107,43 +111,41 @@ export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: I
         : 0;
 
     const handleInventoryUpdate = useCallback((updatedInventory: Catalog[], changedIds?: number[]) => {
-        // Update local state first for immediate UI feedback
-        setInventory(updatedInventory);
+        // Check for status or manual_override changes
+        const statusChangedIds: number[] = [];
 
-        // Update changed items tracking
-        if (changedIds && changedIds.length > 0) {
-            // Use functional update to ensure we're working with latest state
-            setChangedItemIds(prevIds => {
-                // Merge previous IDs with new changed IDs without duplicates
-                const mergedIds = [...prevIds];
-                changedIds.forEach(id => {
-                    if (!mergedIds.includes(id)) {
-                        mergedIds.push(id);
+        updatedInventory.forEach(item => {
+            const originalValues = originalCatalogs.get(item.id);
+            if (originalValues) {
+                // Check if status or manual_override changed
+                if (item.status !== originalValues.status ||
+                    item.manual_override !== originalValues.manual_override) {
+                    statusChangedIds.push(item.id);
+                }
+            }
+        });
+
+        // Merge with any explicitly passed changed IDs
+        const allChangedIds = [...new Set([...statusChangedIds, ...(changedIds || [])])];
+
+        // Update local tracking state
+        if (allChangedIds.length > 0) {
+            setChangedItemIds(prev => {
+                const newIds = [...prev];
+                allChangedIds.forEach(id => {
+                    if (!newIds.includes(id)) {
+                        newIds.push(id);
                     }
                 });
-                return mergedIds;
+                return newIds;
             });
         }
 
-        // Then propagate to parent with all tracked changes
+        // Propagate to parent component
         if (onInventoryUpdate) {
-            // If we have new changedIds, make sure to include both those and previously tracked ones
-            if (changedIds && changedIds.length > 0) {
-                const mergedIds = [...changedItemIds];
-                changedIds.forEach(id => {
-                    if (!mergedIds.includes(id)) {
-                        mergedIds.push(id);
-                    }
-                });
-                // Log for debugging
-                console.log('Propagating inventory update with changed IDs:', mergedIds);
-                onInventoryUpdate(updatedInventory, mergedIds);
-            } else {
-                // No new changes, just pass existing ones
-                onInventoryUpdate(updatedInventory, changedItemIds);
-            }
+            onInventoryUpdate(updatedInventory, allChangedIds.length > 0 ? allChangedIds : changedItemIds);
         }
-    }, [onInventoryUpdate, changedItemIds]);
+    }, [onInventoryUpdate, changedItemIds, originalCatalogs]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -170,7 +172,7 @@ export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: I
                 <StatCard
                     title={t('products.editor.form.inventory.stats.activeListings.title')}
                     value={activeListings.toString()}
-                    description={t('products.editor.form.inventory.stats.activeListings.description', { total: inventory.length })}
+                    description={t('products.editor.form.inventory.stats.activeListings.description', { total: catalogs.length })}
                     icon={<Package className={cn(isMobile ? "h-3 w-3" : "h-4 w-4", "text-green-500")} />}
                     isMobile={isMobile}
                 />
@@ -201,7 +203,7 @@ export function InventoryTab({ product, onInventoryUpdate, readOnly = false }: I
                 </CardHeader>
                 <CardContent className={cn(isMobile && "p-3")}>
                     <ProductInventoryTable
-                        inventory={inventory}
+                        inventory={catalogs}
                         securityStock={product?.security_stock || 10}
                         onInventoryUpdate={handleInventoryUpdate}
                         readOnly={readOnly}
