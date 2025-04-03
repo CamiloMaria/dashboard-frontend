@@ -436,7 +436,10 @@ export const en = {
       success: 'Order Printed',
       successDescription: 'The order has been sent to the printer',
       error: 'Print Error',
-      errorDescription: 'There was an error printing the order. Please try again.'
+      errorDescription: 'There was an error printing the order. Please try again.',
+      forcePrint: 'Force Print',
+      warningTitle: 'Caution',
+      forcePrintWarning: 'This option allows you to force the print job. Make sure to verify if the order has not been printed before.'
     },
     details: {
       title: 'Order Details',

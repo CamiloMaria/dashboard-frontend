@@ -436,7 +436,10 @@ export const es = {
             success: 'Orden Impresa',
             successDescription: 'La orden ha sido enviada a la impresora',
             error: 'Error de Impresión',
-            errorDescription: 'Hubo un error al imprimir la orden. Por favor, inténtalo de nuevo.'
+            errorDescription: 'Hubo un error al imprimir la orden. Por favor, inténtalo de nuevo.',
+            forcePrint: 'Forzar Impresión',
+            warningTitle: 'Precaución',
+            forcePrintWarning: 'Esta opción permite forzar la impresión. Asegúrate de verificar si la orden no fue impresa anteriormente.'
         },
         details: {
             title: 'Detalles de la Orden',

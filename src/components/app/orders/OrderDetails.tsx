@@ -29,7 +29,8 @@ import {
     // Percent,
     ShoppingCart,
     Printer,
-    Loader2
+    Loader2,
+    AlertCircle
 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,8 @@ import {
 } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@/api/orders';
@@ -72,17 +74,18 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     // State for print dialog
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
     const [selectedPrinter, setSelectedPrinter] = useState<string | null>(null);
+    const [forcePrint, setForcePrint] = useState(false);
 
     // Media query hook for responsive design
     const isTablet = useMediaQuery("(min-width: 768px)");
 
     // Fetch printers using React Query
     const spoolerQuery = useQuery({
-        queryKey: ['spooler', order.EMAIL],
+        queryKey: ['spooler'],
         queryFn: () => ordersApi.getSpooler(),
         enabled: isPrintDialogOpen, // Only fetch when dialog is open
         retry(failureCount, error: ApiError) {
-            if (error?.response?.status === 403) {
+            if (error?.response?.status === 403 || error?.response?.status === 404) {
                 return false;
             }
             // Default retry logic for other errors
@@ -101,6 +104,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             });
             setIsPrintDialogOpen(false);
             setSelectedPrinter(null);
+            setForcePrint(false);
         },
         onError: () => {
             toast({
@@ -121,12 +125,22 @@ export function OrderDetails({ order }: OrderDetailsProps) {
         setSelectedPrinter(value);
     };
 
+    // Handle dialog open change
+    const handleDialogOpenChange = (open: boolean) => {
+        setIsPrintDialogOpen(open);
+        if (!open) {
+            setSelectedPrinter(null);
+            setForcePrint(false);
+        }
+    };
+
     // Handle print confirmation
     const handlePrintConfirm = () => {
         if (selectedPrinter) {
             printMutation.mutate({
                 orderNumber: order.ORDEN,
                 spooler: selectedPrinter,
+                forcePrint: forcePrint
             });
         }
     };
@@ -272,7 +286,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             </div>
 
             {/* Print Dialog */}
-            <Dialog open={isPrintDialogOpen} onOpenChange={setIsPrintDialogOpen}>
+            <Dialog open={isPrintDialogOpen} onOpenChange={handleDialogOpenChange}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>{t('orders.print.selectPrinter')}</DialogTitle>
@@ -322,6 +336,37 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                     </div>
                                 ))}
                             </RadioGroup>
+                        )}
+
+                        {/* Force Print Checkbox */}
+                        {spoolerQuery.isSuccess && spoolerQuery.data.data.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                                <div className="flex items-start space-x-2">
+                                    <Checkbox
+                                        id="force-print"
+                                        checked={forcePrint}
+                                        onCheckedChange={(checked) => setForcePrint(checked === true)}
+                                    />
+                                    <div className="grid gap-1.5 leading-none">
+                                        <Label
+                                            htmlFor="force-print"
+                                            className="font-medium text-sm"
+                                        >
+                                            {t('orders.print.forcePrint')}
+                                        </Label>
+                                    </div>
+                                </div>
+
+                                {forcePrint && (
+                                    <Alert variant="destructive" className="mt-2">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>{t('orders.print.warningTitle')}</AlertTitle>
+                                        <AlertDescription>
+                                            {t('orders.print.forcePrintWarning')}
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
                         )}
                     </div>
 

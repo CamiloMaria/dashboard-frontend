@@ -102,6 +102,7 @@ export type SpoolerResponse = BaseResponse<spooler[]>;
 export interface PrintOrderBody {
   orderNumber: string;
   spooler: string;
+  forcePrint?: boolean;
 }
 
 export type PrintOrderResponse = BaseResponse<string>;
