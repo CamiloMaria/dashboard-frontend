@@ -424,6 +424,20 @@ export const es = {
             store: 'Tienda',
             date: 'Fecha'
         },
+        print: {
+            printOrder: 'Imprimir Orden',
+            printing: 'Imprimiendo...',
+            selectPrinter: 'Seleccionar Impresora',
+            selectPrinterDescription: 'Elige una impresora para imprimir esta orden',
+            print: 'Imprimir',
+            loadingPrinters: 'Cargando impresoras...',
+            errorLoadingPrinters: 'No se pudieron cargar las impresoras. Por favor, inténtalo de nuevo.',
+            noPrintersFound: 'No se encontraron impresoras. Asegúrate de tener impresoras configuradas.',
+            success: 'Orden Impresa',
+            successDescription: 'La orden ha sido enviada a la impresora',
+            error: 'Error de Impresión',
+            errorDescription: 'Hubo un error al imprimir la orden. Por favor, inténtalo de nuevo.'
+        },
         details: {
             title: 'Detalles de la Orden',
             billingInformation: 'Información de Facturación',

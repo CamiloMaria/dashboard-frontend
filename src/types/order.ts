@@ -1,4 +1,4 @@
-import { PaginatedResponse } from "./response";
+import { BaseResponse, PaginatedResponse } from "./response";
 
 export enum SortField {
   ORDEN = 'ORDEN',
@@ -91,3 +91,17 @@ export interface Transaction {
   FECHA_APROBACION: string;
   HORA_APROBACION: string;
 }
+
+export interface spooler {
+  spooler: string;
+  model: string;
+}
+
+export type SpoolerResponse = BaseResponse<spooler[]>;
+
+export interface PrintOrderBody {
+  orderNumber: string;
+  spooler: string;
+}
+
+export type PrintOrderResponse = BaseResponse<string>;

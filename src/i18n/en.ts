@@ -424,6 +424,20 @@ export const en = {
       store: 'Store',
       date: 'Date'
     },
+    print: {
+      printOrder: 'Print Order',
+      printing: 'Printing...',
+      selectPrinter: 'Select Printer',
+      selectPrinterDescription: 'Choose a printer to print this order',
+      print: 'Print',
+      loadingPrinters: 'Loading printers...',
+      errorLoadingPrinters: 'Could not load printers. Please try again.',
+      noPrintersFound: 'No printers found. Make sure you have printers configured.',
+      success: 'Order Printed',
+      successDescription: 'The order has been sent to the printer',
+      error: 'Print Error',
+      errorDescription: 'There was an error printing the order. Please try again.'
+    },
     details: {
       title: 'Order Details',
       billingInformation: 'Billing Information',
