@@ -37,14 +37,14 @@ interface OrderDetailsProps {
 
 export function OrderDetails({ order }: OrderDetailsProps) {
     const { t } = useTranslation();
-    const totalAmount = order.FACTURES.reduce((sum, invoice) => sum + invoice.TOTAL, 0);
-    const totalItems = order.ARTICLES.reduce((sum, article) => sum + article.CANT, 0);
+    const totalAmount = order.FACTURAS.reduce((sum, invoice) => sum + invoice.TOTAL, 0);
+    const totalItems = order.ARTICULOS.reduce((sum, article) => sum + article.CANT, 0);
 
     // Media query hook for responsive design
     const isTablet = useMediaQuery("(min-width: 768px)");
 
     // Mobile card view for order items
-    const MobileOrderItem = ({ article }: { article: Order['ARTICLES'][0] }) => (
+    const MobileOrderItem = ({ article }: { article: Order['ARTICULOS'][0] }) => (
         <div className="border rounded-lg p-4 mb-3">
             <div className="flex justify-between items-start mb-2">
                 <div className="font-medium">{article.EAN}</div>
@@ -80,7 +80,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     );
 
     // Mobile card view for invoices
-    const MobileInvoiceItem = ({ invoice }: { invoice: Order['FACTURES'][0] }) => (
+    const MobileInvoiceItem = ({ invoice }: { invoice: Order['FACTURAS'][0] }) => (
         <div className="border rounded-lg p-4 mb-3">
             <div className="flex justify-between items-start mb-2">
                 <div className="font-medium">{invoice.FACTURAS}</div>
@@ -110,7 +110,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     );
 
     // Mobile card view for transactions
-    const MobileTransactionItem = ({ transaction }: { transaction: Order['TRANSACTIONS'][0] }) => (
+    const MobileTransactionItem = ({ transaction }: { transaction: Order['TRANSACCIONES'][0] }) => (
         <div className="border rounded-lg p-4 mb-3">
             <div className="flex justify-between items-start mb-2">
                 <div className="font-medium">{transaction.TARJETA}</div>
@@ -154,7 +154,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             <p className="text-xs sm:text-sm">
-                                {format(new Date(order.TRANSACTIONS[0]?.FECHA_APROBACION), 'PPP')}
+                                {format(new Date(order.TRANSACCIONES[0]?.FECHA_APROBACION), 'PPP')}
                             </p>
                         </div>
                     </div>
@@ -238,7 +238,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 {/* Mobile view for items */}
                 {!isTablet && (
                     <div className="space-y-2">
-                        {order.ARTICLES.map((article) => (
+                        {order.ARTICULOS.map((article) => (
                             <MobileOrderItem key={article.EAN} article={article} />
                         ))}
                     </div>
@@ -260,7 +260,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {order.ARTICLES.map((article) => (
+                                    {order.ARTICULOS.map((article) => (
                                         <TableRow key={article.EAN} className="transition-colors">
                                             <TableCell className="font-medium">{article.EAN}</TableCell>
                                             <TableCell>{article.DESCRIPCION}</TableCell>
@@ -306,7 +306,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 {/* Mobile view for invoices */}
                 {!isTablet && (
                     <div className="space-y-2">
-                        {order.FACTURES.map((invoice) => (
+                        {order.FACTURAS.map((invoice) => (
                             <MobileInvoiceItem key={invoice.FACTURAS} invoice={invoice} />
                         ))}
                     </div>
@@ -327,7 +327,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {order.FACTURES.map((invoice) => (
+                                    {order.FACTURAS.map((invoice) => (
                                         <TableRow key={invoice.FACTURAS} className="transition-colors">
                                             <TableCell className="font-medium">{invoice.FACTURAS}</TableCell>
                                             <TableCell>{invoice.DEPTO}</TableCell>
@@ -363,7 +363,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 {/* Mobile view for transactions */}
                 {!isTablet && (
                     <div className="space-y-2">
-                        {order.TRANSACTIONS.map((transaction) => (
+                        {order.TRANSACCIONES.map((transaction) => (
                             <MobileTransactionItem key={transaction.APROBACION} transaction={transaction} />
                         ))}
                     </div>
@@ -384,7 +384,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {order.TRANSACTIONS.map((transaction) => (
+                                    {order.TRANSACCIONES.map((transaction) => (
                                         <TableRow key={transaction.APROBACION} className="transition-colors">
                                             <TableCell className="font-medium">{transaction.TARJETA}</TableCell>
                                             <TableCell>{transaction.APROBACION}</TableCell>

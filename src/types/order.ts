@@ -44,9 +44,9 @@ export interface Order {
   TIENDA: string;
   FECHA_REGISTRO: string;
   HORA_REGISTRO: string;
-  FACTURES: Invoice[];
-  ARTICLES: Article[];
-  TRANSACTIONS: Transaction[];
+  FACTURAS: Invoice[];
+  ARTICULOS: Article[];
+  TRANSACCIONES: Transaction[];
 }
 
 export interface Invoice {

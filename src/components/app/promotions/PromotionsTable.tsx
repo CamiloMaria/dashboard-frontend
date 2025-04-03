@@ -141,7 +141,7 @@ export function PromotionsTable() {
                 </div>
                 <div>
                     <div className="text-muted-foreground">{t('promotions.columns.shop')}</div>
-                    <div>{promotion.shop}</div>
+                    <div>{promotion.shop === ' ' ? 'Todas' : promotion.shop}</div>
                 </div>
                 <div>
                     <div className="text-muted-foreground">{t('promotions.columns.price')}</div>
@@ -397,7 +397,7 @@ export function PromotionsTable() {
                                         {isDesktop && (
                                             <TableCell className="font-mono text-sm">{promotion.product_title}</TableCell>
                                         )}
-                                        <TableCell>{promotion.shop}</TableCell>
+                                        <TableCell>{promotion.shop === ' ' ? 'Todas' : promotion.shop}</TableCell>
                                         <TableCell className="tabular-nums">
                                             <div className="flex items-center gap-1">
                                                 <DollarSign className="h-3 w-3" />
