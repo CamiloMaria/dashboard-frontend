@@ -1,18 +1,21 @@
-import { Pagination } from "./pagination";
+import { PaginatedResponse } from "./response";
+
+export enum SortField {
+  ORDEN = 'ORDEN',
+  SHOP = 'TIENDA',
+  REGISTERED_AT = 'FECHA_REGISTRO',
+}
 
 export interface GetOrdersParams {
   page: number;
   limit: number;
   search?: string;
-  order?: string;
-  sortBy?: string;
+  sortOrder?: string;
+  sortBy?: SortField;
   store?: string;
 }
 
-export interface OrdersResponse {
-  data: Order[];
-  pagination: Pagination;
-}
+export type OrdersResponse = PaginatedResponse<Order[]>;
 
 export interface Order {
   ID: string;

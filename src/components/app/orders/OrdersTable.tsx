@@ -42,7 +42,7 @@ import { OrderDetails } from './OrderDetails';
 import { orderKeys } from '@/api/query-keys';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { Order } from '@/types/order';
+import { Order, SortField } from '@/types/order';
 
 export function OrdersTable() {
     const { t } = useTranslation();
@@ -70,8 +70,8 @@ export function OrdersTable() {
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch,
-            order: 'desc',
-            sortBy: 'fecha_registro',
+            sortOrder: 'desc',
+            sortBy: SortField.REGISTERED_AT,
             store: storeFilter !== 'all' ? storeFilter : undefined
         }),
         placeholderData: keepPreviousData,
@@ -153,8 +153,8 @@ export function OrdersTable() {
 
     if (!data) return null;
 
-    const { data: orders, pagination } = data;
-    const totalPages = pagination.totalPages;
+    const { data: orders, meta } = data;
+    const totalPages = meta.pagination.totalPages;
 
     // Mobile card view for each order
     const MobileOrderCard = ({ order }: { order: Order }) => (
