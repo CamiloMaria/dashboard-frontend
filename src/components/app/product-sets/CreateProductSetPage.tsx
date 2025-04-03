@@ -121,11 +121,9 @@ export function CreateProductSetPage() {
 
         const payload: CreateSetPayload = {
             title: title.trim(),
-            selected_products: selectedProducts.map(product => ({
+            products: selectedProducts.map(product => ({
                 sku: product.sku,
-                price: product.catalogs?.[0].price ?? 0,
-                is_free: freeProducts.has(product.id),
-                grupo: product.grupo,
+                isFree: freeProducts.has(product.id),
             })),
         };
 

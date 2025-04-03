@@ -10,11 +10,9 @@ export interface GetProductSetsParams {
 
 export interface CreateSetPayload {
   title: string;
-  selected_products: Array<{
+  products: Array<{
     sku: string;
-    price: number;
-    is_free: boolean;
-    grupo: string;
+    isFree?: boolean;
   }>;
 }
 
