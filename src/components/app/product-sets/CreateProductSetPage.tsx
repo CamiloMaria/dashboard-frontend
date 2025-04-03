@@ -131,11 +131,13 @@ export function CreateProductSetPage() {
     };
 
     const getProductPrice = (product: Product) => {
-        return product.catalogs?.[0].price || 0;
+        const price = product.catalogs?.find(catalog => catalog.shop === 'CD01')?.price;
+        return price || 0;
     };
 
     const getProductComparePrice = (product: Product) => {
-        return product.catalogs?.[0].compare_price || null;
+        const comparePrice = product.catalogs?.find(catalog => catalog.shop === 'CD01')?.compare_price;
+        return comparePrice || null;
     };
 
     return (
