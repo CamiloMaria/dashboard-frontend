@@ -1,4 +1,4 @@
-import { GetLogsParams } from "@/types/log";
+import { GetLogsParams } from "@/types/auth";
 import { GetOrdersParams } from "@/types/order";
 import { GetProductsParams } from "@/types/product";
 import { GetProductSetsParams } from "@/types/product-set";

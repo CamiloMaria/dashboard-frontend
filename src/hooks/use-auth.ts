@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import { BASE_PATH } from "@/constants/routes";
 import { authApi } from "@/api/auth";
+import { UserResult } from "@/types";
 
-interface UserInfo {
-  sub: string;
-  username: string;
-  allowedPages: string[];
-}
 
 export function useAuth() {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [userInfo, setUserInfo] = useState<UserResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

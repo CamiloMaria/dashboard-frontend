@@ -14,13 +14,11 @@ interface SignInResult {
     }
 }
 
-interface UserResult {
-    user: {
+export interface UserResult {
         userId: string;
         username: string;
         email: string;
         allowedPages: string[];
-    }
 }
 
 export interface User {
@@ -37,7 +35,9 @@ export interface UserPermissions {
 }
 
 export type SignInResponse = BaseResponse<SignInResult>;
-export type UserResponse = BaseResponse<UserResult>;
+export type UserResponse = BaseResponse<{
+    user: UserResult;
+}>;
 export type RefreshTokenResponse = BaseResponse<null>;
 
 export enum UserSortField {
