@@ -466,5 +466,40 @@ export const en = {
         amount: 'Amount'
       }
     }
+  },
+  logs: {
+    title: 'System Logs',
+    search: 'Search logs...',
+    noDetails: 'No details',
+    viewDetails: 'Details',
+    details: {
+      title: 'Log Details',
+      copy: 'Copy',
+      copied: 'Copied!',
+      close: 'Close',
+      user: 'User',
+      type: 'Type',
+      field: 'Field',
+      date: 'Date',
+      logMessage: 'Log Message',
+      details: 'Details',
+      noDetailsAvailable: 'No details available',
+      errorParsing: 'Error parsing JSON details'
+    },
+    columns: {
+      id: 'ID',
+      user: 'User',
+      type: 'Type',
+      field: 'Field',
+      log: 'Log',
+      date: 'Date',
+      actions: 'Actions'
+    },
+    types: {
+      create: 'Created',
+      update: 'Updated',
+      delete: 'Deleted',
+      info: 'Info'
+    }
   }
 }; 

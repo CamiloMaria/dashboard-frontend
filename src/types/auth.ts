@@ -71,6 +71,7 @@ export interface Log {
     type_log: string;
     field: string;
     log: string;
+    details: string | null;
     date_timer: string;
 }
 

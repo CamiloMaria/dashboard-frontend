@@ -46,10 +46,10 @@ export function LogsPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>System Logs</CardTitle>
+                <CardTitle>{t("logs.title")}</CardTitle>
                 <div className="flex items-center space-x-2">
                     <Input
-                        placeholder={t("common.search")}
+                        placeholder={t("logs.search")}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="max-w-sm"

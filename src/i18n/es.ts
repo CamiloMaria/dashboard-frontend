@@ -466,5 +466,40 @@ export const es = {
                 amount: 'Monto'
             }
         }
+    },
+    logs: {
+        title: 'Logs del Sistema',
+        search: 'Buscar logs...',
+        noDetails: 'Sin detalles',
+        viewDetails: 'Detalles',
+        details: {
+            title: 'Detalles del Log',
+            copy: 'Copiar',
+            copied: '¡Copiado!',
+            close: 'Cerrar',
+            user: 'Usuario',
+            type: 'Tipo',
+            field: 'Campo',
+            date: 'Fecha',
+            logMessage: 'Mensaje del Log',
+            details: 'Detalles',
+            noDetailsAvailable: 'No hay detalles disponibles',
+            errorParsing: 'Error al analizar los detalles JSON'
+        },
+        columns: {
+            id: 'ID',
+            user: 'Usuario',
+            type: 'Tipo',
+            field: 'Campo',
+            log: 'Log',
+            date: 'Fecha',
+            actions: 'Acciones'
+        },
+        types: {
+            create: 'Creado',
+            update: 'Actualizado',
+            delete: 'Eliminado',
+            info: 'Info'
+        }
     }
 }; 
