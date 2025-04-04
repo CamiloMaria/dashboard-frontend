@@ -203,7 +203,7 @@ interface ProductUpdate {
 export interface CatalogUpdate {
     id: number;
     status?: number;
-    status_comment?: string;
+    status_comment?: string | null;
     manual_override?: boolean;
 }
 

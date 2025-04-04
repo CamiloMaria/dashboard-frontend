@@ -1,34 +1,6 @@
 import axios from '@/lib/axios';
-import { BaseResponse } from '@/types';
 import { removeAuthSession } from '@/lib/auth';
-
-interface SignInPayload {
-    username: string;
-    password: string;
-}
-
-interface SignInResult {
-    user: {
-        username: string;
-        sub: string;
-        email: string;
-        allowedPages: string[];
-    }
-}
-
-interface UserResult {
-    user: {
-        userId: string;
-        username: string;
-        sub: string;
-        email: string;
-        allowedPages: string[];
-    }
-}
-
-type SignInResponse = BaseResponse<SignInResult>;
-type UserResponse = BaseResponse<UserResult>;
-type RefreshTokenResponse = BaseResponse<null>;
+import { SignInPayload, SignInResponse, UserResponse, RefreshTokenResponse, GetUsersParams, GetUsersResponse, UserPermissions } from '@/types/auth';
 
 export const authApi = {
     signIn: async (payload: SignInPayload) => {
@@ -41,10 +13,21 @@ export const authApi = {
     },
     getUser: async () => {
         const response = await axios.get<UserResponse>(
-            '/auth/profile'
+            '/auth/user/profile'
+        );
+        
+        return response.data;
+    },
+    getAllUsers: async (params: GetUsersParams) => {
+        const response = await axios.get<GetUsersResponse>(
+            '/auth/users',
+            { params }
         );
 
         return response.data;
+    },
+    saveUserPermissions: async (user: UserPermissions): Promise<void> => {
+        await axios.post('/auth/user/permissions', user);
     },
     refreshToken: async () => {
         const response = await axios.post<SignInResponse>(

@@ -15,7 +15,7 @@ export const ROUTES = {
             NEW: `${BASE_PATH}/products/new`,
             EDITOR: `${BASE_PATH}/product/$productId`,
         },
-        PROMOTIONS: `${BASE_PATH}/promotions`,
+        PROMOTIONS: `${BASE_PATH}/product-promotions`,
         // CATEGORIES: '/categories',
         PRODUCT_SETS: {
             LIST: `${BASE_PATH}/product-sets`,

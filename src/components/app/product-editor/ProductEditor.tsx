@@ -555,7 +555,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         const catalogUpdates: CatalogUpdate[] = modifiedItems.map(item => ({
           id: item.id,
           status: item.status,
-          status_comment: item.status_comment || '',
+          status_comment: item.status_comment || null,
           manual_override: item.manual_override
         }));
 

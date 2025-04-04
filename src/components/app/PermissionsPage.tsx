@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ROUTES_WITHOUT_BASE } from "@/constants/routes";
 import { cn } from "@/lib/utils";
-import { permissionsApi } from "@/api/permissions";
 import { Search, Loader2, ChevronRight } from "lucide-react";
 import {
     Table,
@@ -21,17 +20,12 @@ import { PaginationControls } from './products-table/PaginationControls';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useDebounce } from '@/hooks/use-debounce';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface User {
-    id: string;
-    username: string;
-    codigo: string;
-    allowedPages: string[];
-}
+import { User, UserSortField } from '@/types/auth';
+import { authApi } from '@/api';
 
 interface RouteConfig {
-    path: string;
     label: string;
+    path?: string;
     children?: RouteConfig[];
 }
 
@@ -41,35 +35,50 @@ const availableRoutes: RouteConfig[] = [
         label: 'Inventory',
         children: [
             {
-                path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.LIST,
                 label: 'Products',
                 children: [
+                    { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.LIST, label: 'View Products' },
                     { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.NEW, label: 'Create Products' },
                     { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCTS.EDITOR, label: 'Edit Products' },
                 ]
             },
             { path: ROUTES_WITHOUT_BASE.INVENTORY.PROMOTIONS, label: 'Promotions' },
             {
-                path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCT_SETS.LIST,
                 label: 'Product Sets',
                 children: [
+                    { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCT_SETS.LIST, label: 'View Product Sets' },
                     { path: ROUTES_WITHOUT_BASE.INVENTORY.PRODUCT_SETS.NEW, label: 'Create Product Sets' },
                 ]
             },
         ]
     },
-    { path: ROUTES_WITHOUT_BASE.ORDERS, label: 'Orders' },
+    {
+        label: 'Orders',
+        children: [
+            { path: ROUTES_WITHOUT_BASE.ORDERS, label: 'View Orders' },
+            { path: '/orders:print', label: 'Print Orders' },
+        ]
+    },
     { path: ROUTES_WITHOUT_BASE.LOGS, label: 'Logs' },
     { path: ROUTES_WITHOUT_BASE.PERMISSIONS, label: 'Permissions' },
 ];
 
 function getAllChildPaths(route: RouteConfig): string[] {
-    const paths = [route.path];
+    const paths: string[] = [];
+
+    // Only add the path if it's defined
+    if (route.path) {
+        paths.push(route.path);
+    }
+
     if (route.children) {
         route.children.forEach(child => {
-            paths.push(...getAllChildPaths(child));
+            // Get child paths and filter out any undefined values
+            const childPaths = getAllChildPaths(child);
+            paths.push(...childPaths);
         });
     }
+
     return paths;
 }
 
@@ -77,14 +86,43 @@ function RoutePermissionItem({ route, depth = 0, selectedUser, onToggle }: {
     route: RouteConfig;
     depth?: number;
     selectedUser: User;
-    onToggle: (path: string) => void;
+    onToggle: (path: string, isParentToggle?: boolean) => void;
 }) {
     const [isOpen, setIsOpen] = useState(true);
-    const allChildPaths = route.children ? getAllChildPaths(route) : [route.path];
-    const isChecked = selectedUser.allowedPages.includes(route.path);
-    const isPartiallyChecked = route.children &&
+    const allChildPaths = route.children ? getAllChildPaths(route) : (route.path ? [route.path] : []);
+
+    // For routes with a path, check if it's included in allowedPages
+    // For routes without a path but with children, check if ALL children's paths are included
+    const isChecked = route.path
+        ? selectedUser.allowedPages.includes(route.path)
+        : (route.children && allChildPaths.length > 0
+            ? allChildPaths.every(path => selectedUser.allowedPages.includes(path))
+            : false);
+
+    // Only apply to routes with children and check if SOME but not ALL children are included
+    const isPartiallyChecked = route.children && allChildPaths.length > 0 &&
         allChildPaths.some(path => selectedUser.allowedPages.includes(path)) &&
         !allChildPaths.every(path => selectedUser.allowedPages.includes(path));
+
+    // Handler for toggling parent items without paths
+    const handleToggle = () => {
+        if (route.path) {
+            // For top-level routes with paths and children (like Inventory), treat as parent toggle
+            if (route.children && route.children.length > 0) {
+                onToggle(route.path, true);
+            } else {
+                // For routes with paths but no children, it's a direct toggle
+                onToggle(route.path, false);
+            }
+        } else if (route.children && allChildPaths.length > 0) {
+            // For a parent without a path, toggle all child paths
+            // Indicate this is a parent toggle with isParentToggle=true
+            const firstPath = allChildPaths[0];
+            if (firstPath) {
+                onToggle(firstPath, true);
+            }
+        }
+    };
 
     return (
         <div className="space-y-1">
@@ -111,13 +149,13 @@ function RoutePermissionItem({ route, depth = 0, selectedUser, onToggle }: {
                 )}
                 <div className="flex items-center gap-2 flex-1">
                     <Checkbox
-                        id={route.path}
+                        id={route.path || `route-${route.label}`}
                         checked={isChecked}
                         className={cn(isPartiallyChecked && "opacity-70")}
-                        onCheckedChange={() => onToggle(route.path)}
+                        onCheckedChange={handleToggle}
                     />
                     <Label
-                        htmlFor={route.path}
+                        htmlFor={route.path || `route-${route.label}`}
                         className={cn(
                             "cursor-pointer select-none",
                             route.children && "font-medium"
@@ -131,7 +169,7 @@ function RoutePermissionItem({ route, depth = 0, selectedUser, onToggle }: {
                 <div className="ml-2 border-l pl-2">
                     {route.children.map(child => (
                         <RoutePermissionItem
-                            key={child.path}
+                            key={child.path || `child-${child.label}`}
                             route={child}
                             depth={depth + 1}
                             selectedUser={selectedUser}
@@ -157,12 +195,12 @@ export function PermissionsPage() {
 
     const { data, isFetching } = useQuery({
         queryKey: ['users', { page: currentPage, limit: itemsPerPage, search: debouncedSearch }],
-        queryFn: () => permissionsApi.getAllUsers({
+        queryFn: () => authApi.getAllUsers({
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch,
-            order: 'asc',
-            sortBy: 'codigo',
+            sortOrder: 'asc',
+            sortBy: UserSortField.CODE,
         }),
         placeholderData: keepPreviousData,
         staleTime: 5000,
@@ -189,7 +227,7 @@ export function PermissionsPage() {
         });
     };
 
-    const handleRouteToggle = (path: string) => {
+    const handleRouteToggle = (path: string, isParentToggle?: boolean) => {
         if (!selectedUser) return;
 
         setSelectedUser(prev => {
@@ -198,9 +236,21 @@ export function PermissionsPage() {
             // Find the route config for this path
             const findRoute = (routes: RouteConfig[], parentPaths: string[] = []): [RouteConfig | undefined, string[]] => {
                 for (const route of routes) {
-                    if (route.path === path) return [route, [...parentPaths, route.path]];
+                    if (route.path === path) {
+                        // Only include defined paths in parentPaths
+                        const updatedParentPaths = [...parentPaths];
+                        if (route.path) {
+                            updatedParentPaths.push(route.path);
+                        }
+                        return [route, updatedParentPaths];
+                    }
                     if (route.children) {
-                        const [found, paths] = findRoute(route.children, [...parentPaths, route.path]);
+                        // Only include defined paths in parentPaths
+                        const childParentPaths = [...parentPaths];
+                        if (route.path) {
+                            childParentPaths.push(route.path);
+                        }
+                        const [found, paths] = findRoute(route.children, childParentPaths);
                         if (found) return [found, paths];
                     }
                 }
@@ -213,13 +263,61 @@ export function PermissionsPage() {
             const allChildPaths = getAllChildPaths(routeToToggle);
             const isCurrentlyChecked = prev.allowedPages.includes(path);
 
+            // Find the parent route if this is a child path
+            const findParentRoute = (routes: RouteConfig[], targetPath: string, currentPath: RouteConfig[] = []): RouteConfig[] => {
+                for (const route of routes) {
+                    const currentWithRoute = [...currentPath, route];
+
+                    if (route.path === targetPath) {
+                        return currentWithRoute;
+                    }
+
+                    if (route.children) {
+                        const found = findParentRoute(route.children, targetPath, currentWithRoute);
+                        if (found.length > 0) return found;
+                    }
+                }
+                return [];
+            };
+
+            const routePath = findParentRoute(availableRoutes, path);
+            const parentRoute = routePath.length > 1 ? routePath[routePath.length - 2] : null;
+
+            // For a parent toggle without a path, get all sibling paths to handle group selection
+            let siblingPaths: string[] = [];
+            if (isParentToggle && parentRoute && !parentRoute.path && parentRoute.children) {
+                siblingPaths = getAllChildPaths(parentRoute);
+            }
+
             let updatedPages: string[];
             if (isCurrentlyChecked) {
-                // Remove this path and all child paths
-                updatedPages = prev.allowedPages.filter(p => !allChildPaths.includes(p));
+                // For parent toggle with path and children, remove all child paths too
+                if (isParentToggle && routeToToggle.path && routeToToggle.children) {
+                    const allPaths = getAllChildPaths(routeToToggle);
+                    updatedPages = prev.allowedPages.filter(p => !allPaths.includes(p));
+                } else {
+                    // Remove this path and all child paths
+                    updatedPages = prev.allowedPages.filter(p => !allChildPaths.includes(p));
+                }
+
+                // If this is a parent toggle of a parent without a path, also remove sibling paths
+                if (siblingPaths.length > 0) {
+                    updatedPages = updatedPages.filter(p => !siblingPaths.includes(p));
+                }
             } else {
-                // Add this path, all parent paths, and all child paths
-                updatedPages = [...new Set([...prev.allowedPages, ...parentPaths, ...allChildPaths])];
+                // For parent toggle with path and children, add all child paths too
+                if (isParentToggle && routeToToggle.path && routeToToggle.children) {
+                    const allPaths = getAllChildPaths(routeToToggle);
+                    updatedPages = [...new Set([...prev.allowedPages, ...allPaths])];
+                } else {
+                    // Add this path, all parent paths, and all child paths
+                    updatedPages = [...new Set([...prev.allowedPages, ...parentPaths, ...allChildPaths])];
+                }
+
+                // If this is a parent toggle of a parent without a path, also add all sibling paths
+                if (siblingPaths.length > 0) {
+                    updatedPages = [...new Set([...updatedPages, ...siblingPaths])];
+                }
             }
 
             return { ...prev, allowedPages: updatedPages };
@@ -231,7 +329,10 @@ export function PermissionsPage() {
 
         try {
             setIsLoading(true);
-            await permissionsApi.saveUserPermissions(selectedUser);
+            await authApi.saveUserPermissions({
+                username: selectedUser.username,
+                allowedPages: selectedUser.allowedPages,
+            });
             toast({
                 title: "Success",
                 description: "User permissions saved successfully",
@@ -249,8 +350,8 @@ export function PermissionsPage() {
 
     if (!data) return null;
 
-    const { data: users, pagination } = data;
-    const totalPages = Math.ceil(pagination.length / itemsPerPage);
+    const { data: users, meta } = data;
+    const totalPages = meta.pagination.totalPages;
 
     return (
         <div className="space-y-6">

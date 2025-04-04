@@ -140,7 +140,7 @@ function PriceChange({ current, previous, isMobile }: { current: number | null; 
 
 interface StatusBadgeProps {
     status: number;
-    statusComment?: string;
+    statusComment?: string | null;
     onChange?: (newStatus: number) => void;
     isMobile?: boolean;
     readOnly?: boolean;
@@ -451,7 +451,7 @@ function InventoryCard({
                     <StatusBadge
                         key={`status-${item.id}-${item.status}-${pendingStatusChange ? 'pending' : 'normal'}`}
                         status={item.status}
-                        statusComment={item.status_comment || ''}
+                        statusComment={item.status_comment || null}
                         onChange={handleStatusToggle}
                         manualOverride={item.manual_override}
                         onManualOverrideChange={onManualOverrideChange
@@ -558,7 +558,7 @@ export function ProductInventoryTable({
                 return {
                     ...item,
                     status: newStatus,
-                    status_comment: newStatus === 0 ? comment || '' : '',
+                    status_comment: newStatus === 0 ? comment || null : null,
                     manual_override: manualOverride,
                     status_changed_at: new Date(),
                     status_changed_by: 'user',
@@ -901,7 +901,7 @@ export function ProductInventoryTable({
                                                 <StatusBadge
                                                     key={`status-${inv.id}-${inv.status}-${isPendingChange ? 'pending' : 'normal'}`}
                                                     status={inv.status}
-                                                    statusComment={inv.status_comment || ''}
+                                                    statusComment={inv.status_comment || null}
                                                     onChange={(newStatus) => handleStatusClick(inv.id, inv.shop, newStatus)}
                                                     manualOverride={inv.manual_override}
                                                     onManualOverrideChange={!readOnly

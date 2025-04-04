@@ -5,4 +5,3 @@ export * from './logs';
 export * from './promotions';
 export * from './orders';
 export * from './query-keys';
-export * from './permissions';
