@@ -56,3 +56,22 @@ export interface GetUsersParams {
 }
 
 export type GetUsersResponse = PaginatedResponse<User[]>;
+
+export interface GetLogsParams {
+    page: number;
+    limit: number;
+    search?: string;
+    sortOrder?: string;
+    sortBy?: string;
+}
+
+export interface Log {
+    id: number;
+    user: string;
+    type_log: string;
+    field: string;
+    log: string;
+    date_timer: string;
+}
+
+export type GetLogsResponse = PaginatedResponse<Log[]>;

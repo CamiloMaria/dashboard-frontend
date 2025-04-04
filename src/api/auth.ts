@@ -1,6 +1,6 @@
 import axios from '@/lib/axios';
 import { removeAuthSession } from '@/lib/auth';
-import { SignInPayload, SignInResponse, UserResponse, RefreshTokenResponse, GetUsersParams, GetUsersResponse, UserPermissions } from '@/types/auth';
+import { SignInPayload, SignInResponse, UserResponse, RefreshTokenResponse, GetUsersParams, GetUsersResponse, UserPermissions, GetLogsParams, GetLogsResponse } from '@/types/auth';
 
 export const authApi = {
     signIn: async (payload: SignInPayload) => {
@@ -28,6 +28,10 @@ export const authApi = {
     },
     saveUserPermissions: async (user: UserPermissions): Promise<void> => {
         await axios.post('/auth/user/permissions', user);
+    },
+    getLogs: async (params: GetLogsParams): Promise<GetLogsResponse> => {
+        const response = await axios.get<GetLogsResponse>('/auth/user/logs', { params });
+        return response.data;
     },
     refreshToken: async () => {
         const response = await axios.post<SignInResponse>(

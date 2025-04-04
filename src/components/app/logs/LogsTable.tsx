@@ -7,7 +7,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Log } from "@/types/log";
+import { Log } from "@/types/auth";
 import { AlertCircle, CheckCircle2, Clock, FileEdit, Info, User2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

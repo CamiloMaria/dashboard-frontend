@@ -3,12 +3,12 @@ import { LogsTable } from "./LogsTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { logKeys } from "@/api/query-keys";
-import { logsApi } from "@/api/logs";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
 import { PaginationControls } from "@/components/app/products-table/PaginationControls";
+import { authApi } from "@/api/auth";
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 const DEFAULT_ITEMS_PER_PAGE = ITEMS_PER_PAGE_OPTIONS[0];
@@ -22,7 +22,7 @@ export function LogsPage() {
 
     const { data, isLoading } = useQuery({
         queryKey: logKeys.list({ page: currentPage, limit: itemsPerPage, search: debouncedSearch }),
-        queryFn: () => logsApi.getLogs({
+        queryFn: () => authApi.getLogs({
             page: currentPage,
             limit: itemsPerPage,
             search: debouncedSearch
@@ -38,9 +38,10 @@ export function LogsPage() {
         setCurrentPage(1); // Reset to first page when changing items per page
     };
 
-    const totalPages = data?.pagination
-        ? data.pagination.totalPages
-        : 0;
+    if (!data) return null;
+
+    const { data: logs, meta } = data;
+    const totalPages = meta.pagination.totalPages;
 
     return (
         <Card>
@@ -64,7 +65,7 @@ export function LogsPage() {
                     </div>
                 ) : (
                     <>
-                        <LogsTable logs={data?.data || []} />
+                        <LogsTable logs={logs || []} />
                         <div className="mt-4">
                             <PaginationControls
                                 currentPage={currentPage}
