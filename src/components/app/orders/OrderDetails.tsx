@@ -30,7 +30,8 @@ import {
     ShoppingCart,
     Printer,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    UserCheck
 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
@@ -256,7 +257,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             <p className="text-xs sm:text-sm">
-                                {format(new Date(order.TRANSACCIONES[0]?.FECHA_APROBACION), 'PPP')}
+                                {format(new Date(order.FECHA_REGISTRO), 'PPP')}
                             </p>
                         </div>
                     </div>
@@ -410,8 +411,15 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                             <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             <p className="font-medium">{order.NOMBRE} {order.APELLIDOS}</p>
                         </div>
-                        <p className="pl-5 sm:pl-6">{order.RNC_NAME}</p>
                         {order.RNC && <p className="pl-5 sm:pl-6">RNC: {order.RNC}</p>}
+                        {order.CLUB && (
+                            <div className="flex items-center gap-2">
+                                <UserCheck className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <p>
+                                    {order.CLUB.length === 11 ? 'CEDULA: ' : 'PASAPORTE: '}{order.CLUB}
+                                </p>
+                            </div>
+                        )}
                         <div className="flex items-center gap-2">
                             <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                             <p className="break-all">{order.EMAIL}</p>
