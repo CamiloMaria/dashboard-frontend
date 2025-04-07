@@ -13,4 +13,8 @@ export const productSetsApi = {
     async createProductSet(payload: CreateSetPayload): Promise<void> {
         await axios.post('/product-sets', payload);
     },
+    
+    async updateProductSetStatus(setSku: string, status: boolean): Promise<void> {
+        await axios.patch(`/product-sets/${setSku}/status`, { status });
+    },
 };

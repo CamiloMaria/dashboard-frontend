@@ -349,7 +349,24 @@ export const es = {
             price: 'Precio',
             area: 'Área',
             createdAt: 'Fecha de Creación',
-            updatedAt: 'Fecha de Actualización'
+            updatedAt: 'Fecha de Actualización',
+            status: 'Estado'
+        },
+        status: {
+            active: 'Activo',
+            inactive: 'Inactivo'
+        },
+        statusDialog: {
+            activateTitle: 'Activar Set de Productos',
+            activateDescription: '¿Estás seguro de que quieres activar este set de productos? Será visible para los clientes.',
+            activateButton: 'Activar',
+            deactivateTitle: 'Desactivar Set de Productos',
+            deactivateDescription: '¿Estás seguro de que quieres desactivar este set de productos? Ya no será visible para los clientes.',
+            deactivateButton: 'Desactivar'
+        },
+        toasts: {
+            statusUpdateSuccess: 'Estado actualizado exitosamente',
+            statusUpdateError: 'Error al actualizar el estado'
         },
         expandedView: {
             productsInSet: 'Productos en el Set',

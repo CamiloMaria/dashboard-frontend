@@ -7,7 +7,8 @@ import {
     Calendar,
     Tag,
     DollarSign,
-    MapPin
+    MapPin,
+    ToggleLeft
 } from 'lucide-react';
 import {
     Table,
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, keepPreviousData, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from '@/hooks/use-debounce';
 import { PaginationControls } from '../products-table/PaginationControls';
 import { format } from 'date-fns';
@@ -31,6 +32,9 @@ import { productSetsKeys } from '@/api/query-keys';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { ProductSet, ProductInSet } from '@/types/product-set';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { ConfirmationDialog } from '@/components/app/ConfirmationDialog';
 
 export function ProductSetsTable() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -40,6 +44,9 @@ export function ProductSetsTable() {
     const [expandedMobileCards, setExpandedMobileCards] = useState<Set<string>>(new Set());
     const [, startTransition] = useTransition();
     const { t } = useTranslation();
+    const queryClient = useQueryClient();
+    const { toast } = useToast();
+    const [selectedSetForStatus, setSelectedSetForStatus] = useState<{ setId: string, currentStatus: boolean } | null>(null);
 
     // Media query hooks for responsive design
     const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -52,6 +59,27 @@ export function ProductSetsTable() {
         queryFn: () => productSetsApi.getProductSets({ page: currentPage, limit: itemsPerPage, search: debouncedSearch }),
         placeholderData: keepPreviousData,
         staleTime: 5000,
+    });
+
+    // Mutation for updating product set status
+    const updateStatusMutation = useMutation({
+        mutationFn: ({ setId, status }: { setId: string, status: boolean }) =>
+            productSetsApi.updateProductSetStatus(setId, status),
+        onSuccess: () => {
+            // Invalidate and refetch product sets data after successful mutation
+            queryClient.invalidateQueries({ queryKey: productSetsKeys.lists() });
+            toast({
+                title: t('common.success'),
+                description: t('productSets.toasts.statusUpdateSuccess'),
+            });
+        },
+        onError: () => {
+            toast({
+                title: t('common.error'),
+                description: t('productSets.toasts.statusUpdateError'),
+                variant: "destructive",
+            });
+        }
     });
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +128,26 @@ export function ProductSetsTable() {
         });
     };
 
+    const handleStatusToggleClick = (productSetId: string, currentStatus: boolean, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedSetForStatus({ setId: productSetId, currentStatus });
+    };
+
+    const handleConfirmStatusChange = () => {
+        if (!selectedSetForStatus) return;
+
+        updateStatusMutation.mutate({
+            setId: selectedSetForStatus.setId,
+            status: !selectedSetForStatus.currentStatus
+        });
+
+        setSelectedSetForStatus(null);
+    };
+
+    const handleCancelStatusChange = () => {
+        setSelectedSetForStatus(null);
+    };
+
     // Mobile card view for each product set
     const MobileProductSetCard = ({ productSet }: { productSet: ProductSet }) => (
         <Card className="mb-4 overflow-hidden">
@@ -112,13 +160,30 @@ export function ProductSetsTable() {
                         <div className="font-medium text-base">{productSet.set_sku}</div>
                         <div className="text-sm line-clamp-1 mt-1">{productSet.title}</div>
                     </div>
-                    <div className="transition-transform duration-200"
-                        style={{
-                            transform: expandedMobileCards.has(productSet.set_sku)
-                                ? 'rotate(180deg)'
-                                : 'rotate(0deg)'
-                        }}>
-                        <ChevronDown className="h-5 w-5" />
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="flex items-center"
+                            onClick={(e) => handleStatusToggleClick(productSet.set_sku, productSet.status, e)}
+                        >
+                            <Switch
+                                checked={productSet.status}
+                                className="data-[state=checked]:bg-green-500"
+                            />
+                            <span className="ml-2 text-xs whitespace-nowrap">
+                                {productSet.status
+                                    ? t('productSets.status.active')
+                                    : t('productSets.status.inactive')
+                                }
+                            </span>
+                        </div>
+                        <div className="transition-transform duration-200"
+                            style={{
+                                transform: expandedMobileCards.has(productSet.set_sku)
+                                    ? 'rotate(180deg)'
+                                    : 'rotate(0deg)'
+                            }}>
+                            <ChevronDown className="h-5 w-5" />
+                        </div>
                     </div>
                 </div>
 
@@ -398,6 +463,12 @@ export function ProductSetsTable() {
                                         </TableHead>
                                     </>
                                 )}
+                                <TableHead>
+                                    <div className="flex items-center gap-1.5">
+                                        <ToggleLeft className="h-4 w-4" />
+                                        {t('productSets.columns.status')}
+                                    </div>
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -447,6 +518,23 @@ export function ProductSetsTable() {
                                                 </TableCell>
                                             </>
                                         )}
+                                        <TableCell>
+                                            <div
+                                                className="flex items-center"
+                                                onClick={(e) => handleStatusToggleClick(productSet.set_sku, productSet.status, e)}
+                                            >
+                                                <Switch
+                                                    checked={productSet.status}
+                                                    className="data-[state=checked]:bg-green-500"
+                                                />
+                                                <span className="ml-2 text-sm">
+                                                    {productSet.status
+                                                        ? t('productSets.status.active')
+                                                        : t('productSets.status.inactive')
+                                                    }
+                                                </span>
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                     {expandedRows.has(productSet.set_sku) && (
                                         <TableRow>
@@ -507,6 +595,27 @@ export function ProductSetsTable() {
                     onItemsPerPageChange={handleItemsPerPageChange}
                 />
             </div>
+
+            <ConfirmationDialog
+                open={selectedSetForStatus !== null}
+                title={selectedSetForStatus?.currentStatus
+                    ? t('productSets.statusDialog.deactivateTitle')
+                    : t('productSets.statusDialog.activateTitle')
+                }
+                description={selectedSetForStatus?.currentStatus
+                    ? t('productSets.statusDialog.deactivateDescription')
+                    : t('productSets.statusDialog.activateDescription')
+                }
+                confirmText={selectedSetForStatus?.currentStatus
+                    ? t('productSets.statusDialog.deactivateButton')
+                    : t('productSets.statusDialog.activateButton')
+                }
+                cancelText={t('common.cancel')}
+                confirmVariant={selectedSetForStatus?.currentStatus ? "destructive" : "default"}
+                isLoading={updateStatusMutation.isPending}
+                onConfirm={handleConfirmStatusChange}
+                onCancel={handleCancelStatusChange}
+            />
         </Card>
     );
 } 

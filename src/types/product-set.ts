@@ -31,6 +31,7 @@ export interface ProductSet {
   compare_price: number | null;
   area: string;
   products: ProductInSet[];
+  status: boolean;
   create_at: string;
   update_at: string;
 }

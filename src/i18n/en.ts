@@ -349,7 +349,24 @@ export const en = {
       price: 'Price',
       area: 'Area',
       createdAt: 'Created At',
-      updatedAt: 'Updated At'
+      updatedAt: 'Updated At',
+      status: 'Status'
+    },
+    status: {
+      active: 'Active',
+      inactive: 'Inactive'
+    },
+    statusDialog: {
+      activateTitle: 'Activate Product Set',
+      activateDescription: 'Are you sure you want to activate this product set? It will be visible to customers.',
+      activateButton: 'Activate',
+      deactivateTitle: 'Deactivate Product Set',
+      deactivateDescription: 'Are you sure you want to deactivate this product set? It will no longer be visible to customers.',
+      deactivateButton: 'Deactivate'
+    },
+    toasts: {
+      statusUpdateSuccess: 'Status updated successfully',
+      statusUpdateError: 'Failed to update status'
     },
     expandedView: {
       productsInSet: 'Products in Set',
