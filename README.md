@@ -1,69 +1,66 @@
 
-# Dashboard Ecommerce Frontend
+# Documentation for Dashboard Ecommerce Frontend
 
 Modern React dashboard built with Vite, TypeScript, and Radix UI components for Plaza Lama.
 
-## Tech Stack
 
-- React 18 with TypeScript
-- Vite for build tooling
-- TanStack Router for routing
-- TanStack Query for data fetching
-- Radix UI + shadcn/ui for components
-- Tailwind CSS for styling
-- Zod for validation
-- Axios for API calls
+## 1. Introduction
+- **Project Name:** Dashboard Ecommerce Frontend
+- **Brief Description:** A modern React dashboard built with Vite, TypeScript, and Radix UI components for Plaza Lama.
+- **Technologies Used:**
+  - React 18 with TypeScript
+  - Vite for build tooling
+  - TanStack Router for routing
+  - TanStack Query for data fetching
+  - Radix UI + shadcn/ui for components
+  - Tailwind CSS for styling
+  - Zod for validation
+  - Axios for API calls
+- **Important Links:**
+  - [Repository](#)
+  - [Task Board](#)
+  - [External Documentation](#)
 
-## Features
+## 2. Quick Start Guide
+- **Prerequisites:** Node.js, npm
+- **Cloning the Repository:**
+  ```bash
+  git clone <repository-url>
+  ```
+- **Installing Dependencies:**
+  ```bash
+  npm install
+  ```
+- **Environment Configuration (.env):** Ensure `.env.development` or `.env.production` files are set up correctly.
+- **Running the Project Locally:**
+  ```bash
+  npm run dev
+  ```
+- **Database and Migrations:** Setup instructions for database and migrations.
+- **Useful Commands:**
+  - `npm run build` - Build for production
+  - `npm run lint` - Run ESLint
 
-- Product management system
-- Product set creation and management
-- Promotion handling
-- Modern UI with dark mode support
-- Form handling with react-hook-form
-- Rich text editing with Tiptap
-- Data visualization with Recharts
-- Virtual scrolling support
-- Toast notifications
+## 3. Project Structure
+- **Architecture:** Monorepo
+- **Main Folders:**
+  - `api/` - API integration
+  - `components/` - React components
+  - `constants/` - App constants
+  - `hooks/` - Custom React hooks
+  - `lib/` - Utility functions
+  - `routes/` - Route definitions
+  - `types/` - TypeScript types
+- **Naming Conventions:** Follow standard naming conventions.
+- **Core Modules:** Located in `src/` directory.
 
-## Project Structure
+## 4. Best Practices
+- **Code Conventions:** Follow standard code conventions.
+- **Commit Structure:** Use meaningful commit messages.
+- **Branching Strategy:** Follow Git Flow or trunk-based strategy.
+- **Tests:** Guidelines for writing and running tests.
 
-```
-src/
-├── api/         # API integration
-├── components/  # React components
-├── constants/   # App constants
-├── hooks/       # Custom React hooks
-├── lib/         # Utility functions
-├── routes/      # Route definitions
-└── types/       # TypeScript types
-```
+## 8. GitLab Repository
 
-## Getting Started
-
-1. Clone the repository
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start development server:
-```bash
-npm run dev
-```
-
-4. Build for production:
-```bash
-npm run build
-```
-
-## Development
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## API Configuration
-
-The API endpoint can be configured in `src/api/config.ts`. Default is `http://localhost:3000/api`.
+- **New Dashboard Branch**: `new-dashboard-migration`
+- **Dashboard Frontend (New Backend)**: [Dashboard v2](https://shopi.plazalama.com/dashboard/v2)
