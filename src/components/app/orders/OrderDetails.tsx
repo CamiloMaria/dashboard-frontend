@@ -31,7 +31,8 @@ import {
     Printer,
     Loader2,
     AlertCircle,
-    UserCheck
+    UserCheck,
+    FileText
 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
@@ -66,6 +67,11 @@ interface ApiError extends Error {
         }
     }
 }
+
+// Generate PDF URL for an invoice
+const getPdfInvoiceUrl = (invoiceNumber: string) => {
+    return `https://ecom.plazalama.com/pdf_invoice/?invoice=${invoiceNumber}.pdf`;
+};
 
 export function OrderDetails({ order }: OrderDetailsProps) {
     const { t } = useTranslation();
@@ -208,6 +214,24 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                         {invoice.ITBIS.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                 </div>
+            </div>
+            <div className="mt-3 flex justify-end">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1"
+                    asChild
+                >
+                    <a
+                        href={getPdfInvoiceUrl(invoice.FACTURAS)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={t('orders.details.viewPdfInvoice') || 'View PDF Invoice'}
+                    >
+                        <FileText className="w-3 h-3" />
+                        {t('orders.details.viewPdf') || 'PDF'}
+                    </a>
+                </Button>
             </div>
         </div>
     );
@@ -558,6 +582,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                         <TableHead className="font-semibold">{t('orders.details.columns.ncf')}</TableHead>
                                         <TableHead className="font-semibold">{t('orders.details.columns.itbis')}</TableHead>
                                         <TableHead className="text-right font-semibold">{t('orders.details.columns.total')}</TableHead>
+                                        <TableHead className="text-center font-semibold">{t('orders.details.columns.pdf') || 'PDF'}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -577,6 +602,26 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                                                     <DollarSign className="w-4 h-4" />
                                                     {invoice.TOTAL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                 </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="flex items-center gap-1"
+                                                    asChild
+                                                >
+                                                    <a
+                                                        href={getPdfInvoiceUrl(invoice.FACTURAS)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        aria-label={t('orders.details.viewPdfInvoice') || 'View PDF Invoice'}
+                                                    >
+                                                        <FileText className="w-4 h-4" />
+                                                        <span className="sr-only md:not-sr-only md:inline-block">
+                                                            {t('orders.details.viewPdf') || 'PDF'}
+                                                        </span>
+                                                    </a>
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}

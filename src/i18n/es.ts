@@ -465,6 +465,7 @@ export const es = {
             items: 'Artículos',
             invoices: 'Facturas',
             transactions: 'Transacciones',
+            viewPdf: 'Ver PDF',
             columns: {
                 sku: 'SKU',
                 description: 'Descripción',
@@ -480,7 +481,8 @@ export const es = {
                 approval: 'Aprobación',
                 date: 'Fecha',
                 time: 'Hora',
-                amount: 'Monto'
+                amount: 'Monto',
+                pdf: 'PDF'
             }
         }
     },
