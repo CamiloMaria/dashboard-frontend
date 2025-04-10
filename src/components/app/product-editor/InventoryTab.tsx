@@ -98,7 +98,7 @@ export function InventoryTab({ product, catalogs, onInventoryUpdate, readOnly = 
 
     // Calculate inventory statistics based on local state
     const totalStock = catalogs.reduce((sum, inv) => sum + inv.stock, 0);
-    const lowStockCount = catalogs.filter(inv => inv.stock < (product?.security_stock || 20)).length;
+    const lowStockCount = catalogs.filter(inv => inv.stock < (product?.security_stock ? product?.security_stock : 10)).length;
     const activeListings = catalogs.filter(inv => inv.status === 1).length;
 
     // Calculate average price change

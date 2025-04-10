@@ -98,7 +98,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         title: product.title || '',
         isActive: !!product.isActive,
         borrado_comment: product.borrado_comment || '',
-        security_stock: product.security_stock || 10,
+        security_stock: product.security_stock,
         // catalogs: product.catalogs || [],
       });
       setImages(product.images || []);
