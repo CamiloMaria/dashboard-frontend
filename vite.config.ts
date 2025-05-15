@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       'process.env': env
     },
     plugins: [react()],
-    base: '/',
+    base: '/dashboard/v2',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
