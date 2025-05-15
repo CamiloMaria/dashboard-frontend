@@ -48,6 +48,7 @@ Modern React dashboard built with Vite, TypeScript, and Radix UI components for 
   - `components/` - React components
   - `constants/` - App constants
   - `hooks/` - Custom React hooks
+  - `mocks/` - Mocks Data
   - `lib/` - Utility functions
   - `routes/` - Route definitions
   - `types/` - TypeScript types
@@ -60,7 +61,6 @@ Modern React dashboard built with Vite, TypeScript, and Radix UI components for 
 - **Branching Strategy:** Follow Git Flow or trunk-based strategy.
 - **Tests:** Guidelines for writing and running tests.
 
-## 8. GitLab Repository
+## 8. Backend GitHub Repository
 
-- **New Dashboard Branch**: `new-dashboard-migration`
-- **Dashboard Frontend (New Backend)**: [Dashboard v2](https://shopi.plazalama.com/dashboard/v2)
+- **Dashboard Backend**: [Dashboard v2](https://github.com/CamiloMaria/dashboard-backend)
