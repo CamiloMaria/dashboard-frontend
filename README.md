@@ -36,6 +36,9 @@ Modern React dashboard built with Vite, TypeScript, and Radix UI components for 
   ```bash
   npm run dev
   ```
+- **Login Credentials:**
+  - Username: `admin`
+  - Password: `admin`
 - **Database and Migrations:** Setup instructions for database and migrations.
 - **Useful Commands:**
   - `npm run build` - Build for production
@@ -64,3 +67,4 @@ Modern React dashboard built with Vite, TypeScript, and Radix UI components for 
 ## 8. Backend GitHub Repository
 
 - **Dashboard Backend**: [Dashboard v2](https://github.com/CamiloMaria/dashboard-backend)
+
