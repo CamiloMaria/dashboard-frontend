@@ -1,9 +1,11 @@
 import { createRouter } from '@tanstack/react-router'
 import { rootRoute } from './routes/__root'
 import { notFoundRoute } from './routes/app/not-found'
-import { authRoute } from './routes/auth/auth'
-import { loginRoute } from './routes/auth/login'
+// Auth disabled: login flow removed from this project.
+// import { authRoute } from './routes/auth/auth'
+// import { loginRoute } from './routes/auth/login'
 import { appRoute } from './routes/app/app'
+import { indexRedirectRoute } from './routes/app/index-redirect'
 import { productsListRoute } from './routes/app/products-list'
 import { productEditorRoute } from './routes/app/product-editor'
 import { productsNewRoute } from './routes/app/products-new'
@@ -16,10 +18,11 @@ import { logsRoute } from './routes/app/logs'
 import { BASE_PATH } from './constants/routes'
 
 const routeTree = rootRoute.addChildren([
-    authRoute.addChildren([
-        loginRoute,
-    ]),
+    // authRoute.addChildren([
+    //     loginRoute,
+    // ]),
     appRoute.addChildren([
+        indexRedirectRoute,
         productsListRoute,
         productEditorRoute,
         productsNewRoute,

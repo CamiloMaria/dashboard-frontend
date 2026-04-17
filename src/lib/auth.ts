@@ -1,8 +1,9 @@
-import { ROUTES } from "@/constants/routes";
-import { router } from '@/router'
+// Auth disabled: login flow removed from this project.
+// import { ROUTES } from "@/constants/routes";
+// import { router } from '@/router'
 
 export function removeAuthSession() {
-  // Just a utility function for frontend to call the logout API
-  // The actual cookie clearing happens on the backend
-  router.navigate({ to: ROUTES.AUTH.LOGIN });
+  // No-op: authentication is disabled for this demo deployment.
+  // Previously navigated to the login page.
+  // router.navigate({ to: ROUTES.AUTH.LOGIN });
 }
